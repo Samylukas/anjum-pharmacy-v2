@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anjum Green Pharmacy 2026</title>
+    <title>Anjum Green Pharmacy </title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <!-- مكتبة الباركود إصدار محدد لمنع مشاكل الكاش على PWA والموبايل -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; }
@@ -87,7 +90,7 @@
         .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
-        .camera-div { width: 100%; max-width: 400px; margin: 0 auto; }
+        .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
 
         @media print {
             body.printing-receipt * { visibility: hidden; }
@@ -752,6 +755,7 @@
         if(tabId === 'financeTab') renderFinanceTable();
     }
 
+    /* === نظام إدارة وتشغيل كاميرا الباركود المحسّن === */
     function toggleCameraScanner(key) {
         if (activeScannerKey === key) {
             stopCameraScanner(key);
@@ -766,20 +770,42 @@
         let readerId = key + 'CameraReader';
 
         document.getElementById(containerId).style.display = 'block';
-        scanners[key] = new Html5Qrcode(readerId);
-        const config = { fps: 10, qrbox: { width: 250, height: 150 } };
 
-        scanners[key].start(
-            { facingMode: "environment" },
-            config,
-            (decodedText) => onBarcodeScanned(key, decodedText),
-            () => {}
-        ).then(() => {
-            activeScannerKey = key;
-        }).catch(err => {
-            alert("❌ Camera access denied or not supported: " + err);
+        // طلب الإذن الصريح للكاميرا أولاً لتفادي مشاكل الأذونات على المتصفح العادي
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(function(stream) {
+                stream.getTracks().forEach(track => track.stop());
+                initHtml5Scanner(key, readerId, containerId);
+            })
+            .catch(function(err) {
+                initHtml5Scanner(key, readerId, containerId);
+            });
+        } else {
+            initHtml5Scanner(key, readerId, containerId);
+        }
+    }
+
+    function initHtml5Scanner(key, readerId, containerId) {
+        try {
+            scanners[key] = new Html5Qrcode(readerId);
+            const config = { fps: 15, qrbox: { width: 250, height: 150 } };
+
+            scanners[key].start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => onBarcodeScanned(key, decodedText),
+                () => {}
+            ).then(() => {
+                activeScannerKey = key;
+            }).catch(err => {
+                alert("❌ Camera access failed: " + err);
+                document.getElementById(containerId).style.display = 'none';
+            });
+        } catch(e) {
+            alert("❌ Scanner init error: " + e.message);
             document.getElementById(containerId).style.display = 'none';
-        });
+        }
     }
 
     function stopCameraScanner(key) {
@@ -788,7 +814,9 @@
             scanners[key].stop().then(() => {
                 activeScannerKey = null;
                 document.getElementById(containerId).style.display = 'none';
-            }).catch(err => console.error(err));
+            }).catch(err => {
+                document.getElementById(containerId).style.display = 'none';
+            });
         } else {
             document.getElementById(containerId).style.display = 'none';
         }
@@ -849,37 +877,13 @@
                 <title>Print Label - ${prod.n}</title>
                 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
                 <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 10px;
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
-                        justify-content: flex-start;
-                    }
-                    .label-card {
-                        width: 50mm;
-                        height: 25mm;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        padding: 2px;
-                        text-align: center;
-                        box-sizing: border-box;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: center;
-                        page-break-inside: avoid;
-                    }
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+                    .label-card { width: 50mm; height: 25mm; border: 1px solid #ccc; border-radius: 4px; padding: 2px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; page-break-inside: avoid; }
                     .pharmacy-title { font-size: 7px; font-weight: bold; color: #1e3c72; }
                     .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; }
                     .prod-price { font-size: 8px; font-weight: bold; }
                     svg { width: 44mm; height: 11mm; }
-                    @media print {
-                        body { padding: 0; }
-                        .label-card { border: none; }
-                    }
+                    @media print { body { padding: 0; } .label-card { border: none; } }
                 </style>
             </head>
             <body>
