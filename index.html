@@ -270,10 +270,10 @@
     async function syncData() {
         document.getElementById('netStatus').innerText = "⏳ Syncing...";
         try {
-            let resProd = await fetch(`${SCRIPT_URL}?action=getProducts`);
+            let resProd = await fetch(`${SCRIPT_URL}?action=getProducts`, { redirect: 'follow' });
             productsDB = await resProd.json();
             
-            let resInv = await fetch(`${SCRIPT_URL}?action=getInvoiceId`);
+            let resInv = await fetch(`${SCRIPT_URL}?action=getInvoiceId`, { redirect: 'follow' });
             let invData = await resInv.json();
             currentInvoiceId = invData.nextInvoiceId || 1001;
 
@@ -378,7 +378,11 @@
 
         document.getElementById('netStatus').innerText = "⏳ Saving...";
         try {
-            await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+            await fetch(SCRIPT_URL, { 
+                method: "POST", 
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
             alert("Invoice Saved Successfully!");
             newInvoice();
         } catch(e) {
@@ -413,7 +417,11 @@
             product: { name, barcode, price, quantity: qty }
         };
 
-        await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+        await fetch(SCRIPT_URL, { 
+            method: "POST", 
+            body: JSON.stringify(payload),
+            redirect: 'follow'
+        });
         alert("Product Added!");
         syncData();
         switchTab('stock');
