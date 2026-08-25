@@ -1,0 +1,53 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/barcode-scanner
+
+      - name: Initialize Capacitor Project
+        run: |
+          npx cap init "Anjum Pharmacy" "com.anjum.pharmacy" --web-dir .
+          npx cap add android
+
+      - name: Sync Capacitor Android
+        run: |
+          npx cap sync android
+
+      - name: Build Android APK (Gradle)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Anjum-Pharmacy-App
+          path: android/app/build/outputs/apk/debug/app-debug.apk
