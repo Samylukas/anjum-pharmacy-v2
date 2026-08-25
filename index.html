@@ -6,8 +6,8 @@
     <title>Anjum Green Pharmacy 2026</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- مكتبة قارئ الباركود عبر الكاميرا -->
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; }
@@ -86,7 +86,6 @@
 
         .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
-        /* تنسيقات حوايا الكاميرا */
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; }
 
@@ -246,7 +245,7 @@
                         <th>Guide Min Price (×3)</th>
                         <th>Barcode</th>
                         <th>Expiry Date</th>
-                        <th style="width:140px;">Actions</th>
+                        <th style="width:210px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="stockTableBody"></tbody>
@@ -262,8 +261,6 @@
                 <div class="pay-box"><label>New Product Name:</label><input type="text" id="newProdName" placeholder="Enter product name..."></div>
                 <div class="pay-box"><label>Commercial Price (EGP):</label><input type="number" id="newProdPrice" placeholder="0.00"></div>
                 <div class="pay-box"><label>Available Quantity:</label><input type="number" id="newProdQty" value="10"></div>
-                
-                <!-- إضافة زر الكاميرا لقراءة الباركود عند إضافة منتج جديد -->
                 <div class="pay-box">
                     <label>Barcode (Optional):</label>
                     <div style="display:flex; gap:4px;">
@@ -271,11 +268,9 @@
                         <button class="btn btn-purple" style="width:auto; margin:0; padding:0 8px; font-size:0.75rem;" onclick="toggleCameraScanner('addNew')">📷 Scan</button>
                     </div>
                 </div>
-
                 <div class="pay-box" style="grid-column: span 2;"><label>Expiry Date:</label><input type="date" id="newProdExpiry"></div>
             </div>
 
-            <!-- حاوية الكاميرا لإضافة منتج جديد -->
             <div id="addNewScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="addNewCameraReader" class="camera-div"></div>
                 <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
@@ -291,7 +286,6 @@
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('recharge')">📷 Scan Barcode</button>
             </div>
 
-            <!-- حاوية الكاميرا لشحن المخزون -->
             <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="rechargeCameraReader" class="camera-div"></div>
                 <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
@@ -451,7 +445,6 @@
     let cloudUsers = [];
     let currentNavIndex = -1;
 
-    // حالة الكاميرات المختلفة
     let scanners = { sales: null, addNew: null, recharge: null };
     let activeScannerKey = null;
 
@@ -759,7 +752,6 @@
         if(tabId === 'financeTab') renderFinanceTable();
     }
 
-    /* === نظام التعامل مع كاميرات الباركود متعدد الوظائف === */
     function toggleCameraScanner(key) {
         if (activeScannerKey === key) {
             stopCameraScanner(key);
@@ -839,7 +831,96 @@
             osc.stop(ctx.currentTime + 0.12);
         } catch(e) {}
     }
-    /* ======================================================= */
+
+    function printBarcodeLabel(prodName) {
+        const prod = products.find(p => p.n === prodName);
+        if (!prod) return alert("❌ Product not found!");
+        if (!prod.barcode) return alert("⚠️ This product does not have a barcode! Please edit and add a barcode first.");
+
+        const countInput = prompt(`Enter number of labels to print for:\n[${prod.n}]`, "1");
+        if (countInput === null) return;
+        const count = parseInt(countInput) || 1;
+
+        const win = window.open('', '', 'height=600,width=800');
+        
+        win.document.write(`
+            <html>
+            <head>
+                <title>Print Label - ${prod.n}</title>
+                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 10px;
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        justify-content: flex-start;
+                    }
+                    .label-card {
+                        width: 50mm;
+                        height: 25mm;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                        padding: 2px;
+                        text-align: center;
+                        box-sizing: border-box;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        page-break-inside: avoid;
+                    }
+                    .pharmacy-title { font-size: 7px; font-weight: bold; color: #1e3c72; }
+                    .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; }
+                    .prod-price { font-size: 8px; font-weight: bold; }
+                    svg { width: 44mm; height: 11mm; }
+                    @media print {
+                        body { padding: 0; }
+                        .label-card { border: none; }
+                    }
+                </style>
+            </head>
+            <body>
+        `);
+
+        for (let i = 0; i < count; i++) {
+            win.document.write(`
+                <div class="label-card">
+                    <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
+                    <div class="prod-title">${prod.n}</div>
+                    <svg id="barcode-${i}"></svg>
+                    <div class="prod-price">Price: ${(prod.p * 3).toFixed(2)} EGP</div>
+                </div>
+            `);
+        }
+
+        win.document.write(`
+            <script>
+                window.onload = function() {
+                    for (let i = 0; i < ${count}; i++) {
+                        JsBarcode("#barcode-" + i, "${prod.barcode}", {
+                            format: "CODE128",
+                            width: 1.5,
+                            height: 35,
+                            fontSize: 10,
+                            margin: 0,
+                            displayValue: true
+                        });
+                    }
+                    setTimeout(function() {
+                        window.print();
+                        window.close();
+                    }, 400);
+                };
+            <\/script>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+    }
 
     function searchProduct() {
         const query = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -1306,6 +1387,7 @@
                 <td>${i.expiry || '-'}</td>
                 <td>
                     <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
                     <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteProductSystem('${i.n}')">Delete 🗑️</button>
                 </td>
             </tr>
@@ -1329,6 +1411,7 @@
                 <td>${i.expiry || '-'}</td>
                 <td>
                     <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
                 </td>
             </tr>
         `).join('');
