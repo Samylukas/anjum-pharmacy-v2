@@ -51,6 +51,11 @@ jobs:
         run: |
           npx cap add android
 
+      - name: Set Min SDK Version to 26
+        run: |
+          sed -i 's/minSdkVersion = 22/minSdkVersion = 26/g' android/variables.gradle || true
+          sed -i 's/minSdkVersion = 24/minSdkVersion = 26/g' android/variables.gradle || true
+
       - name: Sync Capacitor Android
         run: |
           npx cap sync android
