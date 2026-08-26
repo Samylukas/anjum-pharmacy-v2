@@ -1409,7 +1409,7 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /* === دالة طباعة التقرير المالي المحدثة التي تبدأ من أعلى الصفحة وتثبت الموضع === */
+    /* === دالة طباعة التقرير المالي المباشرة بدون أضرار إخفاء أو هوامش سفلية/علوية زايدة === */
     function printFinanceReportPDF() {
         const fromD = document.getElementById('finFromDate').value;
         const toD = document.getElementById('finToDate').value;
@@ -1445,17 +1445,13 @@
         const net = totRev - totExp;
 
         const reportElement = document.createElement('div');
-        reportElement.style.position = 'fixed';
-        reportElement.style.top = '0';
-        reportElement.style.left = '0';
         reportElement.style.width = '100%';
-        reportElement.style.zIndex = '-9999';
+        reportElement.style.padding = '10px';
         reportElement.style.background = '#ffffff';
-        reportElement.style.padding = '0px';
 
         let htmlContent = `
             <style>
-                .pdf-container { font-family: system-ui, -apple-system, sans-serif; color: #333; margin: 0; padding: 10px; }
+                .pdf-container { font-family: system-ui, -apple-system, sans-serif; color: #333; margin: 0; padding: 0; }
                 .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 10px; }
                 .pdf-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 9.5px; }
                 .pdf-table th { background: #1e3c72; color: #fff; border: 1px solid #1e3c72; padding: 5px; }
@@ -1538,20 +1534,17 @@
     `;
 
     reportElement.innerHTML = htmlContent;
-    document.body.appendChild(reportElement);
 
     const opt = {
-        margin: 0,
+        margin: 0.2,
         filename: `Anjum_Pharmacy_Finance_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0, windowWidth: document.documentElement.offsetWidth },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.summary-box'] }
     };
 
-    html2pdf().set(opt).from(reportElement).save().then(() => {
-        document.body.removeChild(reportElement);
-    });
+    html2pdf().set(opt).from(reportElement).save();
 }
 
     function changeUserPasswordSystem() {
