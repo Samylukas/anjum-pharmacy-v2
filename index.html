@@ -112,7 +112,7 @@
 <div class="app-container" id="mainContainer" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:6px; margin-bottom:8px;">
         <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.85rem;">👤 User: -</span>
-        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout onclick="logout()">Logout 🚪</button>
+        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout 🚪</button>
     </div>
 
     <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
@@ -347,7 +347,6 @@
             <div>To: <input type="date" id="finToDate"></div>
             <button class="btn btn-blue" style="width: auto; margin-top: 0;" onclick="renderFinanceTable()">Filter 📈</button>
             
-            <!-- خيار دمج أرباح المبيعات داخل الحسبة المالية -->
             <div style="width:100%; margin-top:8px; display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:18px; height:18px;">
                 <label for="includeSalesIncomeToggle" style="font-size:0.85rem; font-weight:bold; color:#1e3c72; cursor:pointer;">
@@ -1280,7 +1279,6 @@
             `;}).join('');
         }
 
-        // إضافة أرباح مبيعات الفواتير إذا تم تفعيل الخيار
         if (includeSales) {
             savedInvoices.forEach(inv => {
                 if (!inv.date) return;
@@ -1325,16 +1323,126 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    /* === دالة طباعة التقرير المالي المخصصة النظيفة بدون أزرار وعمود الحذف === */
     function printFinanceReportPDF() {
-        const element = document.getElementById('financeTab');
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let totRev = 0, totExp = 0;
+        filtered.forEach(f => {
+            if (f.type === 'Revenue') totRev += f.amount;
+            else totExp += f.amount;
+        });
+
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                totRev += (parseFloat(inv.netProfit) || 0);
+            });
+        }
+
+        const net = totRev - totExp;
+
+        const reportElement = document.createElement('div');
+        reportElement.style.padding = '20px';
+        reportElement.style.direction = 'rtl';
+        reportElement.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+        reportElement.style.background = '#ffffff';
+
+        let htmlContent = `
+            <div style="text-align:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px;">
+                <h2 style="color:#1e3c72; margin:0; font-size:22px;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="color:#333; margin:5px 0 0 0; font-size:16px;">التقرير المالي للمصروفات والإيرادات</h3>
+                <p style="color:#666; font-size:11px; margin:5px 0 0 0;">
+                    الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}
+                </p>
+            </div>
+
+            <div style="background:#f8f9fa; border:1px solid #1e3c72; border-radius:8px; padding:12px; margin-bottom:15px; page-break-inside:avoid;">
+                <h4 style="text-align:center; margin:0 0 8px 0; color:#1e3c72; font-size:13px;">📊 الملخص المالي</h4>
+                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11px;">
+                    <thead>
+                        <tr style="background:#1e3c72; color:#fff;">
+                            <th style="padding:6px; border:1px solid #1e3c72;">إجمالي الإيرادات</th>
+                            <th style="padding:6px; border:1px solid #1e3c72;">إجمالي المصروفات</th>
+                            <th style="padding:6px; border:1px solid #1e3c72;">صافي الرصيد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:12px;">${net.toFixed(2)} EGP</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
+                <thead>
+                    <tr style="background:#1e3c72; color:#fff;">
+                        <th style="border:1px solid #333; padding:6px; width:35px;">#</th>
+                        <th style="border:1px solid #333; padding:6px; width:110px;">التاريخ</th>
+                        <th style="border:1px solid #333; padding:6px; width:70px;">النوع</th>
+                        <th style="border:1px solid #333; padding:6px;">البيان / الفئة</th>
+                        <th style="border:1px solid #333; padding:6px; width:90px;">المبلغ (EGP)</th>
+                        <th style="border:1px solid #333; padding:6px;">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        if (filtered.length === 0) {
+            htmlContent += `<tr><td colspan="6" style="padding:10px; border:1px solid #ccc; color:#777;">لا توجد سجلات مالية للفترة المحسوبة</td></tr>`;
+        } else {
+            filtered.forEach((f, idx) => {
+                const isRev = f.type === 'Revenue';
+                htmlContent += `
+                    <tr style="background:${isRev ? '#f2fcf5' : '#fff5f5'}; page-break-inside:avoid;">
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                        <td style="border:1px solid #ccc; padding:5px; white-space:nowrap;">${f.date || '-'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type === 'Revenue' ? 'إيراد' : 'مصروف'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold;">${f.category || '-'}</td>
+                        <td style="border:1px solid #ccc; font-weight:bold; padding:5px; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-size:9px;">${f.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        htmlContent += `
+                </tbody>
+            </table>
+
+            <div style="text-align:center; margin-top:25px; padding-top:8px; border-top:1px solid #eee; font-size:8px; color:#7f8c8d; direction:ltr;">
+                ✨ D&P by Samy Lukas , Powered By Gemini
+            </div>
+        `;
+
+        reportElement.innerHTML = htmlContent;
+
         const opt = {
-            margin: 0.2,
-            filename: `Finance_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+            margin: 0.25,
+            filename: `Anjum_Pharmacy_Finance_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
-        html2pdf().set(opt).from(element).save();
+
+        html2pdf().set(opt).from(reportElement).save();
     }
 
     function changeUserPasswordSystem() {
