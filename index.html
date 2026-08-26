@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anjum Green Pharmacy 2026</title>
     <link rel="manifest" href="manifest.json">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -372,7 +371,7 @@
             </div>
             
             <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
-                <button class="btn btn-purple" style="width:auto; margin:0;" onclick="printFinanceReportPDF()">Export PDF 📄</button>
+                <button class="btn btn-purple" style="width:auto; margin:0;" onclick="printFinanceReportPDF()">Print / Export PDF 📄</button>
                 <button class="btn btn-orange" style="width:auto; margin:0;" onclick="exportFinanceExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -1409,7 +1408,7 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /* === دالة طباعة التقرير المالي المباشرة بدون أضرار إخفاء أو هوامش سفلية/علوية زايدة === */
+    /* === دالة طباعة وتصدير التقرير المالي الاحترافية والمدعومة 100% للموبايل والتطبيق === */
     function printFinanceReportPDF() {
         const fromD = document.getElementById('finFromDate').value;
         const toD = document.getElementById('finToDate').value;
@@ -1444,48 +1443,50 @@
 
         const net = totRev - totExp;
 
-        const reportElement = document.createElement('div');
-        reportElement.style.width = '100%';
-        reportElement.style.padding = '10px';
-        reportElement.style.background = '#ffffff';
-
-        let htmlContent = `
-            <style>
-                .pdf-container { font-family: system-ui, -apple-system, sans-serif; color: #333; margin: 0; padding: 0; }
-                .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 10px; }
-                .pdf-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 9.5px; }
-                .pdf-table th { background: #1e3c72; color: #fff; border: 1px solid #1e3c72; padding: 5px; }
-                .pdf-table td { border: 1px solid #ccc; padding: 4px; vertical-align: middle; }
-                tr { page-break-inside: avoid !important; break-inside: avoid !important; }
-                .summary-box { background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 8px; margin-bottom: 10px; page-break-inside: avoid; }
-            </style>
-
-            <div class="pdf-container">
+        const win = window.open('', '', 'height=800,width=950');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Expenses & Revenues Report - Anjum Green Pharmacy</title>
+                <style>
+                    @page { margin: 10mm 10mm; size: portrait; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; color: #333; font-size: 11px; }
+                    .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px; }
+                    .pdf-header h2 { color: #1e3c72; margin: 0; font-size: 20px; }
+                    .pdf-header h3 { color: #333; margin: 4px 0 0 0; font-size: 14px; }
+                    .pdf-header p { color: #666; font-size: 10px; margin: 4px 0 0 0; }
+                    .summary-box { background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; }
+                    .pdf-table { width: 100%; border-collapse: collapse; text-align: center; }
+                    .pdf-table th { background: #1e3c72; color: #fff; border: 1px solid #1e3c72; padding: 6px; font-size: 10px; }
+                    .pdf-table td { border: 1px solid #ccc; padding: 5px; font-size: 9.5px; vertical-align: middle; }
+                    tr { page-break-inside: avoid; break-inside: avoid; }
+                    .footer { text-align: center; margin-top: 20px; padding-top: 6px; border-top: 1px solid #eee; font-size: 9px; color: #7f8c8d; }
+                </style>
+            </head>
+            <body>
                 <div class="pdf-header">
-                    <h2 style="color:#1e3c72; margin:0; font-size:18px;">Anjum Green Pharmacy 🌿</h2>
-                    <h3 style="color:#333; margin:2px 0 0 0; font-size:13px;">Expenses & Revenues Financial Report</h3>
-                    <p style="color:#666; font-size:9px; margin:2px 0 0 0; direction:ltr;">
-                        Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}
-                    </p>
+                    <h2>Anjum Green Pharmacy 🌿</h2>
+                    <h3>Expenses & Revenues Financial Report</h3>
+                    <p>Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}</p>
                 </div>
 
                 <div class="summary-box">
-                    <h4 style="text-align:center; margin:0 0 4px 0; color:#1e3c72; font-size:11px;">📊 Financial Summary (EGP)</h4>
-                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:9.5px;">
+                    <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
+                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
                         <thead>
                             <tr style="background:#1e3c72; color:#fff;">
-                                <th style="padding:4px;">Total Revenues</th>
-                                ${includeSales ? `<th style="padding:4px;">Total Sales Profit</th>` : ''}
-                                <th style="padding:4px;">Total Expenses</th>
-                                <th style="padding:4px;">Net Balance</th>
+                                <th style="padding:5px;">Total Revenues</th>
+                                ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
+                                <th style="padding:5px;">Total Expenses</th>
+                                <th style="padding:5px;">Net Balance</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td style="padding:5px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
-                                ${includeSales ? `<td style="padding:5px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
-                                <td style="padding:5px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
-                                <td style="padding:5px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:10.5px;">${net.toFixed(2)} EGP</td>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                                ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1494,58 +1495,52 @@
                 <table class="pdf-table">
                     <thead>
                         <tr>
-                            <th style="width:28px;">#</th>
-                            <th style="width:100px;">Date</th>
-                            <th style="width:60px;">Type</th>
+                            <th style="width:30px;">#</th>
+                            <th style="width:120px;">Date</th>
+                            <th style="width:70px;">Type</th>
                             <th>Category / Description</th>
-                            <th style="width:80px;">Amount (EGP)</th>
+                            <th style="width:90px;">Amount (EGP)</th>
                             <th>Notes</th>
                         </tr>
                     </thead>
                     <tbody>
-        `;
+        `);
 
         if (filtered.length === 0) {
-            htmlContent += `<tr style="page-break-inside: avoid;"><td colspan="6" style="padding:8px; color:#777;">No financial records found for selected period</td></tr>`;
+            win.document.write(`<tr><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`);
         } else {
             filtered.forEach((f, idx) => {
                 const isRev = f.type === 'Revenue';
-                htmlContent += `
-                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'}; page-break-inside: avoid !important; break-inside: avoid !important;">
+                win.document.write(`
+                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
                         <td style="font-weight:bold;">${idx + 1}</td>
                         <td style="white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
                         <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
                         <td style="text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
                         <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
-                        <td style="text-align:right; font-size:8.5px; direction:rtl;">${f.notes || '-'}</td>
+                        <td style="text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
                     </tr>
-                `;
+                `);
             });
         }
 
-        htmlContent += `
-                </tbody>
-            </table>
+        win.document.write(`
+                    </tbody>
+                </table>
 
-            <div style="text-align:center; margin-top:15px; padding-top:4px; border-top:1px solid #eee; font-size:8px; color:#7f8c8d; direction:ltr; page-break-inside:avoid;">
-                ✨ D&P by Samy Lukas , Powered By Gemini
-            </div>
-        </div>
-    `;
+                <div class="footer">
+                    ✨ D&P by Samy Lukas , Powered By Gemini
+                </div>
+            </body>
+            </html>
+        `);
 
-    reportElement.innerHTML = htmlContent;
-
-    const opt = {
-        margin: 0.2,
-        filename: `Anjum_Pharmacy_Finance_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.summary-box'] }
-    };
-
-    html2pdf().set(opt).from(reportElement).save();
-}
+        win.document.close();
+        win.focus();
+        setTimeout(() => {
+            win.print();
+        }, 500);
+    }
 
     function changeUserPasswordSystem() {
         if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
@@ -1764,25 +1759,7 @@
     }
 
     function exportStockPDF() {
-        const printArea = document.getElementById('stockPrintArea');
-        const origMaxHeight = printArea.style.maxHeight;
-        const origOverflow = printArea.style.overflowY;
-        
-        printArea.style.maxHeight = 'none';
-        printArea.style.overflowY = 'visible';
-
-        const opt = {
-            margin:       0.3,
-            filename:     'Anjum_Green_Pharmacy_Full_Stock_2026.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(printArea).save().then(() => {
-            printArea.style.maxHeight = origMaxHeight;
-            printArea.style.overflowY = origOverflow;
-        });
+        window.print();
     }
 
     function printSingleReceipt(invId) {
@@ -1829,249 +1806,11 @@
     }
 
     function printReportTable() {
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        let totalCommAll = 0, totalSellEGPAll = 0, totalProfitAll = 0;
-        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-
-        filteredInvoices.forEach(inv => {
-            totalCommAll += parseFloat(inv.totalComm || 0);
-            totalSellEGPAll += parseFloat(inv.totalEGP || 0);
-            totalProfitAll += parseFloat(inv.netProfit || 0);
-
-            if (inv.items && Array.isArray(inv.items)) {
-                inv.items.forEach(i => {
-                    sumUSD += parseFloat(i.usd || 0);
-                    sumEUR += parseFloat(i.eur || 0);
-                    sumGBP += parseFloat(i.gbp || 0);
-                    sumEGP += parseFloat(i.egp || 0);
-                    sumVISA += parseFloat(i.visa || 0);
-                });
-            } else {
-                sumUSD += parseFloat(inv.usd || 0);
-                sumEUR += parseFloat(inv.eur || 0);
-                sumGBP += parseFloat(inv.gbp || 0);
-                sumEGP += parseFloat(inv.egp || 0);
-                sumVISA += parseFloat(inv.visa || 0);
-            }
-        });
-
-        const win = window.open('', '', 'height=700,width=900');
-        win.document.write('<html><head><title>Print Financial Report</title>');
-        win.document.write('<style>body{font-family:sans-serif;direction:rtl;text-align:center;padding:15px;} table{width:100%;border-collapse:collapse;margin-top:10px;} th,td{border:1px solid #333;padding:6px;font-size:10px;} th{background:#1e3c72;color:#fff;} .totals-table{width:100%;margin-top:15px;border-collapse:collapse;} .totals-table td,.totals-table th{border:1px solid #333;padding:6px;font-weight:bold;}</style>');
-        win.document.write('</head><body><h2 style="color:#1e3c72; margin-bottom:2px;">Anjum Green Pharmacy 🌿</h2><h3 style="margin-top:0; color:#333;">Sales & Financial Report</h3><p>' + new Date().toLocaleString() + '</p><table><thead><tr><th style="width:30px;">#</th><th style="width:70px;">Inv ID</th><th style="width:90px;">Date</th><th style="width:45%;">Details</th><th style="width:60px;">Comm</th><th style="width:70px;">Sales (EGP)</th><th style="width:60px;">Net Profit</th></tr></thead><tbody>');
-        
-        filteredInvoices.forEach((inv, idx) => {
-            const itemsList = inv.items ? inv.items.map(i => getItemPaidText(i)).join(' | ') : cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '');
-            win.document.write(`<tr><td>${idx+1}</td><td>#${inv.id}</td><td>${inv.date?inv.date.replace('T',' ').replace('.000Z',''):''}</td><td style="text-align:right;">${itemsList}</td><td>${(inv.totalComm||0).toFixed(2)}</td><td>${(inv.totalEGP||0).toFixed(2)}</td><td>${(inv.netProfit||0).toFixed(2)}</td></tr>`);
-        });
-
-        win.document.write('</tbody></table>');
-
-        win.document.write(`
-            <table class="totals-table" style="background:#ffffff; color:#333;">
-                <thead>
-                    <tr style="background:#f8f9fa; color:#1e3c72;">
-                        <th>Total ($)</th>
-                        <th>Total (€)</th>
-                        <th>Total (£)</th>
-                        <th>Total (EGP)</th>
-                        <th>Total (VISA)</th>
-                        <th>Gross Sales</th>
-                        <th>Total Comm</th>
-                        <th>Net Profit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>$${sumUSD.toFixed(2)}</td>
-                        <td>€${sumEUR.toFixed(2)}</td>
-                        <td>£${sumGBP.toFixed(2)}</td>
-                        <td>${sumEGP.toFixed(2)} EGP</td>
-                        <td>${sumVISA.toFixed(2)} EGP</td>
-                        <td style="color:#27ae60;">${totalSellEGPAll.toFixed(2)} EGP</td>
-                        <td style="color:#c0392b;">${totalCommAll.toFixed(2)} EGP</td>
-                        <td style="color:#8e44ad; font-size:11px;">${totalProfitAll.toFixed(2)} EGP</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="text-align:center; margin-top:20px; font-size:10px; color:#7f8c8d;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-        </body></html>`);
-
-        win.document.close();
-        win.focus();
-        setTimeout(() => win.print(), 300);
+        window.print();
     }
 
     function exportReportPDF() {
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        let totalCommAll = 0, totalSellEGPAll = 0, totalProfitAll = 0;
-        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-
-        filteredInvoices.forEach(inv => {
-            totalCommAll += parseFloat(inv.totalComm || 0);
-            totalSellEGPAll += parseFloat(inv.totalEGP || 0);
-            totalProfitAll += parseFloat(inv.netProfit || 0);
-
-            if (inv.items && Array.isArray(inv.items)) {
-                inv.items.forEach(i => {
-                    sumUSD += parseFloat(i.usd || 0);
-                    sumEUR += parseFloat(i.eur || 0);
-                    sumGBP += parseFloat(i.gbp || 0);
-                    sumEGP += parseFloat(i.egp || 0);
-                    sumVISA += parseFloat(i.visa || 0);
-                });
-            } else {
-                sumUSD += parseFloat(inv.usd || 0);
-                sumEUR += parseFloat(inv.eur || 0);
-                sumGBP += parseFloat(inv.gbp || 0);
-                sumEGP += parseFloat(inv.egp || 0);
-                sumVISA += parseFloat(inv.visa || 0);
-            }
-        });
-
-        const element = document.createElement('div');
-        element.style.padding = '15px';
-        element.style.direction = 'ltr';
-        element.style.fontFamily = 'system-ui, sans-serif';
-        element.style.background = '#ffffff';
-
-        let htmlContent = `
-            <table style="width:100%; border:none; border-collapse:collapse; margin-bottom:12px; border-bottom:2px solid #1e3c72; padding-bottom:8px;">
-                <tr>
-                    <td style="text-align:center; border:none; padding:2px;">
-                        <div style="font-size:20px; font-weight:bold; color:#1e3c72;">Anjum Green Pharmacy</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:center; border:none; padding:2px;">
-                        <div style="font-size:14px; font-weight:bold; color:#333;">Sales & Financial Report</div>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="text-align:center; border:none; padding:2px;">
-                        <div style="font-size:11px; color:#555;">${new Date().toLocaleString()}</div>
-                    </td>
-                </tr>
-            </table>
-            
-            <table style="width:100%; border-collapse:collapse; margin-bottom:15px; background:#fff;">
-                <thead>
-                    <tr style="background:#1e3c72; color:#fff;">
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:30px;">#</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:70px;">Invoice ID</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:90px;">Date</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px;">Products & Seller Details</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:120px;">Payment Breakdown</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:65px;">Commercial</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:75px;">Sales (EGP)</th>
-                        <th style="border:1px solid #333; padding:5px; font-size:10px; width:65px;">Net Profit</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        filteredInvoices.forEach((inv, index) => {
-            let u = 0, eu = 0, g = 0, eg = 0, v = 0;
-            let itemsList = "";
-
-            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-                itemsList = inv.items.map(i => {
-                    u += parseFloat(i.usd || 0);
-                    eu += parseFloat(i.eur || 0);
-                    g += parseFloat(i.gbp || 0);
-                    eg += parseFloat(i.egp || 0);
-                    v += parseFloat(i.visa || 0);
-                    return `• ${getItemPaidText(i)}`;
-                }).join('<br>');
-            } else {
-                itemsList = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
-                u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
-            }
-
-            const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`;
-            const cleanDateStr = inv.date ? inv.date.replace('T', ' ').replace('.000Z', '') : '-';
-
-            htmlContent += `
-                <tr style="page-break-inside: avoid;">
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px;">${index + 1}</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px; font-weight:bold;">#${inv.id}</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px; white-space:nowrap;">${cleanDateStr}</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:left; font-size:9px; line-height:1.3;">${itemsList}</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:8px;">${payBreakdown}</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px; font-weight:bold; color:#27ae60;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ccc; padding:4px; text-align:center; font-size:9px; font-weight:bold; color:#8e44ad;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-                </tr>
-            `;
-        });
-
-        htmlContent += `
-                </tbody>
-            </table>
-
-            <div style="margin-top:15px; background:#ffffff; color:#333; border:2px solid #1e3c72; border-radius:6px; padding:8px; page-break-inside: avoid;">
-                <h3 style="text-align:center; font-size:11px; margin:0 0 6px 0; color:#1e3c72;">💵 Summary Report</h3>
-                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:9px; background:#fff;">
-                    <thead>
-                        <tr style="background:#f0f4f8; color:#1e3c72;">
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total ($)</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total (€)</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total (£)</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total (EGP)</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total (VISA)</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Gross Sales</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Total Commercial</th>
-                            <th style="border:1px solid #1e3c72; padding:4px;">Net Profit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#2c3e50;">$${sumUSD.toFixed(2)}</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#2c3e50;">€${sumEUR.toFixed(2)}</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#2c3e50;">£${sumGBP.toFixed(2)}</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#2c3e50;">${sumEGP.toFixed(2)} EGP</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#2c3e50;">${sumVISA.toFixed(2)} EGP</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#27ae60;">${totalSellEGPAll.toFixed(2)} EGP</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#c0392b;">${totalCommAll.toFixed(2)} EGP</td>
-                            <td style="border:1px solid #1e3c72; padding:5px; font-weight:bold; color:#8e44ad;">${totalProfitAll.toFixed(2)} EGP</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div style="text-align:center; margin-top:20px; font-size:9px; color:#7f8c8d; direction:ltr;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-        `;
-
-        element.innerHTML = htmlContent;
-
-        const opt = {
-            margin:       0.2,
-            filename:     `Anjum_Green_Pharmacy_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' },
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-
-        html2pdf().set(opt).from(element).save();
+        window.print();
     }
 
     function generateReport() {
