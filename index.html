@@ -15,9 +15,12 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
         
-        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 12px; padding: 6px; border-radius: 6px; }
+        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
+
+        /* شريط التنبيهات الذكي */
+        .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.82rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
 
         .nav-tabs { display: flex; gap: 6px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; }
@@ -118,6 +121,14 @@
     <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
     <div id="syncIndicator" class="sync-status status-online">🟢 Online</div>
 
+    <!-- شريط التنبيهات السريع -->
+    <div id="alertsContainer" class="alerts-bar">
+        <div>
+            🔔 Status Summary: <span id="lowStockCountVal" style="color:#c0392b;">0 Low Stock Items</span> | <span id="expiringCountVal" style="color:#e67e22;">0 Expiring Items</span>
+        </div>
+        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:3px 8px; font-size:0.72rem;" onclick="showTab('stockTab'); filterLowStock();">View Items 📦</button>
+    </div>
+
     <div class="nav-tabs">
         <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', event)">🛒 POS & Invoices</button>
         <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 Stock Details</button>
@@ -132,10 +143,12 @@
         <div class="section-title">🛒 Create / Edit Sales Invoice</div>
 
         <div class="date-filter card" style="background:#fff3cd; border-color:#ffeeba;">
-            <div style="color:#856404; font-size:0.85rem; font-weight:bold;">💡 Sync Options:</div>
+            <div style="color:#856404; font-size:0.85rem; font-weight:bold;">💡 Sync & Shortcuts:</div>
             <button class="btn btn-blue" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
             <button class="btn btn-orange" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="prepareNewInvoice()">New Invoice ➕</button>
-            <button class="btn btn-red" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="clearCurrentInvoice()">Clear 🧹</button>
+            <button class="btn btn-purple" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
+            <button class="btn btn-purple" id="resumeHoldBtn" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
+            <button class="btn btn-red" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
         </div>
 
         <div class="info-row" style="background: #eef7fe; padding: 10px; border-radius: 6px; align-items: center;">
@@ -151,8 +164,8 @@
         </div>
 
         <div style="display:flex; gap:6px; margin-top:12px;">
-            <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="Search Product Name or Scan Barcode..." oninput="searchProduct()">
-            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('sales')">📷 Camera Barcode</button>
+            <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="Search Product Name or Scan Barcode... (F4)" oninput="searchProduct()">
+            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('sales')">📷 Camera Barcode (F2)</button>
         </div>
 
         <div id="salesScannerContainer" class="scanner-box">
@@ -222,7 +235,7 @@
             </div>
         </div>
 
-        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px;" onclick="saveInvoice()">Save & Sync Invoice 💾</button>
+        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px;" onclick="saveInvoice()">Save & Sync Invoice (Ctrl+S) 💾</button>
     </div>
 
     <!-- 2. Stock Tab (Manager Access) -->
@@ -488,6 +501,7 @@
     let scanners = { sales: null, addNew: null, recharge: null, stock: null };
     let activeScannerKey = null;
     let selectedStockEditProduct = null;
+    let heldInvoiceItems = null;
 
     window.addEventListener('DOMContentLoaded', () => {
         const userEl = document.getElementById('entryUserInput');
@@ -495,6 +509,24 @@
 
         window.addEventListener('online', updateOnlineStatus);
         window.addEventListener('offline', updateOnlineStatus);
+
+        // إعداد اختصارات الكيبورد السريعة
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                toggleCameraScanner('sales');
+            } else if (e.key === 'F4') {
+                e.preventDefault();
+                showTab('salesTab');
+                document.getElementById('searchInput').focus();
+            } else if (e.key === 'F8') {
+                e.preventDefault();
+                clearCurrentInvoice();
+            } else if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                saveInvoice();
+            }
+        });
         
         loadLocalUsers();
     });
@@ -627,6 +659,24 @@
     let invoiceCounter = 1001;
     let activeInvoiceId = 1001;
 
+    function updateAlertsBar() {
+        let lowStockCount = 0;
+        let expiringCount = 0;
+        let today = new Date();
+
+        products.forEach(p => {
+            if (p.q <= 3) lowStockCount++;
+            if (p.expiry) {
+                let exp = new Date(p.expiry);
+                let diffDays = (exp - today) / (1000 * 60 * 60 * 24);
+                if (diffDays < 90) expiringCount++;
+            }
+        });
+
+        document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
+        document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
+    }
+
     function fetchCloudInvoicesData(callbackAfter) {
         if (!navigator.onLine) {
             if (callbackAfter) callbackAfter();
@@ -644,6 +694,7 @@
                     products = resData.products;
                     saveProductsToStorage();
                     renderStockTable();
+                    updateAlertsBar();
                 }
 
                 if (resData.nextInvoiceId) {
@@ -687,6 +738,24 @@
         renderInvoice();
     }
 
+    function holdCurrentInvoice() {
+        if (invoiceItems.length === 0) return alert('No items to hold!');
+        heldInvoiceItems = JSON.parse(JSON.stringify(invoiceItems));
+        invoiceItems = [];
+        renderInvoice();
+        document.getElementById('resumeHoldBtn').style.display = 'inline-block';
+        alert('⏸️ Invoice put on hold successfully!');
+    }
+
+    function resumeHoldInvoice() {
+        if (!heldInvoiceItems) return;
+        invoiceItems = JSON.parse(JSON.stringify(heldInvoiceItems));
+        heldInvoiceItems = null;
+        document.getElementById('resumeHoldBtn').style.display = 'none';
+        renderInvoice();
+        alert('⏯️ Held invoice resumed!');
+    }
+
     function clearCurrentInvoice() {
         document.getElementById('searchInput').value = '';
         document.getElementById('searchResults').style.display = 'none';
@@ -702,6 +771,7 @@
             });
             saveProductsToStorage();
             renderStockTable();
+            updateAlertsBar();
         }
 
         invoiceItems = [];
@@ -763,6 +833,7 @@
         prepareNewInvoice();
         fetchCloudInvoicesData();
         updateOnlineStatus();
+        updateAlertsBar();
         
         const now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -1062,6 +1133,7 @@
         const pObj = products.find(item => item.n === selectedProd.name);
         pObj.q -= qty;
         saveProductsToStorage();
+        updateAlertsBar();
 
         const commTotal = selectedProd.comm * qty;
         const sellTotal = itemTotalEGP;
@@ -1092,6 +1164,7 @@
                 pObj.q += item.qty;
                 saveProductsToStorage();
                 syncToCloud("updateSingleProduct", pObj);
+                updateAlertsBar();
             }
         }
         invoiceItems.splice(index, 1);
@@ -1339,7 +1412,6 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /* === دالة طباعة التقرير المالي باللغة الإنجليزية كاملة وبشكل احترافي === */
     function printFinanceReportPDF() {
         const fromD = document.getElementById('finFromDate').value;
         const toD = document.getElementById('finToDate').value;
@@ -1375,92 +1447,102 @@
         const net = totRev - totExp;
 
         const reportElement = document.createElement('div');
-        reportElement.style.padding = '20px';
-        reportElement.style.direction = 'ltr';
-        reportElement.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+        reportElement.style.padding = '15px';
         reportElement.style.background = '#ffffff';
 
         let htmlContent = `
-            <div style="text-align:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px;">
-                <h2 style="color:#1e3c72; margin:0; font-size:22px;">Anjum Green Pharmacy 🌿</h2>
-                <h3 style="color:#333; margin:5px 0 0 0; font-size:16px;">Expenses & Revenues Financial Report</h3>
-                <p style="color:#666; font-size:11px; margin:5px 0 0 0;">
-                    Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}
-                </p>
-            </div>
+            <style>
+                .pdf-container { font-family: system-ui, -apple-system, sans-serif; color: #333; }
+                .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
+                .pdf-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 10px; }
+                .pdf-table th { background: #1e3c72; color: #fff; border: 1px solid #1e3c72; padding: 6px; }
+                .pdf-table td { border: 1px solid #ccc; padding: 5px; vertical-align: middle; }
+                .pdf-row { page-break-inside: avoid !important; break-inside: avoid !important; }
+                .summary-box { background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; }
+            </style>
 
-            <div style="background:#f8f9fa; border:1px solid #1e3c72; border-radius:8px; padding:12px; margin-bottom:15px; page-break-inside:avoid;">
-                <h4 style="text-align:center; margin:0 0 8px 0; color:#1e3c72; font-size:13px;">📊 Financial Summary (EGP)</h4>
-                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11px;">
+            <div class="pdf-container">
+                <div class="pdf-header">
+                    <h2 style="color:#1e3c72; margin:0; font-size:20px;">Anjum Green Pharmacy 🌿</h2>
+                    <h3 style="color:#333; margin:4px 0 0 0; font-size:14px;">Expenses & Revenues Financial Report</h3>
+                    <p style="color:#666; font-size:10px; margin:4px 0 0 0; direction:ltr;">
+                        Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}
+                    </p>
+                </div>
+
+                <div class="summary-box">
+                    <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
+                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
+                        <thead>
+                            <tr style="background:#1e3c72; color:#fff;">
+                                <th style="padding:5px;">Total Revenues</th>
+                                ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
+                                <th style="padding:5px;">Total Expenses</th>
+                                <th style="padding:5px;">Net Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                                ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table class="pdf-table">
                     <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="padding:6px; border:1px solid #1e3c72;">Total Revenues</th>
-                            ${includeSales ? `<th style="padding:6px; border:1px solid #1e3c72;">Total Sales Profit</th>` : ''}
-                            <th style="padding:6px; border:1px solid #1e3c72;">Total Expenses</th>
-                            <th style="padding:6px; border:1px solid #1e3c72;">Net Balance</th>
+                        <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:110px;">Date</th>
+                            <th style="width:65px;">Type</th>
+                            <th>Category / Description</th>
+                            <th style="width:85px;">Amount (EGP)</th>
+                            <th>Notes</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
-                            ${includeSales ? `<td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
-                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
-                            <td style="padding:8px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:12px;">${net.toFixed(2)} EGP</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
-                <thead>
-                    <tr style="background:#1e3c72; color:#fff;">
-                        <th style="border:1px solid #333; padding:6px; width:35px;">#</th>
-                        <th style="border:1px solid #333; padding:6px; width:110px;">Date</th>
-                        <th style="border:1px solid #333; padding:6px; width:70px;">Type</th>
-                        <th style="border:1px solid #333; padding:6px;">Category / Description</th>
-                        <th style="border:1px solid #333; padding:6px; width:90px;">Amount (EGP)</th>
-                        <th style="border:1px solid #333; padding:6px;">Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
         `;
 
         if (filtered.length === 0) {
-            htmlContent += `<tr><td colspan="6" style="padding:10px; border:1px solid #ccc; color:#777;">No financial records found for selected period</td></tr>`;
+            htmlContent += `<tr class="pdf-row"><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`;
         } else {
             filtered.forEach((f, idx) => {
                 const isRev = f.type === 'Revenue';
                 htmlContent += `
-                    <tr style="background:${isRev ? '#f2fcf5' : '#fff5f5'}; page-break-inside:avoid;">
-                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
-                        <td style="border:1px solid #ccc; padding:5px; white-space:nowrap;">${f.date || '-'}</td>
-                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                        <td style="border:1px solid #ccc; padding:5px; text-align:left; font-weight:bold;">${f.category || '-'}</td>
-                        <td style="border:1px solid #ccc; font-weight:bold; padding:5px; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
-                        <td style="border:1px solid #ccc; padding:5px; text-align:left; font-size:9px;">${f.notes || '-'}</td>
+                    <tr class="pdf-row" style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
+                        <td style="font-weight:bold;">${idx + 1}</td>
+                        <td style="white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
+                        <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                        <td style="text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
+                        <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
+                        <td style="text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
                     </tr>
                 `;
             });
         }
 
         htmlContent += `
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
-            <div style="text-align:center; margin-top:25px; padding-top:8px; border-top:1px solid #eee; font-size:8px; color:#7f8c8d; direction:ltr;">
-                ✨ D&P by Samy Lukas , Powered By Gemini
+                <div style="text-align:center; margin-top:20px; padding-top:6px; border-top:1px solid #eee; font-size:8px; color:#7f8c8d; direction:ltr;">
+                    ✨ D&P by Samy Lukas , Powered By Gemini
+                </div>
             </div>
         `;
 
         reportElement.innerHTML = htmlContent;
 
         const opt = {
-            margin: 0.25,
+            margin: [0.3, 0.3, 0.3, 0.3],
             filename: `Anjum_Pharmacy_Finance_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
         };
 
         html2pdf().set(opt).from(reportElement).save();
@@ -1504,6 +1586,7 @@
         
         saveProductsToStorage();
         syncToCloud("updateSingleProduct", { n: name, p: price, q: existing ? existing.q : qty, barcode: barcode, expiry: expiry });
+        updateAlertsBar();
 
         alert(`Product (${name}) saved and synced! ☁️`);
         document.getElementById('newProdName').value = '';
@@ -1552,6 +1635,7 @@
         saveProductsToStorage();
 
         syncToCloud("updateSingleProduct", selectedStockProd);
+        updateAlertsBar();
 
         alert(`Recharged (${selectedStockProd.n}) with ${addQty} units! New Stock: ${selectedStockProd.q}`);
         document.getElementById('addStockCard').style.display = 'none';
@@ -1586,6 +1670,7 @@
         saveProductsToStorage();
 
         syncToCloud("updateSingleProduct", prod);
+        updateAlertsBar();
 
         alert(`✅ Product (${newName}) updated!`);
         renderStockTable();
@@ -1606,6 +1691,7 @@
             syncToCloud("deleteProduct", { name: prodName });
             products = products.filter(p => p.n !== prodName);
             saveProductsToStorage();
+            updateAlertsBar();
 
             alert(`🗑️ Product (${prodName}) deleted!`);
             renderStockTable();
@@ -2073,6 +2159,7 @@
                 });
                 saveProductsToStorage();
                 renderStockTable();
+                updateAlertsBar();
             }
 
             savedInvoices.splice(invIdx, 1);
