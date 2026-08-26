@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anjum Green Pharmacy </title>
+    <title>Anjum Green Pharmacy 2026</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- مكتبة الباركود إصدار محدد لمنع مشاكل الكاش على PWA والموبايل -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; }
@@ -114,7 +112,7 @@
 <div class="app-container" id="mainContainer" style="display:none;">
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:6px; margin-bottom:8px;">
         <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.85rem;">👤 User: -</span>
-        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout 🚪</button>
+        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout onclick="logout()">Logout 🚪</button>
     </div>
 
     <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
@@ -122,10 +120,11 @@
 
     <div class="nav-tabs">
         <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', event)">🛒 POS & Invoices</button>
-        <button class="tab-btn admin-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 Stock Details</button>
-        <button class="tab-btn admin-only" id="btnAddStockTab" onclick="showTab('addStockTab', event)">🔒 ➕ Add Inventory</button>
+        <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 Stock Details</button>
+        <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', event)">🔒 ➕ Add Inventory</button>
         <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', event)">🔒 💵 Expenses & Revenues</button>
         <button class="tab-btn admin-only" id="btnReportsTab" onclick="showTab('reportsTab', event)">🔒 📊 Reports & Backup</button>
+        <button class="tab-btn admin-only" id="btnUsersTab" onclick="showTab('usersTab', event)">🔒 🔑 Account Security</button>
     </div>
 
     <!-- 1. POS Tab -->
@@ -226,8 +225,8 @@
         <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px;" onclick="saveInvoice()">Save & Sync Invoice 💾</button>
     </div>
 
-    <!-- 2. Stock Tab -->
-    <div id="stockTab" class="tab-content admin-only">
+    <!-- 2. Stock Tab (Manager Access for cs2 and Admin) -->
+    <div id="stockTab" class="tab-content manager-only">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 Inventory Details</span>
             <div style="display:flex; gap:6px;">
@@ -256,8 +255,8 @@
         </div>
     </div>
 
-    <!-- 3. Add Stock Tab -->
-    <div id="addStockTab" class="tab-content admin-only">
+    <!-- 3. Add Stock Tab (Manager Access for cs2 and Admin) -->
+    <div id="addStockTab" class="tab-content manager-only">
         <div class="section-title">➕ Add New Product</div>
         <div class="card" style="background:#eef7fe;">
             <div class="payment-grid">
@@ -310,7 +309,7 @@
         </div>
     </div>
 
-    <!-- 4. Expenses & Revenues Tab -->
+    <!-- 4. Expenses & Revenues Tab (Admin Only) -->
     <div id="financeTab" class="tab-content admin-only">
         <div class="section-title">💵 Expenses & Revenues Management (EGP Only)</div>
         
@@ -347,6 +346,19 @@
             <div>From: <input type="date" id="finFromDate"></div>
             <div>To: <input type="date" id="finToDate"></div>
             <button class="btn btn-blue" style="width: auto; margin-top: 0;" onclick="renderFinanceTable()">Filter 📈</button>
+            
+            <!-- خيار دمج أرباح المبيعات داخل الحسبة المالية -->
+            <div style="width:100%; margin-top:8px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:18px; height:18px;">
+                <label for="includeSalesIncomeToggle" style="font-size:0.85rem; font-weight:bold; color:#1e3c72; cursor:pointer;">
+                    💡 Include Sales Profit (EGP) in Financial Summary
+                </label>
+            </div>
+            
+            <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
+                <button class="btn btn-purple" style="width:auto; margin:0;" onclick="printFinanceReportPDF()">Export PDF 📄</button>
+                <button class="btn btn-orange" style="width:auto; margin:0;" onclick="exportFinanceExcel()">Export Excel 📊</button>
+            </div>
         </div>
 
         <div class="totals-box" style="background:#1e3c72; margin-bottom:15px;">
@@ -376,7 +388,7 @@
         </table></div>
     </div>
 
-    <!-- 5. Reports Tab -->
+    <!-- 5. Reports Tab (Admin Only) -->
     <div id="reportsTab" class="tab-content admin-only">
         <div class="section-title">📊 Sales Reports & Backup</div>
         
@@ -436,6 +448,26 @@
         </table></div>
     </div>
 
+    <!-- 6. Account Security Tab (Admin Only) -->
+    <div id="usersTab" class="tab-content admin-only">
+        <div class="section-title">🔑 Change Account Passwords</div>
+        <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
+            <div class="pay-box" style="margin-bottom:12px;">
+                <label>Select User:</label>
+                <select id="userSelectPass">
+                    <option value="admin">Admin</option>
+                    <option value="cs2">cs2</option>
+                    <option value="cashier">Cashier</option>
+                </select>
+            </div>
+            <div class="pay-box" style="margin-bottom:12px;">
+                <label>New Password:</label>
+                <input type="password" id="newAccountPass" placeholder="Enter new password...">
+            </div>
+            <button class="btn btn-purple" onclick="changeUserPasswordSystem()">Update Password 💾</button>
+        </div>
+    </div>
+
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
 </div>
 
@@ -480,6 +512,7 @@
         } else {
             cloudUsers = [
                 { username: 'admin', password: '852', role: 'Admin' },
+                { username: 'cs2', password: '456', role: 'User' },
                 { username: 'cashier', password: '123', role: 'Cashier' }
             ];
         }
@@ -524,9 +557,19 @@
 
     function applyRolePermissions() {
         const adminElements = document.querySelectorAll('.admin-only');
-        if (currentUser && currentUser.role === 'Cashier') {
-            adminElements.forEach(el => el.style.display = 'none');
+        const managerElements = document.querySelectorAll('.manager-only');
+
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+
+        if (!isManager) {
+            managerElements.forEach(el => el.style.display = 'none');
             showTab('salesTab');
+        } else {
+            managerElements.forEach(el => el.style.display = '');
+        }
+
+        if (currentUser && currentUser.role !== 'Admin' && currentUser.username !== 'admin') {
+            adminElements.forEach(el => el.style.display = 'none');
         } else {
             adminElements.forEach(el => el.style.display = '');
         }
@@ -739,8 +782,6 @@
     function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
 
     function showTab(tabId, evt) {
-        if (currentUser && currentUser.role === 'Cashier' && tabId !== 'salesTab') return;
-
         stopAllScanners();
 
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -755,7 +796,6 @@
         if(tabId === 'financeTab') renderFinanceTable();
     }
 
-    /* === نظام إدارة وتشغيل كاميرا الباركود المحسّن === */
     function toggleCameraScanner(key) {
         if (activeScannerKey === key) {
             stopCameraScanner(key);
@@ -771,7 +811,6 @@
 
         document.getElementById(containerId).style.display = 'block';
 
-        // طلب الإذن الصريح للكاميرا أولاً لتفادي مشاكل الأذونات على المتصفح العادي
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
             .then(function(stream) {
@@ -1208,6 +1247,7 @@
     function renderFinanceTable() {
         const fromD = document.getElementById('finFromDate') ? document.getElementById('finFromDate').value : '';
         const toD = document.getElementById('finToDate') ? document.getElementById('finToDate').value : '';
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
 
         const filtered = savedFinances.filter(f => {
             if (!f.date) return true;
@@ -1221,7 +1261,7 @@
         const tbody = document.getElementById('financeTableBody');
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No records found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
         } else {
             tbody.innerHTML = filtered.map((f, idx) => {
                 if (f.type === 'Revenue') totRev += f.amount;
@@ -1240,12 +1280,78 @@
             `;}).join('');
         }
 
+        // إضافة أرباح مبيعات الفواتير إذا تم تفعيل الخيار
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                totRev += (parseFloat(inv.netProfit) || 0);
+            });
+        }
+
         document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
         document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
         const net = totRev - totExp;
         const netEl = document.getElementById('netBalance');
         netEl.textContent = net.toFixed(2) + ' EGP';
         netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
+    }
+
+    function exportFinanceExcel() {
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let excelData = filtered.map((f, i) => ({
+            "م": i + 1,
+            "التاريخ": f.date,
+            "النوع": f.type,
+            "الفئة / البيان": f.category,
+            "المبلغ (EGP)": f.amount,
+            "ملاحظات": f.notes || ""
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Finance_Report");
+        XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function printFinanceReportPDF() {
+        const element = document.getElementById('financeTab');
+        const opt = {
+            margin: 0.2,
+            filename: `Finance_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function changeUserPasswordSystem() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const targetUser = document.getElementById('userSelectPass').value;
+        const newPass = document.getElementById('newAccountPass').value.trim();
+
+        if (!newPass) return alert("Please enter new password!");
+
+        let uObj = cloudUsers.find(u => u.username === targetUser);
+        if (uObj) {
+            uObj.password = newPass;
+            saveLocalUsers(cloudUsers);
+            syncToCloud("updateUserPassword", { username: targetUser, newPassword: newPass });
+            alert(`✅ Password for [${targetUser.toUpperCase()}] updated successfully!`);
+            document.getElementById('newAccountPass').value = '';
+        }
     }
 
     function addNewProductToSystem() {
@@ -1325,7 +1431,8 @@
     }
 
     function editProductSystem(prodName) {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+        if (!isManager) return alert("❌ Restricted access!");
 
         const prod = products.find(p => p.n === prodName);
         if (!prod) return;
@@ -1341,7 +1448,7 @@
         if (newQtyInput === null) return;
         const newQty = parseInt(newQtyInput) || prod.q;
 
-        const newBarcode = prompt("📷 New Barcode:", prod.barcode || "");
+        const newBarcode = prompt("📷 New Barcode (Leave empty or scan via camera button in table):", prod.barcode || "");
         if (newBarcode !== null) prod.barcode = newBarcode.trim();
 
         prod.n = newName;
@@ -1355,8 +1462,23 @@
         renderStockTable();
     }
 
+    function scanAndEditProductBarcode(prodName) {
+        const prod = products.find(p => p.n === prodName);
+        if (!prod) return;
+        
+        let scanned = prompt(`📷 Scan barcode for [${prod.n}]:`, prod.barcode || "");
+        if (scanned !== null && scanned.trim() !== "") {
+            prod.barcode = scanned.trim();
+            saveProductsToStorage();
+            syncToCloud("updateSingleProduct", prod);
+            alert(`✅ Barcode updated for [${prod.n}] to: ${prod.barcode}`);
+            renderStockTable();
+        }
+    }
+
     function deleteProductSystem(prodName) {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+        if (!isManager) return alert("❌ Restricted access!");
 
         if (confirm(`❌ Delete product (${prodName}) completely?`)) {
             syncToCloud("deleteProduct", { name: prodName });
@@ -1391,7 +1513,8 @@
                 <td>${i.expiry || '-'}</td>
                 <td>
                     <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
-                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="scanAndEditProductBarcode('${i.n}')">Scan 📷</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
                     <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteProductSystem('${i.n}')">Delete 🗑️</button>
                 </td>
             </tr>
