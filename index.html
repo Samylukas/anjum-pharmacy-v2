@@ -177,7 +177,7 @@
             <div class="info-row">
                 <div>Available Stock: <span id="stockQty" style="color:#27ae60;">0</span> units</div>
                 <div>Commercial Unit Price: <span id="commPrice" style="color:#2c3e50;">0</span> EGP</div>
-                <div>Guide Min Price (×3): <span id="guidePrice" style="color:#e67e22;">0</span> EGP</div>
+                <div>Guide Min Price: <span id="guidePrice" style="color:#e67e22;">0</span> EGP</div>
             </div>
 
             <div class="info-row" style="align-items: center;">
@@ -260,7 +260,7 @@
                         <th>Product Name</th>
                         <th>Available Stock</th>
                         <th>Commercial Unit Price</th>
-                        <th>Guide Min Price (×3)</th>
+                        <th id="thStockGuideHead">Guide Min Price (×3)</th>
                         <th>Barcode</th>
                         <th>Expiry Date</th>
                         <th style="width:210px;">Actions</th>
@@ -416,7 +416,7 @@
             <div class="toolbar-row">
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
-                <button class="btn btn-purple" onclick="promptSetRates()">Set FX Rates ⚙️</button>
+                <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Guide Multiplier ⚙️</button>
                 <button class="btn btn-purple" onclick="printReportTable()">Print Report 🖨️</button>
                 <button class="btn btn-orange" onclick="exportReportPDF()">Export PDF 📄</button>
                 <button class="btn btn-blue" style="background:#27ae60;" onclick="handleBackupExportAction()">Backup JSON 💾</button>
@@ -609,11 +609,15 @@
         }
     }
 
-    let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1 };
+    /* المعامل الإفتراضي للأسعار الاسترشادية هو 3 وديناميكي للتعديل من الأدمن */
+    let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 
     function loadRatesFromStorage() {
         const savedRates = localStorage.getItem('anjum_rates');
-        if (savedRates) RATES = JSON.parse(savedRates);
+        if (savedRates) {
+            RATES = JSON.parse(savedRates);
+            if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3;
+        }
         updateRateLabels();
     }
 
@@ -622,6 +626,9 @@
         if(document.getElementById('lblEUR')) document.getElementById('lblEUR').textContent = `EUR (€ × ${RATES.EUR})`;
         if(document.getElementById('lblGBP')) document.getElementById('lblGBP').textContent = `GBP (£ × ${RATES.GBP})`;
         if(document.getElementById('lblVISA')) document.getElementById('lblVISA').textContent = `VISA (× ${RATES.VISA})`;
+        
+        const thHead = document.getElementById('thStockGuideHead');
+        if (thHead) thHead.textContent = `Guide Min Price (×${RATES.GUIDE_MULT || 3})`;
     }
 
     function promptSetRates() {
@@ -634,16 +641,21 @@
         if (g === null) return;
         const v = prompt("💳 VISA Multiplier:", RATES.VISA);
         if (v === null) return;
+        const mult = prompt("📈 Guide Min Price Multiplier (e.g. 3, 6, 8):", RATES.GUIDE_MULT || 3);
+        if (mult === null) return;
 
         RATES.USD = parseFloat(u) || RATES.USD;
         RATES.EUR = parseFloat(eu) || RATES.EUR;
         RATES.GBP = parseFloat(g) || RATES.GBP;
         RATES.VISA = parseFloat(v) || RATES.VISA;
+        RATES.GUIDE_MULT = parseFloat(mult) || RATES.GUIDE_MULT;
 
         localStorage.setItem('anjum_rates', JSON.stringify(RATES));
         updateRateLabels();
-        checkPriceAlert();
-        alert('✅ Exchange rates updated successfully!');
+        
+        if (selectedProd) pickProductIndex(products.findIndex(p => p.n === selectedProd.name));
+        renderStockTable();
+        alert('✅ Exchange rates & Guide Multiplier updated successfully!');
     }
 
     let products = [];
@@ -991,6 +1003,7 @@
         const count = parseInt(countInput) || 1;
 
         const win = window.open('', '', 'height=600,width=800');
+        const guideMult = RATES.GUIDE_MULT || 3;
         
         win.document.write(`
             <html>
@@ -1016,7 +1029,7 @@
                     <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
                     <div class="prod-title">${prod.n}</div>
                     <svg id="barcode-${i}"></svg>
-                    <div class="prod-price">Price: ${(prod.p * 3).toFixed(2)} EGP</div>
+                    <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
                 </div>
             `);
         }
@@ -1076,14 +1089,15 @@
     function pickProductIndex(index) {
         const p = products[index];
         if (!p) return;
-        selectedProd = { name: p.n, comm: p.p, guide: p.p * 3, stock: p.q };
+        const guideMult = RATES.GUIDE_MULT || 3;
+        selectedProd = { name: p.n, comm: p.p, guide: p.p * guideMult, stock: p.q };
         
         document.getElementById('searchResults').style.display = 'none';
         document.getElementById('searchInput').value = p.n;
         document.getElementById('prodName').textContent = p.n;
         document.getElementById('stockQty').textContent = p.q;
         document.getElementById('commPrice').textContent = (p.p || 0).toFixed(2);
-        document.getElementById('guidePrice').textContent = ((p.p || 0) * 3).toFixed(2);
+        document.getElementById('guidePrice').textContent = ((p.p || 0) * guideMult).toFixed(2);
         document.getElementById('sellQty').value = 1;
         
         ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => document.getElementById(id).value = 0);
@@ -1408,7 +1422,6 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /* === دالة طباعة وتصدير التقرير المالي الاحترافية والمدعومة 100% للموبايل والتطبيق === */
     function printFinanceReportPDF() {
         const fromD = document.getElementById('finFromDate').value;
         const toD = document.getElementById('finToDate').value;
@@ -1695,6 +1708,8 @@
     function renderStockTable(filter = '') {
         const tbody = document.getElementById('stockTableBody');
         const matched = products.filter(i => (i.n && i.n.toLowerCase().includes(filter.toLowerCase())) || (i.barcode && i.barcode.toLowerCase().includes(filter.toLowerCase())));
+        const guideMult = RATES.GUIDE_MULT || 3;
+
         tbody.innerHTML = matched.map((i, index) => {
             let isExpiring = false;
             if (i.expiry) {
@@ -1710,7 +1725,7 @@
                 <td style="text-align:left; font-weight:bold;">${i.n} ${i.q <= 3 ? '⚠️ (Low)' : ''} ${isExpiring ? '⏳ (Expiring)' : ''}</td>
                 <td style="font-weight:bold;">${i.q} units</td>
                 <td>${i.p.toFixed(2)} EGP</td>
-                <td>${(i.p * 3).toFixed(2)} EGP</td>
+                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
                 <td style="font-family:monospace; font-weight:bold; color:#1e3c72;">${i.barcode || '-'}</td>
                 <td>${i.expiry || '-'}</td>
                 <td>
@@ -1729,13 +1744,15 @@
         document.getElementById('stockFilterInput').value = '';
         const tbody = document.getElementById('stockTableBody');
         const matched = products.filter(i => i.q <= 3);
+        const guideMult = RATES.GUIDE_MULT || 3;
+
         tbody.innerHTML = matched.map((i, index) => `
             <tr class="low-stock-row">
                 <td style="font-weight:bold;">${index + 1}</td>
                 <td style="text-align:left; font-weight:bold;">${i.n} ⚠️ (Low Stock)</td>
                 <td style="font-weight:bold;">${i.q} units</td>
                 <td>${i.p.toFixed(2)} EGP</td>
-                <td>${(i.p * 3).toFixed(2)} EGP</td>
+                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
                 <td style="font-family:monospace;">${i.barcode || '-'}</td>
                 <td>${i.expiry || '-'}</td>
                 <td>
