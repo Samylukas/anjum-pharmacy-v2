@@ -75,9 +75,19 @@
         .toolbar-row .btn { flex: 1; min-width: 120px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
-        table { width: 100%; min-width: 600px; border-collapse: collapse; }
-        th, td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: break-word; vertical-align: middle; }
+        table { width: 100%; min-width: 750px; border-collapse: collapse; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.8rem; word-break: normal; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
+
+        /* حماية اسم المنتج من الانكسار والضغط */
+        .items-column-cell {
+            text-align: right !important;
+            font-size: 0.8rem !important;
+            line-height: 1.5 !important;
+            min-width: 220px !important;
+            white-space: nowrap !important;
+            word-break: normal !important;
+        }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -93,7 +103,7 @@
         .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 8px; background: #eef7fe; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
         .discount-bar input { width: 70px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #3498db; font-weight: bold; }
 
-        .totals-box { background: #1e3c72; color: #fff; padding: 12px; border-radius: 8px; margin-top: 15px; }
+        .totals-box { background: #1e3c72; color: #fff; padding: 12px; border-radius: 8px; margin-top: 15px; position: relative; }
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
@@ -447,7 +457,10 @@
 
     <!-- 5. Sales Reports Tab -->
     <div id="reportsTab" class="tab-content admin-only">
-        <div class="section-title">📊 Sales Reports</div>
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>📊 Sales Reports</span>
+            <button class="btn btn-red" style="width:auto; padding:4px 10px; margin:0;" onclick="closeReportView()">❌ إغلاق / العودة</button>
+        </div>
         
         <div class="card date-filter-box">
             <div class="date-inputs-row">
@@ -465,6 +478,7 @@
         </div>
 
         <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
+            <button class="btn btn-red" style="position:absolute; left:8px; top:8px; width:auto; padding:2px 8px; font-size:0.75rem;" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
             <div class="totals-grid">
                 <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
@@ -489,7 +503,7 @@
                     <th style="width:30px;">#</th>
                     <th style="width:65px;">Inv ID</th>
                     <th style="width:110px;">Date</th>
-                    <th>Items</th>
+                    <th style="min-width:220px;">Items Details</th>
                     <th>Pay Breakdown</th>
                     <th>C-Total</th>
                     <th style="width:55px;">Disc %</th>
@@ -585,6 +599,10 @@
         
         loadLocalUsers();
     });
+
+    function closeReportView() {
+        showTab('salesTab');
+    }
 
     function updateOnlineStatus() {
         const ind = document.getElementById('syncIndicator');
@@ -1896,7 +1914,6 @@
         }, 500);
     }
 
-    // دالة طباعة المبيعات لـ A4 و PDF
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1988,7 +2005,6 @@
         setTimeout(() => win.print(), 500);
     }
 
-    // دالة طباعة جدول المخزون لـ A4 و PDF
     function printStockTable() {
         const win = window.open('', '', 'height=850,width=1100');
         win.document.write(`
@@ -2129,7 +2145,7 @@
                 <td><span class="seq-num">${index + 1}</span></td>
                 <td style="font-weight:bold;">#${inv.id}</td>
                 <td style="white-space:nowrap;">${cleanDateStr}</td>
-                <td style="text-align:right; font-size:0.75rem; line-height:1.4;">${itemsList}</td>
+                <td class="items-column-cell">${itemsList}</td>
                 <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
                 <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
                 <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
