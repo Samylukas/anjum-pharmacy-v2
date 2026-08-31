@@ -76,10 +76,9 @@
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; }
-        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.8rem; word-break: normal; vertical-align: middle; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: normal; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
-        /* حماية اسم المنتج من الانكسار والضغط */
         .items-column-cell {
             text-align: right !important;
             font-size: 0.8rem !important;
@@ -457,10 +456,7 @@
 
     <!-- 5. Sales Reports Tab -->
     <div id="reportsTab" class="tab-content admin-only">
-        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>📊 Sales Reports</span>
-            <button class="btn btn-red" style="width:auto; padding:4px 10px; margin:0;" onclick="closeReportView()">❌ إغلاق / العودة</button>
-        </div>
+        <div class="section-title">📊 Sales Reports</div>
         
         <div class="card date-filter-box">
             <div class="date-inputs-row">
@@ -480,6 +476,15 @@
         <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
             <button class="btn btn-red" style="position:absolute; left:8px; top:8px; width:auto; padding:2px 8px; font-size:0.75rem;" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
+            
+            <!-- زر التبديل لخصم المصروفات من أرباح المبيعات -->
+            <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
+                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer;">
+                <label for="deductExpensesToggle" style="font-size:0.8rem; font-weight:bold; color:#f1c40f; cursor:pointer;">
+                    💡 Deduct Expenses from Sales Profit (Real Net Profit)
+                </label>
+            </div>
+
             <div class="totals-grid">
                 <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
                 <div class="total-item">Total EUR (€) <span id="repTotalEUR">€0.00</span></div>
@@ -488,7 +493,7 @@
                 <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">N-Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
             </div>
             
             <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
@@ -599,10 +604,6 @@
         
         loadLocalUsers();
     });
-
-    function closeReportView() {
-        showTab('salesTab');
-    }
 
     function updateOnlineStatus() {
         const ind = document.getElementById('syncIndicator');
@@ -1549,7 +1550,7 @@
 
         const net = totRev - totExp;
 
-        const win = window.open('', '', 'height=800,width=950');
+        const win = window.open('', '_blank', 'height=800,width=950');
         win.document.write(`
             <html>
             <head>
@@ -1637,15 +1638,17 @@
                 <div class="footer">
                     ✨ D&P by Samy Lukas , Powered By Gemini
                 </div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function(){ window.close(); }, 500);
+                    };
+                <\/script>
             </body>
             </html>
         `);
 
         win.document.close();
-        win.focus();
-        setTimeout(() => {
-            win.print();
-        }, 500);
     }
 
     function changeUserPasswordSystem() {
@@ -1914,6 +1917,7 @@
         }, 500);
     }
 
+    // دالة طباعة تقرير المبيعات المنفصلة السريعة الإغلاق
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1926,7 +1930,7 @@
             return true;
         });
 
-        const win = window.open('', '', 'height=850,width=1100');
+        const win = window.open('', '_blank', 'height=850,width=1100');
         win.document.write(`
             <html>
             <head>
@@ -1996,17 +2000,21 @@
                     </tbody>
                 </table>
                 <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function(){ window.close(); }, 500);
+                    };
+                <\/script>
             </body>
             </html>
         `);
 
         win.document.close();
-        win.focus();
-        setTimeout(() => win.print(), 500);
     }
 
     function printStockTable() {
-        const win = window.open('', '', 'height=850,width=1100');
+        const win = window.open('', '_blank', 'height=850,width=1100');
         win.document.write(`
             <html>
             <head>
@@ -2060,13 +2068,17 @@
                     </tbody>
                 </table>
                 <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        setTimeout(function(){ window.close(); }, 500);
+                    };
+                <\/script>
             </body>
             </html>
         `);
 
         win.document.close();
-        win.focus();
-        setTimeout(() => win.print(), 400);
     }
 
     function exportSalesReportExcel() {
@@ -2198,10 +2210,12 @@
         }
     }
 
+    // دالة احتساب صافي الربح الفعلي بعد إمكانية خصم المصروفات
     function handleNetProfitAction() {
         if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
+        const deductExp = document.getElementById('deductExpensesToggle') ? document.getElementById('deductExpensesToggle').checked : false;
 
         const filteredInvoices = savedInvoices.filter(inv => {
             if (!inv.date) return true;
@@ -2252,6 +2266,21 @@
                 });
             }
         });
+
+        // خصم إجمالي المصروفات إن كان الزر مفاعلاً
+        if (deductExp) {
+            let totalExpensesInPeriod = 0;
+            savedFinances.forEach(f => {
+                if (f.type === 'Expense') {
+                    if (!f.date) return;
+                    let fD = f.date.slice(0, 10);
+                    if (fromD && fD < fromD) return;
+                    if (toD && fD > toD) return;
+                    totalExpensesInPeriod += (parseFloat(f.amount) || 0);
+                }
+            });
+            netProfit = netProfit - totalExpensesInPeriod;
+        }
 
         document.getElementById('repTotalUSD').textContent = '$' + sumUSD.toFixed(2);
         document.getElementById('repTotalEUR').textContent = '€' + sumEUR.toFixed(2);
