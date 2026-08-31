@@ -282,7 +282,7 @@
             <span>📦 Inventory Details</span>
             <div style="display:flex; gap:6px;">
                 <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">Print 🖨️</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">Print / PDF 🖨️</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
@@ -413,7 +413,7 @@
             </div>
             
             <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
-                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">Print Report 🖨️</button>
+                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">Print / PDF 📄</button>
                 <button class="btn btn-orange" style="flex:1;" onclick="exportFinanceExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -459,7 +459,7 @@
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
                 <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Multiplier ⚙️</button>
-                <button class="btn btn-purple" onclick="printReportTable()">Print Report 🖨️</button>
+                <button class="btn btn-purple" onclick="printReportTable()">Print / PDF 📄</button>
                 <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -1896,7 +1896,7 @@
         }, 500);
     }
 
-    // دالة طباعة تقرير المبيعات بدقة A4 احترافية وبدون أزرار أو أجزاء شاشة إضافية
+    // دالة طباعة المبيعات لـ A4 و PDF
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1986,6 +1986,71 @@
         win.document.close();
         win.focus();
         setTimeout(() => win.print(), 500);
+    }
+
+    // دالة طباعة جدول المخزون لـ A4 و PDF
+    function printStockTable() {
+        const win = window.open('', '', 'height=850,width=1100');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Stock Inventory - Anjum Green Pharmacy</title>
+                <style>
+                    @page { size: A4 portrait; margin: 10mm; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; color: #333; }
+                    .header-title { border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
+                    .header-title h2 { color: #1e3c72; margin: 0; font-size: 22px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                    th, td { border: 1px solid #1e3c72; padding: 6px; text-align: center; }
+                    th { background-color: #1e3c72; color: #ffffff; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                    .footer { margin-top: 15px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
+                </style>
+            </head>
+            <body>
+                <div class="header-title">
+                    <h2>Anjum Green Pharmacy 🌿</h2>
+                    <h3 style="margin:4px 0;">جدول تفاصيل المخزون</h3>
+                    <p>التاريخ: ${new Date().toLocaleString()}</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>م</th>
+                            <th style="width:40%;">اسم المنتج</th>
+                            <th>الكمية</th>
+                            <th>السعر التجاري</th>
+                            <th>الباركود</th>
+                            <th>الصلاحية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `);
+
+        products.forEach((i, idx) => {
+            win.document.write(`
+                <tr>
+                    <td>${idx+1}</td>
+                    <td style="text-align:right; font-weight:bold;">${i.n}</td>
+                    <td>${i.q} قطعة</td>
+                    <td>${i.p.toFixed(2)} ج.م</td>
+                    <td style="font-family:monospace;">${i.barcode || '-'}</td>
+                    <td>${i.expiry || '-'}</td>
+                </tr>
+            `);
+        });
+
+        win.document.write(`
+                    </tbody>
+                </table>
+                <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 400);
     }
 
     function exportSalesReportExcel() {
