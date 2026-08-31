@@ -1,301 +1,2055 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anjum Green Pharmacy POS 2026</title>
+    <title>Anjum Green Pharmacy 2026</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #1e3c72; --secondary: #2a5298; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f6f9; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; direction: rtl; }
-        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .header h1 { color: var(--primary); margin: 0; font-size: 24px; }
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 13px; margin-top: 5px; font-weight: bold; }
-        .online { background: #e8f8f5; color: #27ae60; }
-        .offline { background: #fdeae8; color: #e74c3c; }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; }
-        .tab-btn { padding: 10px 15px; border: none; background: #e0e0e0; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; }
-        .tab-btn.active { background: var(--primary); color: #fff; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .grid-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .btn { padding: 10px; border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; text-align: center; }
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; }
+        .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
+        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
+        
+        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
+
+        .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.82rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; }
+        .tab-btn.active { background: #1e3c72; color: #fff; }
+
+        .tab-content { display: none; width: 100%; }
+        .tab-content.active { display: block; }
+
+        .section-title { font-weight: bold; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1rem; }
+        
+        .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
+        .results-list { max-height: 200px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .result-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.85rem; }
+
+        .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; width: 100%; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
+        .info-row span { font-weight: bold; }
+        
+        .payment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box; }
+        .pay-box { display: flex; flex-direction: column; width: 100%; }
+        .pay-box label { font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; }
+        .pay-box input, .pay-box select { width: 100%; padding: 8px 4px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 0.95rem; box-sizing: border-box; }
+        
+        @media (max-width: 550px) {
+            .payment-grid { grid-template-columns: 1fr; }
+            .pay-box { grid-column: span 1 !important; }
+        }
+
+        .warning-box { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+        .btn { background: #27ae60; color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 0.9rem; }
+        .btn:hover { background: #219653; }
         .btn-blue { background: #3498db; }
-        .btn-orange { background: #e67e22; }
-        .btn-red { background: var(--danger); }
-        .btn-green { background: var(--accent); }
+        .btn-blue:hover { background: #2980b9; }
+        .btn-red { background: #e74c3c; }
         .btn-purple { background: #8e44ad; }
-        .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
-        .search-box input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
-        th { background: var(--primary); color: #fff; }
-        .totals-card { background: #1a252f; color: #fff; padding: 15px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; text-align: center; }
-        .totals-card div { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .btn-orange { background: #e67e22; }
+
+        .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .nav-controls .btn { width: auto; font-size: 0.8rem; padding: 6px 12px; margin-top: 0; }
+
+        .toolbar-row { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding-bottom: 4px; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+        .toolbar-row .btn { width: auto; flex-shrink: 0; margin-top: 0; font-size: 0.8rem; padding: 7px 12px; white-space: nowrap; }
+
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
+        table { width: 100%; min-width: 600px; border-collapse: collapse; }
+        th, td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: break-word; vertical-align: middle; }
+        th { background: #3498db; color: white; white-space: nowrap; }
+
+        .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
+
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.9); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
+        .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
+        
+        .totals-box { background: #1e3c72; color: #fff; padding: 12px; border-radius: 8px; margin-top: 15px; }
+        .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
+        .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
+        .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
+        .date-filter { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .date-filter input { padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; }
+
+        .live-invoice-summary { background: #1e3c72; color: white; border-radius: 8px; padding: 10px; margin-top: 12px; }
+        .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 6px; text-align: center; font-size: 0.75rem; }
+        .live-summary-item { background: rgba(255,255,255,0.12); padding: 5px; border-radius: 5px; }
+        .live-summary-item span { display: block; color: #f1c40f; font-weight: bold; font-size: 0.85rem; margin-top: 2px; }
+
+        .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
+        .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
+
+        @media print {
+            body.printing-receipt * { visibility: hidden; }
+            #receiptPrintSection, #receiptPrintSection * { visibility: visible; }
+            #receiptPrintSection { position: absolute; left: 0; top: 0; width: 80mm; font-family: monospace; font-size: 11px; text-align: center; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
-        <div id="netStatus" class="status-badge offline">🔴 Offline / Error</div>
-    </div>
-
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('pos')">🛒 POS & Invoices</button>
-        <button class="tab-btn" onclick="switchTab('stock')">🔒 Stock Details</button>
-        <button class="tab-btn" onclick="switchTab('add-stock')">🔒 ➕ Add Inventory</button>
-        <button class="tab-btn" onclick="switchTab('expenses')">🔒 💵 Expenses & Revenues</button>
-        <button class="tab-btn" onclick="switchTab('reports')">🔒 📊 Reports & Backup</button>
-    </div>
-
-    <!-- POS SECTION -->
-    <div id="pos" class="section active">
-        <div class="grid-actions">
-            <button class="btn btn-blue" onclick="syncData()">Sync Data 🔄</button>
-            <button class="btn btn-orange" onclick="newInvoice()">New Invoice ➕</button>
-            <button class="btn btn-red" onclick="clearInvoice()">Clear 🧹</button>
-        </div>
-
-        <div style="margin-bottom: 10px; font-weight: bold; font-size: 16px;">
-            Invoice ID: <span id="invoiceIdDisplay" style="color:var(--primary)">---</span>
-        </div>
-
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search Product Name or Scan..." oninput="handleSearch()">
-            <button class="btn btn-purple" onclick="triggerScan()">Scan 📷</button>
-        </div>
-
-        <div id="searchResults" style="background:#fff; border:1px solid #ccc; max-height:150px; overflow-y:auto; display:none; margin-bottom:10px;"></div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Product Name</th>
-                    <th>Qty</th>
-                    <th>Price (EGP)</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="cartTable"></tbody>
-        </table>
-
-        <div class="totals-card">
-            <div>USD ($)<br><strong id="totalUSD" style="color:#f1c40f">$0.00</strong></div>
-            <div>EUR (€)<br><strong id="totalEUR" style="color:#3498db">€0.00</strong></div>
-            <div>GBP (£)<br><strong id="totalGBP" style="color:#9b59b6">£0.00</strong></div>
-            <div>Total (EGP)<br><strong id="grandTotal" style="color:#2ecc71; font-size:18px;">0.00 EGP</strong></div>
-        </div>
-        <br>
-        <button class="btn btn-green" style="width: 100%; padding: 15px; font-size: 16px;" onclick="saveInvoice()">Save & Sync Invoice 💾</button>
-    </div>
-
-    <!-- STOCK SECTION -->
-    <div id="stock" class="section">
-        <h3>📦 Inventory Stock</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Barcode</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                </tr>
-            </thead>
-            <tbody id="stockTable"></tbody>
-        </table>
-    </div>
-
-    <!-- ADD INVENTORY SECTION -->
-    <div id="add-stock" class="section">
-        <h3>➕ Add New Product</h3>
-        <div class="form-group"><label>Product Name</label><input type="text" id="prodName"></div>
-        <div class="form-group">
-            <label>Barcode</label>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="prodBarcode">
-                <button class="btn btn-purple" onclick="scanForAdd()">Scan 📷</button>
-            </div>
-        </div>
-        <div class="form-group"><label>Price (EGP)</label><input type="number" id="prodPrice"></div>
-        <div class="form-group"><label>Quantity</label><input type="number" id="prodQty"></div>
-        <button class="btn btn-green" style="width:100%" onclick="saveProduct()">Save Product 📦</button>
-    </div>
-
-    <!-- EXPENSES SECTION -->
-    <div id="expenses" class="section">
-        <h3>💵 Expenses & Revenues</h3>
-        <div class="form-group"><label>Type</label><select id="expType"><option>Expense</option><option>Revenue</option></select></div>
-        <div class="form-group"><label>Description</label><input type="text" id="expDesc"></div>
-        <div class="form-group"><label>Amount (EGP)</label><input type="number" id="expAmount"></div>
-        <button class="btn btn-blue" style="width:100%">Record Transaction</button>
-    </div>
-
-    <!-- REPORTS SECTION -->
-    <div id="reports" class="section">
-        <h3>📊 Reports & Summary</h3>
-        <p>Sales summary and reports will be generated here automatically from synchronized invoices.</p>
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+        <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.2rem;">🔐 Anjum Green Pharmacy</h2>
+        <input type="text" id="entryUserInput" class="search-box" style="text-align:center; margin-bottom:10px;" placeholder="Username...">
+        <input type="password" id="entryPassInput" class="search-box" style="text-align:center;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+        <button class="btn btn-blue" onclick="validateEntryPassword()">Login System 🚀</button>
+        <div class="footer-signature" style="margin-top:15px; font-size:0.65rem;">✨ D&P by Samy Lukas , Powered By Gemini</div>
     </div>
 </div>
 
+<div class="app-container" id="mainContainer" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:6px; margin-bottom:8px;">
+        <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.85rem;">👤 User: -</span>
+        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout 🚪</button>
+    </div>
+
+    <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
+    <div id="syncIndicator" class="sync-status status-online">🟢 Online</div>
+
+    <div id="alertsContainer" class="alerts-bar">
+        <div>
+            🔔 Status Summary: <span id="lowStockCountVal" style="color:#c0392b;">0 Low Stock Items</span> | <span id="expiringCountVal" style="color:#e67e22;">0 Expiring Items</span>
+        </div>
+        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:3px 8px; font-size:0.72rem;" onclick="showTab('stockTab'); filterLowStock();">View Items 📦</button>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', event)">🛒 POS & Invoices</button>
+        <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 Stock Details</button>
+        <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', event)">🔒 ➕ Add Inventory</button>
+        <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', event)">🔒 💵 Expenses & Revenues</button>
+        <button class="tab-btn admin-only" id="btnReportsTab" onclick="showTab('reportsTab', event)">🔒 📊 Reports & Backup</button>
+        <button class="tab-btn admin-only" id="btnUsersTab" onclick="showTab('usersTab', event)">🔒 🔑 Account Security</button>
+    </div>
+
+    <!-- 1. POS Tab -->
+    <div id="salesTab" class="tab-content active">
+        <div class="section-title">🛒 Create / Edit Sales Invoice</div>
+
+        <div class="date-filter card" style="background:#fff3cd; border-color:#ffeeba;">
+            <div style="color:#856404; font-size:0.85rem; font-weight:bold;">💡 Sync & Shortcuts:</div>
+            <button class="btn btn-blue" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
+            <button class="btn btn-orange" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="prepareNewInvoice()">New Invoice ➕</button>
+            <button class="btn btn-purple" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
+            <button class="btn btn-purple" id="resumeHoldBtn" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
+            <button class="btn btn-red" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
+        </div>
+
+        <div class="info-row" style="background: #eef7fe; padding: 10px; border-radius: 6px; align-items: center;">
+            <div>Invoice Date: <input type="datetime-local" id="invoiceDate" style="padding: 4px; border-radius: 4px; border: 1px solid #ccc;"></div>
+            <div>Invoice ID: <span id="invNum" style="color: #1e3c72; font-size: 1.2rem; font-weight: bold;">1001</span></div>
+        </div>
+
+        <div class="nav-controls">
+            <button class="btn btn-blue" onclick="navigateInvoice('first')">First ⏮️</button>
+            <button class="btn btn-blue" onclick="navigateInvoice('prev')">Previous ◀️</button>
+            <button class="btn btn-blue" onclick="navigateInvoice('next')">Next ▶️</button>
+            <button class="btn btn-blue" onclick="navigateInvoice('last')">Last ⏭️</button>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-top:12px;">
+            <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="Search Product Name or Scan Barcode... (F4)" oninput="searchProduct()">
+            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('sales')">📷 Camera Barcode (F2)</button>
+        </div>
+
+        <div id="salesScannerContainer" class="scanner-box">
+            <div id="salesCameraReader" class="camera-div"></div>
+            <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('sales')">Close Camera ❌</button>
+        </div>
+
+        <div id="searchResults" class="results-list"></div>
+
+        <div id="productCard" class="card" style="display:none; margin-top: 8px;">
+            <h3 id="prodName" style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1rem;"></h3>
+            <div class="info-row">
+                <div>Available Stock: <span id="stockQty" style="color:#27ae60;">0</span> units</div>
+                <div>Commercial Unit Price: <span id="commPrice" style="color:#2c3e50;">0</span> EGP</div>
+                <div>Guide Min Price: <span id="guidePrice" style="color:#e67e22;">0</span> EGP</div>
+            </div>
+
+            <div class="info-row" style="align-items: center;">
+                <label>Sold Quantity:</label>
+                <input type="number" id="sellQty" value="1" min="1" style="width: 80px; padding: 6px; text-align: center; border-radius: 4px; border: 1px solid #ccc;" oninput="checkPriceAlert()">
+            </div>
+
+            <p style="font-size: 0.85rem; font-weight: bold; margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 8px;">Enter Manual Payments:</p>
+            <div class="payment-grid">
+                <div class="pay-box"><label id="lblUSD">USD ($ × 50)</label><input type="number" id="pUSD" value="0" oninput="checkPriceAlert()"></div>
+                <div class="pay-box"><label id="lblEUR">EUR (€ × 60)</label><input type="number" id="pEUR" value="0" oninput="checkPriceAlert()"></div>
+                <div class="pay-box"><label id="lblGBP">GBP (£ × 70)</label><input type="number" id="pGBP" value="0" oninput="checkPriceAlert()"></div>
+                <div class="pay-box"><label id="lblEGP">EGP (EGP)</label><input type="number" id="pEGP" value="0" oninput="checkPriceAlert()"></div>
+                <div class="pay-box" style="grid-column: span 2;"><label id="lblVISA">VISA (EGP)</label><input type="number" id="pVISA" value="0" oninput="checkPriceAlert()"></div>
+            </div>
+
+            <div id="priceWarningBox" class="warning-box">
+                ⚠️ Warning: Total entered amount (<span id="enteredTotalVal">0</span> EGP) is below minimum threshold (<span id="requiredMinVal">0</span> EGP)!
+            </div>
+
+            <button class="btn" onclick="addToInvoice()">Deduct Stock & Add to Invoice 🛒</button>
+        </div>
+
+        <div class="section-title" style="margin-top: 20px;">📄 Current Invoice Items</div>
+        <div class="table-responsive"><table>
+            <thead>
+                <tr>
+                    <th style="width:35px;">#</th>
+                    <th>Product Name</th>
+                    <th>Qty</th>
+                    <th>Commercial Total</th>
+                    <th>Payment Breakdown</th>
+                    <th>Sell Total</th>
+                    <th>Seller</th>
+                    <th style="width:60px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceTableBody">
+                <tr><td colspan="8" style="color: #7f8c8d;">No items added yet</td></tr>
+            </tbody>
+        </table></div>
+
+        <div class="live-invoice-summary">
+            <h4 style="text-align:center; font-size:0.85rem; margin-bottom:6px; color:#f1c40f;">💵 Invoice Total Breakdown:</h4>
+            <div class="live-summary-grid">
+                <div class="live-summary-item">USD ($)<span id="liveUSD">$0</span></div>
+                <div class="live-summary-item">EUR (€)<span id="liveEUR">€0</span></div>
+                <div class="live-summary-item">GBP (£)<span id="liveGBP">£0</span></div>
+                <div class="live-summary-item">EGP<span id="liveEGP">0 EGP</span></div>
+                <div class="live-summary-item">VISA<span id="liveVISA">0 EGP</span></div>
+                <div class="live-summary-item" style="background:rgba(46,204,113,0.3); border:1px solid #27ae60;">Total (EGP)<span id="liveTotalEGP" style="color:#fff; font-size:0.95rem;">0.00 EGP</span></div>
+            </div>
+        </div>
+
+        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px;" onclick="saveInvoice()">Save & Sync Invoice (Ctrl+S) 💾</button>
+    </div>
+
+    <!-- 2. Stock Tab (Manager Access) -->
+    <div id="stockTab" class="tab-content manager-only">
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span>📦 Inventory Details</span>
+            <div style="display:flex; gap:6px;">
+                <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">Print 🖨️</button>
+                <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="exportStockPDF()">Export PDF 📄</button>
+            </div>
+        </div>
+        <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
+
+        <div id="stockScannerContainer" class="scanner-box" style="margin-top:10px;">
+            <div id="stockCameraReader" class="camera-div"></div>
+            <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
+        </div>
+
+        <div id="stockPrintArea" style="max-height: 400px; overflow-y: auto;">
+            <div class="table-responsive"><table>
+                <thead>
+                    <tr>
+                        <th style="width:35px;">#</th>
+                        <th>Product Name</th>
+                        <th>Available Stock</th>
+                        <th>Commercial Unit Price</th>
+                        <th id="thStockGuideHead">Guide Min Price (×3)</th>
+                        <th>Barcode</th>
+                        <th>Expiry Date</th>
+                        <th style="width:210px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="stockTableBody"></tbody>
+            </table></div>
+        </div>
+    </div>
+
+    <!-- 3. Add Stock Tab (Manager Access) -->
+    <div id="addStockTab" class="tab-content manager-only">
+        <div class="section-title">➕ Add New Product</div>
+        <div class="card" style="background:#eef7fe;">
+            <div class="payment-grid">
+                <div class="pay-box"><label>New Product Name:</label><input type="text" id="newProdName" placeholder="Enter product name..."></div>
+                <div class="pay-box"><label>Commercial Price (EGP):</label><input type="number" id="newProdPrice" placeholder="0.00"></div>
+                <div class="pay-box"><label>Available Quantity:</label><input type="number" id="newProdQty" value="10"></div>
+                <div class="pay-box">
+                    <label>Barcode (Optional):</label>
+                    <div style="display:flex; gap:4px;">
+                        <input type="text" id="newProdBarcode" placeholder="Scan barcode...">
+                        <button class="btn btn-purple" style="width:auto; margin:0; padding:0 8px; font-size:0.75rem;" onclick="toggleCameraScanner('addNew')">📷 Scan</button>
+                    </div>
+                </div>
+                <div class="pay-box" style="grid-column: span 2;"><label>Expiry Date:</label><input type="date" id="newProdExpiry"></div>
+            </div>
+
+            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:10px;">
+                <div id="addNewCameraReader" class="camera-div"></div>
+                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
+            </div>
+
+            <button class="btn btn-purple" style="margin-top: 12px;" onclick="addNewProductToSystem()">Save & Sync Product 📦</button>
+        </div>
+
+        <div class="section-title" style="margin-top:20px;">➕ Recharge Existing Stock</div>
+        <div class="card">
+            <div style="display:flex; gap:6px;">
+                <input type="text" id="addStockSearch" class="search-box" style="margin-bottom:0;" placeholder="Search product name or scan barcode..." oninput="searchAddStockProduct()">
+                <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('recharge')">📷 Scan Barcode</button>
+            </div>
+
+            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:10px;">
+                <div id="rechargeCameraReader" class="camera-div"></div>
+                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
+            </div>
+
+            <div id="addStockResults" class="results-list"></div>
+
+            <div id="addStockCard" style="display: none; margin-top: 10px;">
+                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 10px;"></h4>
+                <div class="info-row">
+                    <div>Current Stock: <span id="currentStockVal" style="color:#27ae60;">0</span> units</div>
+                </div>
+                <div class="pay-box" style="margin-top: 10px;">
+                    <label>Quantity to Add:</label>
+                    <input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;">
+                </div>
+                <button class="btn" style="margin-top: 15px;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Expenses & Revenues Tab (Admin Only) -->
+    <div id="financeTab" class="tab-content admin-only">
+        <div class="section-title">💵 Expenses & Revenues Management (EGP Only)</div>
+        
+        <div class="card" style="background:#fdfefe; border-color:#d6dbdf;">
+            <div class="payment-grid">
+                <div class="pay-box">
+                    <label>Entry Type:</label>
+                    <select id="finType">
+                        <option value="Expense">Expense</option>
+                        <option value="Revenue">Revenue</option>
+                    </select>
+                </div>
+                <div class="pay-box">
+                    <label>Category / Description:</label>
+                    <input type="text" id="finCategory" placeholder="e.g., Rent, Electricity, Services...">
+                </div>
+                <div class="pay-box">
+                    <label>Amount (EGP):</label>
+                    <input type="number" id="finAmount" min="0" placeholder="0.00">
+                </div>
+                <div class="pay-box">
+                    <label>Date & Time:</label>
+                    <input type="datetime-local" id="finDate">
+                </div>
+                <div class="pay-box" style="grid-column: span 2;">
+                    <label>Notes / Details:</label>
+                    <input type="text" id="finNotes" placeholder="Additional notes...">
+                </div>
+            </div>
+            <button class="btn btn-purple" style="margin-top: 12px;" onclick="saveFinanceEntry()">Save Entry 💾</button>
+        </div>
+
+        <div class="date-filter card" style="margin-top: 15px;">
+            <div>From: <input type="date" id="finFromDate"></div>
+            <div>To: <input type="date" id="finToDate"></div>
+            <button class="btn btn-blue" style="width: auto; margin-top: 0;" onclick="renderFinanceTable()">Filter 📈</button>
+            
+            <div style="width:100%; margin-top:8px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:18px; height:18px;">
+                <label for="includeSalesIncomeToggle" style="font-size:0.85rem; font-weight:bold; color:#1e3c72; cursor:pointer;">
+                    💡 Include Total Sales Profit (EGP) in Financial Summary
+                </label>
+            </div>
+            
+            <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
+                <button class="btn btn-purple" style="width:auto; margin:0;" onclick="printFinanceReportPDF()">Print / Export PDF 📄</button>
+                <button class="btn btn-orange" style="width:auto; margin:0;" onclick="exportFinanceExcel()">Export Excel 📊</button>
+            </div>
+        </div>
+
+        <div class="totals-box" style="background:#1e3c72; margin-bottom:15px;">
+            <h3 style="text-align:center; margin-bottom:10px;">📊 Financial Summary (EGP)</h3>
+            <div class="totals-grid">
+                <div class="total-item" style="background:rgba(46,204,113,0.2);">Total Revenues <span id="sumRevenues">0.00 EGP</span></div>
+                <div class="total-item" style="background:rgba(231,76,60,0.2);">Total Expenses <span id="sumExpenses">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Balance <span id="netBalance" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+            </div>
+        </div>
+
+        <div class="table-responsive"><table>
+            <thead>
+                <tr>
+                    <th style="width:35px;">#</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Amount (EGP)</th>
+                    <th>Notes</th>
+                    <th style="width:60px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="financeTableBody">
+                <tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>
+            </tbody>
+        </table></div>
+    </div>
+
+    <!-- 5. Reports Tab (Admin Only) -->
+    <div id="reportsTab" class="tab-content admin-only">
+        <div class="section-title">📊 Sales Reports & Backup</div>
+        
+        <div class="card">
+            <div class="date-filter" style="margin-bottom:8px;">
+                <div>From: <input type="date" id="fromDate"></div>
+                <div>To: <input type="date" id="toDate"></div>
+            </div>
+            
+            <div class="toolbar-row">
+                <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
+                <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
+                <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Guide Multiplier ⚙️</button>
+                <button class="btn btn-purple" onclick="printReportTable()">Print Report 🖨️</button>
+                <button class="btn btn-orange" onclick="exportReportPDF()">Export PDF 📄</button>
+                <button class="btn btn-blue" style="background:#27ae60;" onclick="handleBackupExportAction()">Backup JSON 💾</button>
+                <button class="btn btn-purple" style="background:#8e44ad;" onclick="handleBackupImportAction()">Restore Backup 📥</button>
+            </div>
+        </div>
+
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
+            <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
+            <div class="totals-grid">
+                <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
+                <div class="total-item">Total EUR (€) <span id="repTotalEUR">€0.00</span></div>
+                <div class="total-item">Total GBP (£) <span id="repTotalGBP">£0.00</span></div>
+                <div class="total-item">Total EGP <span id="repTotalEGP">0.00 EGP</span></div>
+                <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
+                <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
+                <div class="total-item" style="background:rgba(231,76,60,0.2);">Commercial Total <span id="repTotalComm">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Sales Net Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+            </div>
+            
+            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
+                <h4 style="text-align:center; color:#f1c40f; margin-bottom:6px;">⭐ Top Selling Products:</h4>
+                <div id="topProductsList" style="font-size:0.8rem; text-align:center; line-height:1.5;"></div>
+            </div>
+        </div>
+
+        <div class="table-responsive" id="reportsPrintArea"><table>
+            <thead>
+                <tr>
+                    <th style="width:35px;">#</th>
+                    <th>Invoice ID</th>
+                    <th>Date</th>
+                    <th>Items Details</th>
+                    <th>Payments Breakdown</th>
+                    <th>Commercial Total</th>
+                    <th>Sales Total (EGP)</th>
+                    <th>Net Profit</th>
+                    <th style="width:160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="savedInvoicesBody">
+                <tr><td colspan="9" style="color:#7f8c8d;">No saved invoices</td></tr>
+            </tbody>
+        </table></div>
+    </div>
+
+    <!-- 6. Account Security Tab (Admin Only) -->
+    <div id="usersTab" class="tab-content admin-only">
+        <div class="section-title">🔑 Change Account Passwords</div>
+        <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
+            <div class="pay-box" style="margin-bottom:12px;">
+                <label>Select User:</label>
+                <select id="userSelectPass">
+                    <option value="admin">Admin</option>
+                    <option value="cs2">cs2</option>
+                    <option value="cashier">Cashier</option>
+                </select>
+            </div>
+            <div class="pay-box" style="margin-bottom:12px;">
+                <label>New Password:</label>
+                <input type="password" id="newAccountPass" placeholder="Enter new password...">
+            </div>
+            <button class="btn btn-purple" onclick="changeUserPasswordSystem()">Update Password 💾</button>
+        </div>
+    </div>
+
+    <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
+</div>
+
+<div id="receiptPrintSection"></div>
+
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFs0SQAS-P6dO3NrtM9QrJM-51UzBIRGpL5FpKI9DRZtq7Kq-IOLUwwYgMGe4IVzuSTQ/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
+    
+    let currentUser = null;
+    let cloudUsers = [];
+    let currentNavIndex = -1;
 
-    let productsDB = [];
-    let cart = [];
-    let currentInvoiceId = 1001;
+    let scanners = { sales: null, addNew: null, recharge: null, stock: null };
+    let activeScannerKey = null;
+    let selectedStockEditProduct = null;
+    let heldInvoiceItems = null;
 
-    const RATES = { USD: 48.5, EUR: 52.0, GBP: 61.5 };
+    window.addEventListener('DOMContentLoaded', () => {
+        const userEl = document.getElementById('entryUserInput');
+        if (userEl) userEl.focus();
 
-    window.onload = function() { syncData(); };
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') {
+                e.preventDefault();
+                toggleCameraScanner('sales');
+            } else if (e.key === 'F4') {
+                e.preventDefault();
+                showTab('salesTab');
+                document.getElementById('searchInput').focus();
+            } else if (e.key === 'F8') {
+                e.preventDefault();
+                clearCurrentInvoice();
+            } else if (e.ctrlKey && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                saveInvoice();
+            }
+        });
+        
+        loadLocalUsers();
+    });
+
+    function updateOnlineStatus() {
+        const ind = document.getElementById('syncIndicator');
+        if (navigator.onLine) {
+            ind.className = 'sync-status status-online';
+            ind.textContent = '🟢 Online';
+            processOfflineQueue();
+        } else {
+            ind.className = 'sync-status status-offline';
+            ind.textContent = '🔴 Offline';
+        }
     }
 
-    function jsonpFetch(action) {
-        return new Promise((resolve, reject) => {
-            const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                document.body.removeChild(script);
-                resolve(data);
-            };
-            const script = document.createElement('script');
-            script.src = `${SCRIPT_URL}?action=${action}&callback=${callbackName}`;
-            script.onerror = reject;
-            document.body.appendChild(script);
+    function loadLocalUsers() {
+        const savedUsers = localStorage.getItem('anjum_local_users');
+        if (savedUsers) {
+            cloudUsers = JSON.parse(savedUsers);
+        } else {
+            cloudUsers = [
+                { username: 'admin', password: '852', role: 'Admin' },
+                { username: 'cs2', password: '456', role: 'User' },
+                { username: 'cashier', password: '123', role: 'Cashier' }
+            ];
+        }
+    }
+
+    function saveLocalUsers(users) {
+        if (users && users.length > 0) {
+            cloudUsers = users;
+            localStorage.setItem('anjum_local_users', JSON.stringify(users));
+        }
+    }
+
+    function validateEntryPassword() {
+        const usernameInput = document.getElementById('entryUserInput').value.trim().toLowerCase();
+        const passwordInput = document.getElementById('entryPassInput').value.trim();
+
+        if (!usernameInput || !passwordInput) return alert('Enter both username and password!');
+
+        let matched = cloudUsers.find(u => u.username === usernameInput && u.password === passwordInput);
+
+        if (matched) {
+            currentUser = matched;
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            document.getElementById('userGreeting').textContent = `👤 User: ${matched.username.toUpperCase()} (${matched.role})`;
+            
+            applyRolePermissions();
+            initSystem();
+        } else {
+            alert('❌ Invalid Username or Password!');
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        stopAllScanners();
+        document.getElementById('mainContainer').style.display = 'none';
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('entryUserInput').value = '';
+        document.getElementById('entryPassInput').value = '';
+    }
+
+    function applyRolePermissions() {
+        const adminElements = document.querySelectorAll('.admin-only');
+        const managerElements = document.querySelectorAll('.manager-only');
+
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+
+        if (!isManager) {
+            managerElements.forEach(el => el.style.display = 'none');
+            showTab('salesTab');
+        } else {
+            managerElements.forEach(el => el.style.display = '');
+        }
+
+        if (currentUser && currentUser.role !== 'Admin' && currentUser.username !== 'admin') {
+            adminElements.forEach(el => el.style.display = 'none');
+        } else {
+            adminElements.forEach(el => el.style.display = '');
+        }
+    }
+
+    /* المعامل الإفتراضي للأسعار الاسترشادية هو 3 وديناميكي للتعديل من الأدمن */
+    let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
+
+    function loadRatesFromStorage() {
+        const savedRates = localStorage.getItem('anjum_rates');
+        if (savedRates) {
+            RATES = JSON.parse(savedRates);
+            if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3;
+        }
+        updateRateLabels();
+    }
+
+    function updateRateLabels() {
+        if(document.getElementById('lblUSD')) document.getElementById('lblUSD').textContent = `USD ($ × ${RATES.USD})`;
+        if(document.getElementById('lblEUR')) document.getElementById('lblEUR').textContent = `EUR (€ × ${RATES.EUR})`;
+        if(document.getElementById('lblGBP')) document.getElementById('lblGBP').textContent = `GBP (£ × ${RATES.GBP})`;
+        if(document.getElementById('lblVISA')) document.getElementById('lblVISA').textContent = `VISA (× ${RATES.VISA})`;
+        
+        const thHead = document.getElementById('thStockGuideHead');
+        if (thHead) thHead.textContent = `Guide Min Price (×${RATES.GUIDE_MULT || 3})`;
+    }
+
+    function promptSetRates() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const u = prompt("💵 USD Rate:", RATES.USD);
+        if (u === null) return;
+        const eu = prompt("💶 EUR Rate:", RATES.EUR);
+        if (eu === null) return;
+        const g = prompt("💷 GBP Rate:", RATES.GBP);
+        if (g === null) return;
+        const v = prompt("💳 VISA Multiplier:", RATES.VISA);
+        if (v === null) return;
+        const mult = prompt("📈 Guide Min Price Multiplier (e.g. 3, 6, 8):", RATES.GUIDE_MULT || 3);
+        if (mult === null) return;
+
+        RATES.USD = parseFloat(u) || RATES.USD;
+        RATES.EUR = parseFloat(eu) || RATES.EUR;
+        RATES.GBP = parseFloat(g) || RATES.GBP;
+        RATES.VISA = parseFloat(v) || RATES.VISA;
+        RATES.GUIDE_MULT = parseFloat(mult) || RATES.GUIDE_MULT;
+
+        localStorage.setItem('anjum_rates', JSON.stringify(RATES));
+        updateRateLabels();
+        
+        if (selectedProd) pickProductIndex(products.findIndex(p => p.n === selectedProd.name));
+        renderStockTable();
+        alert('✅ Exchange rates & Guide Multiplier updated successfully!');
+    }
+
+    let products = [];
+    let selectedProd = null;
+    let selectedStockProd = null;
+    let invoiceItems = [];
+    let savedInvoices = [];
+    let savedFinances = [];
+    let invoiceCounter = 1001;
+    let activeInvoiceId = 1001;
+
+    function updateAlertsBar() {
+        let lowStockCount = 0;
+        let expiringCount = 0;
+        let today = new Date();
+
+        products.forEach(p => {
+            if (p.q <= 3) lowStockCount++;
+            if (p.expiry) {
+                let exp = new Date(p.expiry);
+                let diffDays = (exp - today) / (1000 * 60 * 60 * 24);
+                if (diffDays < 90) expiringCount++;
+            }
+        });
+
+        document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
+        document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
+    }
+
+    function fetchCloudInvoicesData(callbackAfter) {
+        if (!navigator.onLine) {
+            if (callbackAfter) callbackAfter();
+            return;
+        }
+
+        const oldScript = document.getElementById('cloudSyncScript');
+        if (oldScript) oldScript.remove();
+
+        window.handleCloudInvoicesResponse = function(resData) {
+            if (resData && resData.status === "success") {
+                if (resData.users) saveLocalUsers(resData.users);
+
+                if (resData.products && resData.products.length > 0) {
+                    products = resData.products;
+                    saveProductsToStorage();
+                    renderStockTable();
+                    updateAlertsBar();
+                }
+
+                if (resData.nextInvoiceId) {
+                    invoiceCounter = resData.nextInvoiceId;
+                    localStorage.setItem('anjum_counter', invoiceCounter.toString());
+                }
+
+                if (resData.invoices) {
+                    savedInvoices = resData.invoices;
+                    saveInvoicesToStorage();
+                    generateReport();
+                }
+
+                if (resData.finances) {
+                    savedFinances = resData.finances;
+                    saveFinancesToStorage();
+                    renderFinanceTable();
+                }
+
+                prepareNewInvoice();
+                if (callbackAfter) callbackAfter();
+            }
+        };
+
+        const script = document.createElement('script');
+        script.id = 'cloudSyncScript';
+        script.src = GOOGLE_SCRIPT_URL + "?callback=handleCloudInvoicesResponse&nocache=" + Math.random();
+        document.body.appendChild(script);
+    }
+
+    function prepareNewInvoice() {
+        activeInvoiceId = invoiceCounter;
+        currentNavIndex = -1;
+        document.getElementById('invNum').textContent = activeInvoiceId;
+        
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
+        
+        invoiceItems = [];
+        renderInvoice();
+    }
+
+    function holdCurrentInvoice() {
+        if (invoiceItems.length === 0) return alert('No items to hold!');
+        heldInvoiceItems = JSON.parse(JSON.stringify(invoiceItems));
+        invoiceItems = [];
+        renderInvoice();
+        document.getElementById('resumeHoldBtn').style.display = 'inline-block';
+        alert('⏸️ Invoice put on hold successfully!');
+    }
+
+    function resumeHoldInvoice() {
+        if (!heldInvoiceItems) return;
+        invoiceItems = JSON.parse(JSON.stringify(heldInvoiceItems));
+        heldInvoiceItems = null;
+        document.getElementById('resumeHoldBtn').style.display = 'none';
+        renderInvoice();
+        alert('⏯️ Held invoice resumed!');
+    }
+
+    function clearCurrentInvoice() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('productCard').style.display = 'none';
+        selectedProd = null;
+        
+        if (invoiceItems.length > 0) {
+            invoiceItems.forEach(item => {
+                const pObj = products.find(p => p.n === item.name);
+                if (pObj) {
+                    pObj.q += item.qty;
+                }
+            });
+            saveProductsToStorage();
+            renderStockTable();
+            updateAlertsBar();
+        }
+
+        invoiceItems = [];
+        renderInvoice();
+    }
+
+    function loadInvoiceIntoForm(inv) {
+        if (!inv) return;
+        activeInvoiceId = inv.id;
+        document.getElementById('invNum').textContent = inv.id;
+        
+        if (inv.date) {
+            document.getElementById('invoiceDate').value = inv.date.replace(' ', 'T').slice(0, 16);
+        }
+
+        if (Array.isArray(inv.items)) {
+            invoiceItems = JSON.parse(JSON.stringify(inv.items));
+        } else {
+            invoiceItems = [{
+                name: cleanItemSummaryText(inv.itemsText),
+                qty: 1,
+                commUnitPrice: inv.totalComm || 0,
+                sellUnitPrice: inv.totalEGP || 0,
+                commTotal: inv.totalComm || 0,
+                sellTotal: inv.totalEGP || 0,
+                netProfit: inv.netProfit || 0,
+                seller: currentUser ? currentUser.username : 'Unknown',
+                usd: inv.usd||0, eur: inv.eur||0, gbp: inv.gbp||0, egp: inv.egp||0, visa: inv.visa||0
+            }];
+        }
+        renderInvoice();
+    }
+
+    function cleanItemSummaryText(rawText) {
+        if (!rawText) return "Saved Item";
+        return rawText.toString().trim();
+    }
+
+    function navigateInvoice(direction) {
+        if (savedInvoices.length === 0) return alert('No invoices recorded!');
+        
+        if (direction === 'first') currentNavIndex = 0;
+        else if (direction === 'last') currentNavIndex = savedInvoices.length - 1;
+        else if (direction === 'prev') {
+            if (currentNavIndex <= 0) currentNavIndex = 0;
+            else currentNavIndex--;
+        }
+        else if (direction === 'next') {
+            if (currentNavIndex >= savedInvoices.length - 1) currentNavIndex = savedInvoices.length - 1;
+            else currentNavIndex++;
+        }
+
+        loadInvoiceIntoForm(savedInvoices[currentNavIndex]);
+    }
+
+    function initSystem() {
+        loadDataFromStorage();
+        loadRatesFromStorage();
+        prepareNewInvoice();
+        fetchCloudInvoicesData();
+        updateOnlineStatus();
+        updateAlertsBar();
+        
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        if(document.getElementById('finDate')) document.getElementById('finDate').value = now.toISOString().slice(0, 16);
+    }
+
+    function loadDataFromStorage() {
+        const storedProducts = localStorage.getItem('anjum_products');
+        if (storedProducts) products = JSON.parse(storedProducts);
+
+        const storedInvoices = localStorage.getItem('anjum_invoices');
+        if (storedInvoices) savedInvoices = JSON.parse(storedInvoices);
+
+        const storedCounter = localStorage.getItem('anjum_counter');
+        if (storedCounter) invoiceCounter = parseInt(storedCounter);
+
+        const storedFinances = localStorage.getItem('anjum_finances');
+        if (storedFinances) savedFinances = JSON.parse(storedFinances);
+    }
+
+    function saveProductsToStorage() { localStorage.setItem('anjum_products', JSON.stringify(products)); }
+    function saveInvoicesToStorage() { localStorage.setItem('anjum_invoices', JSON.stringify(savedInvoices)); localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
+    function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
+
+    function showTab(tabId, evt) {
+        stopAllScanners();
+
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) targetTab.classList.add('active');
+        if (evt && evt.target) evt.target.classList.add('active');
+
+        if(tabId === 'stockTab') renderStockTable();
+        if(tabId === 'reportsTab') generateReport();
+        if(tabId === 'financeTab') renderFinanceTable();
+    }
+
+    function toggleCameraScanner(key) {
+        if (activeScannerKey === key) {
+            stopCameraScanner(key);
+        } else {
+            stopAllScanners();
+            startCameraScanner(key);
+        }
+    }
+
+    function startCameraScanner(key) {
+        let containerId = key + 'ScannerContainer';
+        let readerId = key + 'CameraReader';
+
+        document.getElementById(containerId).style.display = 'block';
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(function(stream) {
+                stream.getTracks().forEach(track => track.stop());
+                initHtml5Scanner(key, readerId, containerId);
+            })
+            .catch(function(err) {
+                initHtml5Scanner(key, readerId, containerId);
+            });
+        } else {
+            initHtml5Scanner(key, readerId, containerId);
+        }
+    }
+
+    function initHtml5Scanner(key, readerId, containerId) {
+        try {
+            scanners[key] = new Html5Qrcode(readerId);
+            const config = { fps: 15, qrbox: { width: 250, height: 150 } };
+
+            scanners[key].start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => onBarcodeScanned(key, decodedText),
+                () => {}
+            ).then(() => {
+                activeScannerKey = key;
+            }).catch(err => {
+                alert("❌ Camera access failed: " + err);
+                document.getElementById(containerId).style.display = 'none';
+            });
+        } catch(e) {
+            alert("❌ Scanner init error: " + e.message);
+            document.getElementById(containerId).style.display = 'none';
+        }
+    }
+
+    function stopCameraScanner(key) {
+        let containerId = key + 'ScannerContainer';
+        if (scanners[key] && activeScannerKey === key) {
+            scanners[key].stop().then(() => {
+                activeScannerKey = null;
+                document.getElementById(containerId).style.display = 'none';
+            }).catch(err => {
+                document.getElementById(containerId).style.display = 'none';
+            });
+        } else {
+            document.getElementById(containerId).style.display = 'none';
+        }
+    }
+
+    function stopAllScanners() {
+        ['sales', 'addNew', 'recharge', 'stock'].forEach(key => stopCameraScanner(key));
+    }
+
+    function onBarcodeScanned(key, decodedText) {
+        playBeepSound();
+        const barcodeQuery = decodedText.trim();
+
+        if (key === 'sales') {
+            document.getElementById('searchInput').value = barcodeQuery;
+            const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toString().trim() === barcodeQuery);
+            if (barcodeMatched) {
+                pickProductIndex(products.indexOf(barcodeMatched));
+            } else {
+                alert("⚠️ Product with barcode [" + barcodeQuery + "] not found in inventory!");
+            }
+        } else if (key === 'addNew') {
+            document.getElementById('newProdBarcode').value = barcodeQuery;
+            alert("✅ Barcode captured: " + barcodeQuery);
+        } else if (key === 'recharge') {
+            document.getElementById('addStockSearch').value = barcodeQuery;
+            searchAddStockProduct();
+        } else if (key === 'stock') {
+            if (selectedStockEditProduct) {
+                selectedStockEditProduct.barcode = barcodeQuery;
+                saveProductsToStorage();
+                syncToCloud("updateSingleProduct", selectedStockEditProduct);
+                alert(`✅ Barcode updated for [${selectedStockEditProduct.n}] to: ${barcodeQuery}`);
+                selectedStockEditProduct = null;
+                renderStockTable();
+            }
+        }
+
+        stopCameraScanner(key);
+    }
+
+    function playBeepSound() {
+        try {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = ctx.createOscillator();
+            osc.connect(ctx.destination);
+            osc.frequency.value = 850;
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+        } catch(e) {}
+    }
+
+    function printBarcodeLabel(prodName) {
+        const prod = products.find(p => p.n === prodName);
+        if (!prod) return alert("❌ Product not found!");
+        if (!prod.barcode) return alert("⚠️ This product does not have a barcode! Please edit and add a barcode first.");
+
+        const countInput = prompt(`Enter number of labels to print for:\n[${prod.n}]`, "1");
+        if (countInput === null) return;
+        const count = parseInt(countInput) || 1;
+
+        const win = window.open('', '', 'height=600,width=800');
+        const guideMult = RATES.GUIDE_MULT || 3;
+        
+        win.document.write(`
+            <html>
+            <head>
+                <title>Print Label - ${prod.n}</title>
+                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
+                    .label-card { width: 50mm; height: 25mm; border: 1px solid #ccc; border-radius: 4px; padding: 2px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; page-break-inside: avoid; }
+                    .pharmacy-title { font-size: 7px; font-weight: bold; color: #1e3c72; }
+                    .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; }
+                    .prod-price { font-size: 8px; font-weight: bold; }
+                    svg { width: 44mm; height: 11mm; }
+                    @media print { body { padding: 0; } .label-card { border: none; } }
+                </style>
+            </head>
+            <body>
+        `);
+
+        for (let i = 0; i < count; i++) {
+            win.document.write(`
+                <div class="label-card">
+                    <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
+                    <div class="prod-title">${prod.n}</div>
+                    <svg id="barcode-${i}"></svg>
+                    <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
+                </div>
+            `);
+        }
+
+        win.document.write(`
+            <script>
+                window.onload = function() {
+                    for (let i = 0; i < ${count}; i++) {
+                        JsBarcode("#barcode-" + i, "${prod.barcode}", {
+                            format: "CODE128",
+                            width: 1.5,
+                            height: 35,
+                            fontSize: 10,
+                            margin: 0,
+                            displayValue: true
+                        });
+                    }
+                    setTimeout(function() {
+                        window.print();
+                        window.close();
+                    }, 400);
+                };
+            <\/script>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+    }
+
+    function searchProduct() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const list = document.getElementById('searchResults');
+        if (!query) { list.style.display = 'none'; return; }
+        
+        const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toLowerCase() === query);
+        if (barcodeMatched) {
+            pickProductIndex(products.indexOf(barcodeMatched));
+            return;
+        }
+
+        const matched = products.filter(item => item && item.n && item.n.toLowerCase().includes(query));
+        if (matched.length > 0) {
+            list.innerHTML = matched.map(i => {
+                const idx = products.indexOf(i);
+                return `<div class="result-item" onclick="pickProductIndex(${idx})">
+                    <span style="color:#1e3c72; font-weight:bold;">${i.n}</span>
+                    <span style="color:${i.q > 3 ? '#27ae60' : '#e74c3c'}; font-size:0.8rem;">(Stock: ${i.q})</span>
+                </div>`;
+            }).join('');
+            list.style.display = 'block';
+        } else {
+            list.style.display = 'none';
+        }
+    }
+
+    function pickProductIndex(index) {
+        const p = products[index];
+        if (!p) return;
+        const guideMult = RATES.GUIDE_MULT || 3;
+        selectedProd = { name: p.n, comm: p.p, guide: p.p * guideMult, stock: p.q };
+        
+        document.getElementById('searchResults').style.display = 'none';
+        document.getElementById('searchInput').value = p.n;
+        document.getElementById('prodName').textContent = p.n;
+        document.getElementById('stockQty').textContent = p.q;
+        document.getElementById('commPrice').textContent = (p.p || 0).toFixed(2);
+        document.getElementById('guidePrice').textContent = ((p.p || 0) * guideMult).toFixed(2);
+        document.getElementById('sellQty').value = 1;
+        
+        ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => document.getElementById(id).value = 0);
+        document.getElementById('productCard').style.display = 'block';
+        checkPriceAlert();
+    }
+
+    function checkPriceAlert() {
+        if (!selectedProd) return;
+        const qty = parseInt(document.getElementById('sellQty').value) || 1;
+        const u = parseFloat(document.getElementById('pUSD').value) || 0;
+        const eu = parseFloat(document.getElementById('pEUR').value) || 0;
+        const g = parseFloat(document.getElementById('pGBP').value) || 0;
+        const eg = parseFloat(document.getElementById('pEGP').value) || 0;
+        const v = parseFloat(document.getElementById('pVISA').value) || 0;
+        const enteredTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
+
+        const minRequiredTotal = selectedProd.guide * qty;
+        const warnBox = document.getElementById('priceWarningBox');
+
+        document.getElementById('enteredTotalVal').textContent = enteredTotalEGP.toFixed(2);
+        document.getElementById('requiredMinVal').textContent = minRequiredTotal.toFixed(2);
+
+        if (enteredTotalEGP < minRequiredTotal) {
+            warnBox.style.display = 'block';
+        } else {
+            warnBox.style.display = 'none';
+        }
+    }
+
+    function addToInvoice() {
+        if (!selectedProd) return;
+        const qty = parseInt(document.getElementById('sellQty').value) || 1;
+        if (qty > selectedProd.stock) return alert('⚠️ Quantity not available in stock! Available: ' + selectedProd.stock);
+
+        const u = parseFloat(document.getElementById('pUSD').value) || 0;
+        const eu = parseFloat(document.getElementById('pEUR').value) || 0;
+        const g = parseFloat(document.getElementById('pGBP').value) || 0;
+        const eg = parseFloat(document.getElementById('pEGP').value) || 0;
+        const v = parseFloat(document.getElementById('pVISA').value) || 0;
+        const itemTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
+
+        const pObj = products.find(item => item.n === selectedProd.name);
+        pObj.q -= qty;
+        saveProductsToStorage();
+        updateAlertsBar();
+
+        const commTotal = selectedProd.comm * qty;
+        const sellTotal = itemTotalEGP;
+        const netProfit = sellTotal - commTotal;
+
+        invoiceItems.push({
+            name: selectedProd.name,
+            qty: qty,
+            commUnitPrice: selectedProd.comm,
+            sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
+            commTotal: commTotal,
+            sellTotal: sellTotal,
+            netProfit: netProfit,
+            seller: currentUser ? currentUser.username : 'Unknown',
+            usd: u, eur: eu, gbp: g, egp: eg, visa: v
+        });
+
+        renderInvoice();
+        document.getElementById('productCard').style.display = 'none';
+        document.getElementById('searchInput').value = '';
+    }
+
+    function removeInvoiceItem(index) {
+        const item = invoiceItems[index];
+        if (item) {
+            const pObj = products.find(p => p.n === item.name);
+            if (pObj) {
+                pObj.q += item.qty;
+                saveProductsToStorage();
+                syncToCloud("updateSingleProduct", pObj);
+                updateAlertsBar();
+            }
+        }
+        invoiceItems.splice(index, 1);
+        renderInvoice();
+    }
+
+    function renderInvoice() {
+        const tbody = document.getElementById('invoiceTableBody');
+        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0, totalSellEGP = 0;
+
+        if (invoiceItems.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="color: #7f8c8d;">No items added yet</td></tr>';
+        } else {
+            tbody.innerHTML = invoiceItems.map((item, index) => {
+                sumUSD += parseFloat(item.usd || 0);
+                sumEUR += parseFloat(item.eur || 0);
+                sumGBP += parseFloat(item.gbp || 0);
+                sumEGP += parseFloat(item.egp || 0);
+                sumVISA += parseFloat(item.visa || 0);
+                totalSellEGP += parseFloat(item.sellTotal || 0);
+
+                return `
+                <tr>
+                    <td style="font-weight:bold;">${index + 1}</td>
+                    <td style="font-weight:bold; text-align:left;">${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>${(item.commTotal||0).toFixed(2)} EGP</td>
+                    <td>$:${item.usd||0} | €:${item.eur||0} | £:${item.gbp||0} | EGP:${item.egp||0} | VISA:${item.visa||0}</td>
+                    <td style="color:#27ae60; font-weight:bold;">${(item.sellTotal||0).toFixed(2)} EGP</td>
+                    <td style="font-weight:bold; color:#1e3c72;">${item.seller || 'Unknown'}</td>
+                    <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="removeInvoiceItem(${index})">Delete</button></td>
+                </tr>
+            `;}).join('');
+        }
+
+        document.getElementById('liveUSD').textContent = '$' + sumUSD.toFixed(2);
+        document.getElementById('liveEUR').textContent = '€' + sumEUR.toFixed(2);
+        document.getElementById('liveGBP').textContent = '£' + sumGBP.toFixed(2);
+        document.getElementById('liveEGP').textContent = sumEGP.toFixed(2) + ' EGP';
+        document.getElementById('liveVISA').textContent = sumVISA.toFixed(2) + ' EGP';
+        document.getElementById('liveTotalEGP').textContent = totalSellEGP.toFixed(2) + ' EGP';
+    }
+
+    function syncToCloud(actionType, data) {
+        if (!navigator.onLine) {
+            let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
+            queue.push({ action: actionType, data: data });
+            localStorage.setItem('anjum_offline_queue', JSON.stringify(queue));
+            return;
+        }
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST", mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: actionType, data: data })
         });
     }
 
-    async function syncData() {
-        const statusEl = document.getElementById('netStatus');
-        statusEl.className = "status-badge offline";
-        statusEl.innerText = "⏳ Syncing...";
-
-        try {
-            productsDB = await jsonpFetch('getProducts') || [];
-            let invData = await jsonpFetch('getInvoiceId');
-            currentInvoiceId = invData.nextInvoiceId || 1001;
-
-            document.getElementById('invoiceIdDisplay').innerText = currentInvoiceId;
-            statusEl.className = "status-badge online";
-            statusEl.innerText = "🟢 Online";
-            renderStockTable();
-        } catch(e) {
-            statusEl.className = "status-badge offline";
-            statusEl.innerText = "🔴 Offline / Error";
-            console.error("Sync Error:", e);
+    function processOfflineQueue() {
+        let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
+        if (queue.length > 0) {
+            queue.forEach(item => syncToCloud(item.action, item.data));
+            localStorage.removeItem('anjum_offline_queue');
         }
     }
 
-    function handleSearch() {
-        let val = document.getElementById('searchInput').value.trim().toLowerCase();
-        let resultsContainer = document.getElementById('searchResults');
-        if (!val) { resultsContainer.style.display = 'none'; return; }
+    function getItemPaidText(item) {
+        if (!item) return '';
+        let paidParts = [];
+        if (item.usd > 0) paidParts.push(`${item.usd} $`);
+        if (item.eur > 0) paidParts.push(`${item.eur} €`);
+        if (item.gbp > 0) paidParts.push(`${item.gbp} £`);
+        if (item.egp > 0) paidParts.push(`${item.egp} EGP`);
+        if (item.visa > 0) paidParts.push(`${item.visa} Visa`);
 
-        let matches = productsDB.filter(p => p.name.toLowerCase().includes(val) || (p.barcode && p.barcode.toString() === val));
+        let paidStr = paidParts.length > 0 ? paidParts.join(" - ") : `${(item.sellTotal||0).toFixed(1)} EGP`;
+        return `${item.name} | Qty: ${item.qty} | Price: ${paidStr} | Seller: ${item.seller || 'Unknown'}`;
+    }
 
-        if (matches.length > 0) {
-            resultsContainer.innerHTML = matches.map(p => `
-                <div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="addToCart('${p.id}')">
-                    <strong>${p.name}</strong> - ${p.price} EGP (Stock: ${p.quantity})
-                </div>
-            `).join('');
-            resultsContainer.style.display = 'block';
+    function saveInvoice() {
+        if (invoiceItems.length === 0) return alert('Please add items to invoice first!');
+
+        let invDateRaw = document.getElementById('invoiceDate').value;
+        let invDate = invDateRaw ? invDateRaw.replace('T', ' ') : new Date().toLocaleString();
+
+        let totalSell = 0, totalComm = 0, totalProfit = 0;
+        let itemsSummaryText = [];
+
+        invoiceItems.forEach(i => {
+            totalSell += i.sellTotal;
+            totalComm += i.commTotal;
+            totalProfit += i.netProfit;
+            itemsSummaryText.push(getItemPaidText(i));
+
+            const pObj = products.find(p => p.n === i.name);
+            if (pObj) syncToCloud("updateSingleProduct", pObj);
+        });
+
+        const savedInv = {
+            id: activeInvoiceId,
+            date: invDate,
+            status: 'Active',
+            items: JSON.parse(JSON.stringify(invoiceItems)),
+            itemsText: itemsSummaryText.join(" | "),
+            totalComm: totalComm,
+            totalEGP: totalSell,
+            netProfit: totalProfit
+        };
+
+        const existingIndex = savedInvoices.findIndex(i => i.id === activeInvoiceId);
+        if (existingIndex > -1) {
+            savedInvoices[existingIndex] = savedInv;
         } else {
-            resultsContainer.style.display = 'none';
+            savedInvoices.push(savedInv);
+            if (activeInvoiceId === invoiceCounter) invoiceCounter++;
+        }
+
+        saveInvoicesToStorage();
+        syncToCloud("saveInvoice", savedInv);
+
+        alert(`Invoice #${activeInvoiceId} saved successfully! 💾☁️`);
+        prepareNewInvoice();
+        generateReport();
+    }
+
+    function saveFinanceEntry() {
+        const type = document.getElementById('finType').value;
+        const category = document.getElementById('finCategory').value.trim();
+        const amount = parseFloat(document.getElementById('finAmount').value) || 0;
+        let dateRaw = document.getElementById('finDate').value;
+        const notes = document.getElementById('finNotes').value.trim();
+
+        if (!category) return alert('Please enter category/description!');
+        if (amount <= 0) return alert('Please enter a valid amount!');
+
+        let dateStr = dateRaw ? dateRaw.replace('T', ' ') : new Date().toLocaleString();
+
+        const fEntry = {
+            id: Date.now(),
+            date: dateStr,
+            type: type,
+            category: category,
+            amount: amount,
+            notes: notes
+        };
+
+        savedFinances.push(fEntry);
+        saveFinancesToStorage();
+        syncToCloud("saveFinance", fEntry);
+
+        alert(`✅ ${type} record saved successfully!`);
+        document.getElementById('finCategory').value = '';
+        document.getElementById('finAmount').value = '';
+        document.getElementById('finNotes').value = '';
+        renderFinanceTable();
+    }
+
+    function deleteFinanceEntry(id) {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        if (confirm("❌ Delete this finance record permanently?")) {
+            savedFinances = savedFinances.filter(f => f.id !== id);
+            saveFinancesToStorage();
+            syncToCloud("deleteFinance", { id: id });
+            renderFinanceTable();
         }
     }
 
-    function addToCart(prodId) {
-        let prod = productsDB.find(p => p.id == prodId);
+    function renderFinanceTable() {
+        const fromD = document.getElementById('finFromDate') ? document.getElementById('finFromDate').value : '';
+        const toD = document.getElementById('finToDate') ? document.getElementById('finToDate').value : '';
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let totRev = 0, totExp = 0;
+        const tbody = document.getElementById('financeTableBody');
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map((f, idx) => {
+                if (f.type === 'Revenue') totRev += f.amount;
+                else totExp += f.amount;
+
+                return `
+                <tr style="background:${f.type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
+                    <td>${idx + 1}</td>
+                    <td style="white-space:nowrap;">${f.date}</td>
+                    <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                    <td style="text-align:left; font-weight:bold;">${f.category}</td>
+                    <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
+                    <td style="text-align:left; font-size:0.75rem;">${f.notes || '-'}</td>
+                    <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
+                </tr>
+            `;}).join('');
+        }
+
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                totRev += (parseFloat(inv.netProfit) || 0);
+            });
+        }
+
+        document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
+        document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
+        const net = totRev - totExp;
+        const netEl = document.getElementById('netBalance');
+        netEl.textContent = net.toFixed(2) + ' EGP';
+        netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
+    }
+
+    function exportFinanceExcel() {
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let excelData = filtered.map((f, i) => ({
+            "#": i + 1,
+            "Date": f.date,
+            "Type": f.type,
+            "Category": f.category,
+            "Amount (EGP)": f.amount,
+            "Notes": f.notes || ""
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Finance_Report");
+        XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function printFinanceReportPDF() {
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let totRev = 0, totExp = 0;
+        let salesProfit = 0;
+
+        filtered.forEach(f => {
+            if (f.type === 'Revenue') totRev += f.amount;
+            else totExp += f.amount;
+        });
+
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                salesProfit += (parseFloat(inv.netProfit) || 0);
+            });
+            totRev += salesProfit;
+        }
+
+        const net = totRev - totExp;
+
+        const win = window.open('', '', 'height=800,width=950');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Expenses & Revenues Report - Anjum Green Pharmacy</title>
+                <style>
+                    @page { margin: 10mm 10mm; size: portrait; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; color: #333; font-size: 11px; }
+                    .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px; }
+                    .pdf-header h2 { color: #1e3c72; margin: 0; font-size: 20px; }
+                    .pdf-header h3 { color: #333; margin: 4px 0 0 0; font-size: 14px; }
+                    .pdf-header p { color: #666; font-size: 10px; margin: 4px 0 0 0; }
+                    .summary-box { background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px; page-break-inside: avoid; }
+                    .pdf-table { width: 100%; border-collapse: collapse; text-align: center; }
+                    .pdf-table th { background: #1e3c72; color: #fff; border: 1px solid #1e3c72; padding: 6px; font-size: 10px; }
+                    .pdf-table td { border: 1px solid #ccc; padding: 5px; font-size: 9.5px; vertical-align: middle; }
+                    tr { page-break-inside: avoid; break-inside: avoid; }
+                    .footer { text-align: center; margin-top: 20px; padding-top: 6px; border-top: 1px solid #eee; font-size: 9px; color: #7f8c8d; }
+                </style>
+            </head>
+            <body>
+                <div class="pdf-header">
+                    <h2>Anjum Green Pharmacy 🌿</h2>
+                    <h3>Expenses & Revenues Financial Report</h3>
+                    <p>Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}</p>
+                </div>
+
+                <div class="summary-box">
+                    <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
+                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
+                        <thead>
+                            <tr style="background:#1e3c72; color:#fff;">
+                                <th style="padding:5px;">Total Revenues</th>
+                                ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
+                                <th style="padding:5px;">Total Expenses</th>
+                                <th style="padding:5px;">Net Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                                ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                                <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table class="pdf-table">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:120px;">Date</th>
+                            <th style="width:70px;">Type</th>
+                            <th>Category / Description</th>
+                            <th style="width:90px;">Amount (EGP)</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `);
+
+        if (filtered.length === 0) {
+            win.document.write(`<tr><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`);
+        } else {
+            filtered.forEach((f, idx) => {
+                const isRev = f.type === 'Revenue';
+                win.document.write(`
+                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
+                        <td style="font-weight:bold;">${idx + 1}</td>
+                        <td style="white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
+                        <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                        <td style="text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
+                        <td style="font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
+                        <td style="text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        win.document.write(`
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    ✨ D&P by Samy Lukas , Powered By Gemini
+                </div>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+        win.focus();
+        setTimeout(() => {
+            win.print();
+        }, 500);
+    }
+
+    function changeUserPasswordSystem() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const targetUser = document.getElementById('userSelectPass').value;
+        const newPass = document.getElementById('newAccountPass').value.trim();
+
+        if (!newPass) return alert("Please enter new password!");
+
+        let uObj = cloudUsers.find(u => u.username === targetUser);
+        if (uObj) {
+            uObj.password = newPass;
+            saveLocalUsers(cloudUsers);
+            syncToCloud("updateUserPassword", { username: targetUser, newPassword: newPass });
+            alert(`✅ Password for [${targetUser.toUpperCase()}] updated successfully!`);
+            document.getElementById('newAccountPass').value = '';
+        }
+    }
+
+    function addNewProductToSystem() {
+        const name = document.getElementById('newProdName').value.trim();
+        const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+        const qty = parseInt(document.getElementById('newProdQty').value) || 0;
+        const barcode = document.getElementById('newProdBarcode').value.trim();
+        const expiry = document.getElementById('newProdExpiry').value;
+
+        if (!name) return alert('Enter product name!');
+        
+        const existing = products.find(p => p.n.toLowerCase() === name.toLowerCase());
+        if (existing) {
+            existing.p = price;
+            existing.q += qty;
+            existing.barcode = barcode || existing.barcode;
+            existing.expiry = expiry || existing.expiry;
+        } else {
+            products.push({ n: name, p: price, q: qty, barcode: barcode, expiry: expiry });
+        }
+        
+        saveProductsToStorage();
+        syncToCloud("updateSingleProduct", { n: name, p: price, q: existing ? existing.q : qty, barcode: barcode, expiry: expiry });
+        updateAlertsBar();
+
+        alert(`Product (${name}) saved and synced! ☁️`);
+        document.getElementById('newProdName').value = '';
+        document.getElementById('newProdBarcode').value = '';
+    }
+
+    function searchAddStockProduct() {
+        const query = document.getElementById('addStockSearch').value.toLowerCase().trim();
+        const list = document.getElementById('addStockResults');
+        if (!query) { list.style.display = 'none'; return; }
+
+        const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toLowerCase() === query);
+        if (barcodeMatched) {
+            pickAddStockIndex(products.indexOf(barcodeMatched));
+            return;
+        }
+
+        const matched = products.filter(item => item && item.n && item.n.toLowerCase().includes(query));
+        if (matched.length > 0) {
+            list.innerHTML = matched.map(i => {
+                const idx = products.indexOf(i);
+                return `<div class="result-item" onclick="pickAddStockIndex(${idx})"><span style="color:#1e3c72; font-weight:bold;">${i.n}</span> <span style="color:#27ae60; font-size:0.8rem;">(Stock: ${i.q})</span></div>`;
+            }).join('');
+            list.style.display = 'block';
+        } else {
+            list.style.display = 'none';
+        }
+    }
+
+    function pickAddStockIndex(index) {
+        const p = products[index];
+        if (!p) return;
+        selectedStockProd = p;
+
+        document.getElementById('addStockResults').style.display = 'none';
+        document.getElementById('addStockSearch').value = p.n;
+        document.getElementById('addStockName').textContent = p.n;
+        document.getElementById('currentStockVal').textContent = p.q;
+        document.getElementById('addStockCard').style.display = 'block';
+    }
+
+    function saveStockAddition() {
+        if (!selectedStockProd) return;
+        const addQty = parseInt(document.getElementById('newStockQty').value) || 0;
+        selectedStockProd.q += addQty;
+        saveProductsToStorage();
+
+        syncToCloud("updateSingleProduct", selectedStockProd);
+        updateAlertsBar();
+
+        alert(`Recharged (${selectedStockProd.n}) with ${addQty} units! New Stock: ${selectedStockProd.q}`);
+        document.getElementById('addStockCard').style.display = 'none';
+        document.getElementById('addStockSearch').value = '';
+        renderStockTable();
+    }
+
+    function editProductSystem(prodName) {
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+        if (!isManager) return alert("❌ Restricted access!");
+
+        const prod = products.find(p => p.n === prodName);
         if (!prod) return;
 
-        let exist = cart.find(c => c.id == prodId);
-        if (exist) { exist.qty += 1; } else { cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 }); }
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('searchInput').value = '';
-        renderCart();
+        const newName = prompt("✏️ New Product Name:", prod.n);
+        if (newName === null) return;
+
+        const newPriceInput = prompt("💵 New Commercial Price (EGP):", prod.p);
+        if (newPriceInput === null) return;
+        const newPrice = parseFloat(newPriceInput) || prod.p;
+
+        const newQtyInput = prompt("📦 New Available Stock:", prod.q);
+        if (newQtyInput === null) return;
+        const newQty = parseInt(newQtyInput) || prod.q;
+
+        const newBarcode = prompt("📷 New Barcode (Leave empty or scan via camera button in table):", prod.barcode || "");
+        if (newBarcode !== null) prod.barcode = newBarcode.trim();
+
+        prod.n = newName;
+        prod.p = newPrice;
+        prod.q = newQty;
+        saveProductsToStorage();
+
+        syncToCloud("updateSingleProduct", prod);
+        updateAlertsBar();
+
+        alert(`✅ Product (${newName}) updated!`);
+        renderStockTable();
     }
 
-    function renderCart() {
-        let html = ''; let total = 0;
-        cart.forEach((item, index) => {
-            let itemTotal = item.price * item.qty;
-            total += itemTotal;
-            html += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.name}</td>
-                    <td><input type="number" value="${item.qty}" min="1" style="width:60px; text-align:center;" onchange="updateQty(${index}, this.value)"></td>
-                    <td>${item.price}</td>
-                    <td>${itemTotal.toFixed(2)}</td>
-                    <td><button class="btn btn-red" onclick="removeItem(${index})">X</button></td>
-                </tr>
-            `;
-        });
-        document.getElementById('cartTable').innerHTML = html;
-        document.getElementById('grandTotal').innerText = total.toFixed(2) + " EGP";
-        document.getElementById('totalUSD').innerText = "$" + (total / RATES.USD).toFixed(2);
-        document.getElementById('totalEUR').innerText = "€" + (total / RATES.EUR).toFixed(2);
-        document.getElementById('totalGBP').innerText = "£" + (total / RATES.GBP).toFixed(2);
+    function scanAndEditProductBarcode(prodName) {
+        const prod = products.find(p => p.n === prodName);
+        if (!prod) return;
+        selectedStockEditProduct = prod;
+        toggleCameraScanner('stock');
     }
 
-    function updateQty(index, val) { cart[index].qty = parseInt(val) || 1; renderCart(); }
-    function removeItem(index) { cart.splice(index, 1); renderCart(); }
-    function clearInvoice() { cart = []; renderCart(); }
-    function newInvoice() { clearInvoice(); syncData(); }
+    function deleteProductSystem(prodName) {
+        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
+        if (!isManager) return alert("❌ Restricted access!");
 
-    function renderStockTable() {
-        document.getElementById('stockTable').innerHTML = productsDB.map(p => `
-            <tr><td>${p.id}</td><td>${p.name}</td><td>${p.barcode || '-'}</td><td>${p.price}</td><td>${p.quantity}</td></tr>
+        if (confirm(`❌ Delete product (${prodName}) completely?`)) {
+            syncToCloud("deleteProduct", { name: prodName });
+            products = products.filter(p => p.n !== prodName);
+            saveProductsToStorage();
+            updateAlertsBar();
+
+            alert(`🗑️ Product (${prodName}) deleted!`);
+            renderStockTable();
+        }
+    }
+
+    function renderStockTable(filter = '') {
+        const tbody = document.getElementById('stockTableBody');
+        const matched = products.filter(i => (i.n && i.n.toLowerCase().includes(filter.toLowerCase())) || (i.barcode && i.barcode.toLowerCase().includes(filter.toLowerCase())));
+        const guideMult = RATES.GUIDE_MULT || 3;
+
+        tbody.innerHTML = matched.map((i, index) => {
+            let isExpiring = false;
+            if (i.expiry) {
+                let expDate = new Date(i.expiry);
+                let today = new Date();
+                let diffDays = (expDate - today) / (1000 * 60 * 60 * 24);
+                if (diffDays < 90) isExpiring = true;
+            }
+
+            return `
+            <tr class="${i.q <= 3 || isExpiring ? 'low-stock-row' : ''}">
+                <td style="font-weight:bold;">${index + 1}</td>
+                <td style="text-align:left; font-weight:bold;">${i.n} ${i.q <= 3 ? '⚠️ (Low)' : ''} ${isExpiring ? '⏳ (Expiring)' : ''}</td>
+                <td style="font-weight:bold;">${i.q} units</td>
+                <td>${i.p.toFixed(2)} EGP</td>
+                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
+                <td style="font-family:monospace; font-weight:bold; color:#1e3c72;">${i.barcode || '-'}</td>
+                <td>${i.expiry || '-'}</td>
+                <td>
+                    <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="scanAndEditProductBarcode('${i.n}')">Scan 📷</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
+                    <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteProductSystem('${i.n}')">Delete 🗑️</button>
+                </td>
+            </tr>
+        `;}).join('');
+    }
+
+    function filterStockTable(val) { renderStockTable(val); }
+
+    function filterLowStock() {
+        document.getElementById('stockFilterInput').value = '';
+        const tbody = document.getElementById('stockTableBody');
+        const matched = products.filter(i => i.q <= 3);
+        const guideMult = RATES.GUIDE_MULT || 3;
+
+        tbody.innerHTML = matched.map((i, index) => `
+            <tr class="low-stock-row">
+                <td style="font-weight:bold;">${index + 1}</td>
+                <td style="text-align:left; font-weight:bold;">${i.n} ⚠️ (Low Stock)</td>
+                <td style="font-weight:bold;">${i.q} units</td>
+                <td>${i.p.toFixed(2)} EGP</td>
+                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
+                <td style="font-family:monospace;">${i.barcode || '-'}</td>
+                <td>${i.expiry || '-'}</td>
+                <td>
+                    <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
+                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
+                </td>
+            </tr>
         `).join('');
     }
 
-    async function saveInvoice() {
-        if (cart.length === 0) return alert("Cart is empty!");
-        let grandTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        let payload = { action: "saveInvoice", invoice: { id: currentInvoiceId, items: cart, totalEGP: grandTotal } };
-
-        await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), mode: 'no-cors' });
-        alert("Invoice Saved & Synced Successfully!");
-        newInvoice();
+    function printStockTable() {
+        const win = window.open('', '', 'height=700,width=900');
+        win.document.write('<html><head><title>Print Inventory</title>');
+        win.document.write('<style>body{font-family:sans-serif;direction:rtl;text-align:center;padding:15px;} table{width:100%;border-collapse:collapse;margin-top:10px;} th,td{border:1px solid #333;padding:6px;font-size:11px;} th{background:#1e3c72;color:#fff;}</style>');
+        win.document.write('</head><body><h2 style="color:#1e3c72; margin-bottom:2px;">Anjum Green Pharmacy 🌿</h2><h3 style="margin-top:0;">جدول تفاصيل المخزون</h3><p>التاريخ: ' + new Date().toLocaleString() + '</p><table><thead><tr><th>م</th><th style="width:40%;">اسم المنتج</th><th>الكمية</th><th>السعر التجاري</th><th>الباركود</th><th>الصلاحية</th></tr></thead><tbody>');
+        products.forEach((i, idx) => { win.document.write(`<tr><td>${idx+1}</td><td style="text-align:right;">${i.n}</td><td>${i.q} قطعة</td><td>${i.p.toFixed(2)} ج.م</td><td>${i.barcode || '-'}</td><td>${i.expiry || '-'}</td></tr>`); });
+        win.document.write('</tbody></table><div style="text-align:center; margin-top:20px; font-size:10px; color:#7f8c8d;">✨ D&P by Samy Lukas , Powered By Gemini</div></body></html>');
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 300);
     }
 
-    async function saveProduct() {
-        let name = document.getElementById('prodName').value;
-        let barcode = document.getElementById('prodBarcode').value;
-        let price = document.getElementById('prodPrice').value;
-        let qty = document.getElementById('prodQty').value;
-
-        if (!name || !price) return alert("Please fill required fields!");
-
-        let payload = { action: "saveProduct", product: { name, barcode, price, quantity: qty } };
-        await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), mode: 'no-cors' });
-        alert("Product Added!");
-        syncData();
-        switchTab('stock');
+    function exportStockPDF() {
+        window.print();
     }
 
-    function triggerScan() {
-        let code = prompt("Scan or Enter Barcode:");
-        if (code) { document.getElementById('searchInput').value = code; handleSearch(); }
+    function printSingleReceipt(invId) {
+        const inv = savedInvoices.find(i => i.id === invId);
+        if (!inv) return;
+
+        let receiptHTML = `
+            <h3>Anjum Green Pharmacy 🌿</h3>
+            <p>Invoice ID: <b>#${inv.id}</b></p>
+            <p>Date: ${(inv.date||'').replace('T', ' ')}</p>
+            <hr style="border-top:1px dashed #000; margin:6px 0;">
+            <table style="width:100%; border-collapse:collapse; font-size:10px;">
+                <thead><tr><th style="text-align:left;">Item</th><th style="text-align:right;">Total</th></tr></thead>
+                <tbody>
+        `;
+
+        if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+            inv.items.forEach(i => {
+                receiptHTML += `<tr><td style="text-align:left;">${i.name} (x${i.qty}) <br><small>By: ${i.seller || 'Unknown'}</small></td><td style="text-align:right;">${i.sellTotal.toFixed(2)}</td></tr>`;
+            });
+        } else {
+            receiptHTML += `<tr><td colspan="2" style="text-align:left;">${cleanItemSummaryText(inv.itemsText)}</td></tr>`;
+        }
+
+        receiptHTML += `
+                </tbody>
+            </table>
+            <hr style="border-top:1px dashed #000; margin:6px 0;">
+            <h4 style="text-align:right;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
+            <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
+            <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+        `;
+
+        const printSec = document.getElementById('receiptPrintSection');
+        printSec.innerHTML = receiptHTML;
+        document.body.classList.add('printing-receipt');
+
+        window.print();
+
+        setTimeout(() => {
+            document.body.classList.remove('printing-receipt');
+            printSec.innerHTML = '';
+        }, 500);
     }
 
-    function scanForAdd() {
-        let code = prompt("Scan or Enter Barcode:");
-        if (code) { document.getElementById('prodBarcode').value = code; }
+    function printReportTable() {
+        window.print();
+    }
+
+    function exportReportPDF() {
+        window.print();
+    }
+
+    function generateReport() {
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        const filteredInvoices = savedInvoices.filter(inv => {
+            if (!inv.date) return true;
+            const invD = inv.date.slice(0, 10);
+            if (fromD && invD < fromD) return false;
+            if (toD && invD > toD) return false;
+            return true;
+        });
+
+        const tbody = document.getElementById('savedInvoicesBody');
+        if (filteredInvoices.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d;">No saved invoices found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filteredInvoices.map((inv, index) => {
+            let u = 0, eu = 0, g = 0, eg = 0, v = 0;
+            let itemsList = "";
+
+            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+                itemsList = inv.items.map(i => {
+                    u += parseFloat(i.usd || 0);
+                    eu += parseFloat(i.eur || 0);
+                    g += parseFloat(i.gbp || 0);
+                    eg += parseFloat(i.egp || 0);
+                    v += parseFloat(i.visa || 0);
+                    return `• ${getItemPaidText(i)}`;
+                }).join('<br>');
+            } else {
+                itemsList = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
+                u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
+            }
+
+            const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`;
+            const cleanDateStr = inv.date ? inv.date.replace('T', ' ').replace('.000Z', '') : '-';
+
+            return `
+            <tr>
+                <td><span class="seq-num">${index + 1}</span></td>
+                <td style="font-weight:bold;">#${inv.id}</td>
+                <td style="white-space:nowrap;">${cleanDateStr}</td>
+                <td style="text-align:left; font-size:0.75rem; line-height:1.4;">${itemsList}</td>
+                <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
+                <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
+                <td style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
+                <td style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
+                <td>
+                    <button class="btn btn-purple" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="printSingleReceipt(${inv.id})">Receipt 🧾</button>
+                    <button class="btn btn-blue" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="loadInvoiceToEdit(${inv.id})">Edit ✏️</button>
+                    <button class="btn btn-red" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="cancelInvoiceSystem(${inv.id})">Delete 🗑️</button>
+                </td>
+            </tr>
+        `;}).join('');
+    }
+
+    function loadInvoiceToEdit(invId) {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const inv = savedInvoices.find(i => i.id === invId);
+        if (!inv) return;
+
+        showTab('salesTab');
+        loadInvoiceIntoForm(inv);
+    }
+
+    function cancelInvoiceSystem(invId) {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const invIdx = savedInvoices.findIndex(i => i.id === invId);
+        if (invIdx === -1) return;
+        const inv = savedInvoices[invIdx];
+
+        if (confirm(`❌ Delete invoice #${invId} permanently?`)) {
+            if (inv.items && Array.isArray(inv.items)) {
+                inv.items.forEach(item => {
+                    const pObj = products.find(p => p.n === item.name);
+                    if (pObj) {
+                        pObj.q += item.qty;
+                        syncToCloud("updateSingleProduct", pObj);
+                    }
+                });
+                saveProductsToStorage();
+                renderStockTable();
+                updateAlertsBar();
+            }
+
+            savedInvoices.splice(invIdx, 1);
+            saveInvoicesToStorage();
+            syncToCloud("deleteInvoice", { id: invId });
+
+            alert(`🗑️ Invoice #${invId} deleted!`);
+            fetchCloudInvoicesData();
+        }
+    }
+
+    function handleNetProfitAction() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        const filteredInvoices = savedInvoices.filter(inv => {
+            if (!inv.date) return true;
+            const invD = inv.date.slice(0, 10);
+            if (fromD && invD < fromD) return false;
+            if (toD && invD > toD) return false;
+            return true;
+        });
+
+        let totalSell = 0, totalComm = 0, netProfit = 0;
+        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
+        let productStats = {};
+
+        filteredInvoices.forEach(inv => {
+            totalSell += inv.totalEGP || 0;
+            totalComm += inv.totalComm || 0;
+            netProfit += inv.netProfit || 0;
+
+            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+                inv.items.forEach(i => {
+                    sumUSD += parseFloat(i.usd || 0);
+                    sumEUR += parseFloat(i.eur || 0);
+                    sumGBP += parseFloat(i.gbp || 0);
+                    sumEGP += parseFloat(i.egp || 0);
+                    sumVISA += parseFloat(i.visa || 0);
+
+                    if (i.name) {
+                        productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
+                    }
+                });
+            } else if (inv.itemsText) {
+                sumUSD += parseFloat(inv.usd || 0);
+                sumEUR += parseFloat(inv.eur || 0);
+                sumGBP += parseFloat(inv.gbp || 0);
+                sumEGP += parseFloat(inv.egp || 0);
+                sumVISA += parseFloat(inv.visa || 0);
+
+                let rawItems = inv.itemsText.split(' | ');
+                rawItems.forEach(raw => {
+                    let namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0];
+                    let qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/);
+                    let qty = qtyPart ? parseInt(qtyPart[1]) : 1;
+                    let cleanName = namePart.trim();
+
+                    if (cleanName) {
+                        productStats[cleanName] = (productStats[cleanName] || 0) + qty;
+                    }
+                });
+            }
+        });
+
+        document.getElementById('repTotalUSD').textContent = '$' + sumUSD.toFixed(2);
+        document.getElementById('repTotalEUR').textContent = '€' + sumEUR.toFixed(2);
+        document.getElementById('repTotalGBP').textContent = '£' + sumGBP.toFixed(2);
+        document.getElementById('repTotalEGP').textContent = sumEGP.toFixed(2) + ' EGP';
+        document.getElementById('repTotalVISA').textContent = sumVISA.toFixed(2) + ' EGP';
+
+        document.getElementById('repTotalSell').textContent = totalSell.toFixed(2) + ' EGP';
+        document.getElementById('repTotalComm').textContent = totalComm.toFixed(2) + ' EGP';
+        document.getElementById('repNetProfit').textContent = netProfit.toFixed(2) + ' EGP';
+
+        let sortedTop = Object.keys(productStats).map(key => {
+            return { name: key, qty: productStats[key] };
+        }).sort((a,b) => b.qty - a.qty).slice(0, 5);
+
+        const topHtml = sortedTop.length > 0 ? sortedTop.map((p, idx) => `<b>#${idx+1} ${p.name}</b> (${p.qty} units)`).join(' | ') : 'No data available';
+        document.getElementById('topProductsList').innerHTML = topHtml;
+
+        document.getElementById('profitBox').style.display = 'block';
+    }
+
+    function handleBackupExportAction() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const backupData = {
+            products: products,
+            invoices: savedInvoices,
+            finances: savedFinances,
+            rates: RATES,
+            counter: invoiceCounter,
+            date: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Anjum_Pharmacy_Full_Backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+    }
+
+    function handleBackupImportAction() {
+        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.products) products = data.products;
+                    if (data.invoices) savedInvoices = data.invoices;
+                    if (data.finances) savedFinances = data.finances;
+                    if (data.rates) RATES = data.rates;
+                    if (data.counter) invoiceCounter = data.counter;
+
+                    saveProductsToStorage();
+                    saveInvoicesToStorage();
+                    saveFinancesToStorage();
+                    localStorage.setItem('anjum_rates', JSON.stringify(RATES));
+
+                    alert('✅ Backup restored successfully!');
+                    location.reload();
+                } catch(err) {
+                    alert('❌ Invalid backup file!');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 </script>
 </body>
