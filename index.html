@@ -9,15 +9,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; direction: rtl; }
         .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .header h1 { color: var(--primary); margin: 0; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        
-        /* 1. حركة ورقة الشجر */
-        .leaf-icon { display: inline-block; animation: leafSway 2s ease-in-out infinite alternate; }
-        @keyframes leafSway {
-            0% { transform: rotate(-10deg) scale(1); }
-            100% { transform: rotate(15deg) scale(1.1); }
-        }
-
+        .header h1 { color: var(--primary); margin: 0; font-size: 24px; }
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 13px; margin-top: 5px; font-weight: bold; }
         .online { background: #e8f8f5; color: #27ae60; }
         .offline { background: #fdeae8; color: #e74c3c; }
@@ -38,14 +30,6 @@
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
         th { background: var(--primary); color: #fff; }
-        
-        /* تنبيهات الصلاحية */
-        .exp-warning { background-color: #fff9db !important; color: #856404; font-weight: bold; }
-        .exp-expired { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
-
-        .discount-container { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 10px 0; font-weight: bold; background: #f8f9fa; padding: 10px; border-radius: 6px; }
-        .discount-container input { width: 80px; padding: 8px; text-align: center; border: 2px solid #ccc; border-radius: 5px; font-size: 16px; font-weight: bold; }
-
         .totals-card { background: #1a252f; color: #fff; padding: 15px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; text-align: center; }
         .totals-card div { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 5px; }
         .form-group { margin-bottom: 12px; }
@@ -57,7 +41,7 @@
 
 <div class="container">
     <div class="header">
-        <h1><span class="leaf-icon">🌿</span> Anjum Green Pharmacy - Management System 2026</h1>
+        <h1>🌿 Anjum Green Pharmacy - Management System 2026</h1>
         <div id="netStatus" class="status-badge offline">🔴 Offline / Error</div>
     </div>
 
@@ -102,12 +86,6 @@
             <tbody id="cartTable"></tbody>
         </table>
 
-        <!-- 3. نسبة الخصم % (حد أقصى 25%) -->
-        <div class="discount-container">
-            <label for="discountInput">Discount % (Max 25%):</label>
-            <input type="number" id="discountInput" min="0" max="25" value="0" oninput="applyDiscount(this)">
-        </div>
-
         <div class="totals-card">
             <div>USD ($)<br><strong id="totalUSD" style="color:#f1c40f">$0.00</strong></div>
             <div>EUR (€)<br><strong id="totalEUR" style="color:#3498db">€0.00</strong></div>
@@ -120,11 +98,7 @@
 
     <!-- STOCK SECTION -->
     <div id="stock" class="section">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3>📦 Inventory Stock</h3>
-            <!-- 4. فرز الصلاحية -->
-            <button class="btn btn-orange" onclick="sortByExpiry()">Sort by Expiry Warning ⚠️</button>
-        </div>
+        <h3>📦 Inventory Stock</h3>
         <table>
             <thead>
                 <tr>
@@ -133,8 +107,6 @@
                     <th>Barcode</th>
                     <th>Price</th>
                     <th>Quantity</th>
-                    <th>Expiry Date</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody id="stockTable"></tbody>
@@ -154,7 +126,6 @@
         </div>
         <div class="form-group"><label>Price (EGP)</label><input type="number" id="prodPrice"></div>
         <div class="form-group"><label>Quantity</label><input type="number" id="prodQty"></div>
-        <div class="form-group"><label>Expiry Date</label><input type="date" id="prodExpiry"></div>
         <button class="btn btn-green" style="width:100%" onclick="saveProduct()">Save Product 📦</button>
     </div>
 
@@ -169,7 +140,7 @@
 
     <!-- REPORTS SECTION -->
     <div id="reports" class="section">
-        <h3>📊 Reports & Backup</h3>
+        <h3>📊 Reports & Summary</h3>
         <p>Sales summary and reports will be generated here automatically from synchronized invoices.</p>
     </div>
 </div>
@@ -180,25 +151,8 @@
     let productsDB = [];
     let cart = [];
     let currentInvoiceId = 1001;
-    let discountPercent = 0;
 
     const RATES = { USD: 48.5, EUR: 52.0, GBP: 61.5 };
-
-    // 2. صوت البيب
-    function playBeep() {
-        try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.12);
-        } catch(e) {}
-    }
 
     window.onload = function() { syncData(); };
 
@@ -237,10 +191,11 @@
             document.getElementById('invoiceIdDisplay').innerText = currentInvoiceId;
             statusEl.className = "status-badge online";
             statusEl.innerText = "🟢 Online";
-            renderStockTable(productsDB);
+            renderStockTable();
         } catch(e) {
             statusEl.className = "status-badge offline";
             statusEl.innerText = "🔴 Offline / Error";
+            console.error("Sync Error:", e);
         }
     }
 
@@ -258,8 +213,6 @@
                 </div>
             `).join('');
             resultsContainer.style.display = 'block';
-            
-            if (matches.some(p => p.barcode && p.barcode.toString() === val)) playBeep();
         } else {
             resultsContainer.style.display = 'none';
         }
@@ -269,7 +222,6 @@
         let prod = productsDB.find(p => p.id == prodId);
         if (!prod) return;
 
-        playBeep();
         let exist = cart.find(c => c.id == prodId);
         if (exist) { exist.qty += 1; } else { cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 }); }
         document.getElementById('searchResults').style.display = 'none';
@@ -277,26 +229,11 @@
         renderCart();
     }
 
-    function applyDiscount(input) {
-        let val = parseFloat(input.value) || 0;
-        if (val > 25) {
-            alert("Maximum discount allowed is 25%!");
-            input.value = 25;
-            discountPercent = 25;
-        } else if (val < 0) {
-            input.value = 0;
-            discountPercent = 0;
-        } else {
-            discountPercent = val;
-        }
-        renderCart();
-    }
-
     function renderCart() {
-        let html = ''; let subtotal = 0;
+        let html = ''; let total = 0;
         cart.forEach((item, index) => {
             let itemTotal = item.price * item.qty;
-            subtotal += itemTotal;
+            total += itemTotal;
             html += `
                 <tr>
                     <td>${index + 1}</td>
@@ -308,71 +245,28 @@
                 </tr>
             `;
         });
-
-        let discountAmount = (subtotal * discountPercent) / 100;
-        let finalTotal = subtotal - discountAmount;
-
         document.getElementById('cartTable').innerHTML = html;
-        document.getElementById('grandTotal').innerText = finalTotal.toFixed(2) + " EGP";
-        document.getElementById('totalUSD').innerText = "$" + (finalTotal / RATES.USD).toFixed(2);
-        document.getElementById('totalEUR').innerText = "€" + (finalTotal / RATES.EUR).toFixed(2);
-        document.getElementById('totalGBP').innerText = "£" + (finalTotal / RATES.GBP).toFixed(2);
+        document.getElementById('grandTotal').innerText = total.toFixed(2) + " EGP";
+        document.getElementById('totalUSD').innerText = "$" + (total / RATES.USD).toFixed(2);
+        document.getElementById('totalEUR').innerText = "€" + (total / RATES.EUR).toFixed(2);
+        document.getElementById('totalGBP').innerText = "£" + (total / RATES.GBP).toFixed(2);
     }
 
     function updateQty(index, val) { cart[index].qty = parseInt(val) || 1; renderCart(); }
     function removeItem(index) { cart.splice(index, 1); renderCart(); }
-    function clearInvoice() { cart = []; document.getElementById('discountInput').value = 0; discountPercent = 0; renderCart(); }
+    function clearInvoice() { cart = []; renderCart(); }
     function newInvoice() { clearInvoice(); syncData(); }
 
-    function renderStockTable(list) {
-        let today = new Date();
-        let threeMonths = new Date();
-        threeMonths.setMonth(today.getMonth() + 3);
-
-        document.getElementById('stockTable').innerHTML = list.map(p => {
-            let expClass = '';
-            let statusText = 'OK 🟢';
-            
-            if (p.expiry) {
-                let expDate = new Date(p.expiry);
-                if (expDate < today) {
-                    expClass = 'exp-expired';
-                    statusText = 'Expired 🔴';
-                } else if (expDate <= threeMonths) {
-                    expClass = 'exp-warning';
-                    statusText = 'Near Expiry 🟡';
-                }
-            }
-
-            return `
-                <tr class="${expClass}">
-                    <td>${p.id}</td>
-                    <td>${p.name}</td>
-                    <td>${p.barcode || '-'}</td>
-                    <td>${p.price}</td>
-                    <td>${p.quantity}</td>
-                    <td>${p.expiry || '-'}</td>
-                    <td>${statusText}</td>
-                </tr>
-            `;
-        }).join('');
-    }
-
-    function sortByExpiry() {
-        let sorted = [...productsDB].sort((a, b) => {
-            if (!a.expiry) return 1;
-            if (!b.expiry) return -1;
-            return new Date(a.expiry) - new Date(b.expiry);
-        });
-        renderStockTable(sorted);
+    function renderStockTable() {
+        document.getElementById('stockTable').innerHTML = productsDB.map(p => `
+            <tr><td>${p.id}</td><td>${p.name}</td><td>${p.barcode || '-'}</td><td>${p.price}</td><td>${p.quantity}</td></tr>
+        `).join('');
     }
 
     async function saveInvoice() {
         if (cart.length === 0) return alert("Cart is empty!");
-        let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        let finalTotal = subtotal - ((subtotal * discountPercent) / 100);
-
-        let payload = { action: "saveInvoice", invoice: { id: currentInvoiceId, items: cart, discount: discountPercent, totalEGP: finalTotal } };
+        let grandTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        let payload = { action: "saveInvoice", invoice: { id: currentInvoiceId, items: cart, totalEGP: grandTotal } };
 
         await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), mode: 'no-cors' });
         alert("Invoice Saved & Synced Successfully!");
@@ -384,11 +278,10 @@
         let barcode = document.getElementById('prodBarcode').value;
         let price = document.getElementById('prodPrice').value;
         let qty = document.getElementById('prodQty').value;
-        let expiry = document.getElementById('prodExpiry').value;
 
         if (!name || !price) return alert("Please fill required fields!");
 
-        let payload = { action: "saveProduct", product: { name, barcode, price, quantity: qty, expiry: expiry } };
+        let payload = { action: "saveProduct", product: { name, barcode, price, quantity: qty } };
         await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload), mode: 'no-cors' });
         alert("Product Added!");
         syncData();
@@ -396,13 +289,11 @@
     }
 
     function triggerScan() {
-        playBeep();
         let code = prompt("Scan or Enter Barcode:");
         if (code) { document.getElementById('searchInput').value = code; handleSearch(); }
     }
 
     function scanForAdd() {
-        playBeep();
         let code = prompt("Scan or Enter Barcode:");
         if (code) { document.getElementById('prodBarcode').value = code; }
     }
