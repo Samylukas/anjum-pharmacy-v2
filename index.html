@@ -121,21 +121,18 @@
 </head>
 <body>
 
-<!-- شاشة تسجيل الدخول بالتحديثات الجديدة -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.2rem;">
             🔐 <span class="animated-leaf">🌿</span> Anjum Green Pharmacy
         </h2>
         
-        <!-- اختيار اليوزر تلقائياً من الدروب داون -->
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
             <option value="admin">ADMIN (Admin Role)</option>
             <option value="cs2">CS2 (Manager Role)</option>
             <option value="cashier">CASHIER (Cashier Role)</option>
         </select>
         
-        <!-- حقل كلمة المرور مع زر العين لإظهار/إخفاء النص -->
         <div class="pass-container">
             <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; padding-right:35px;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
             <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
@@ -244,8 +241,8 @@
                     <th style="width:35px;">#</th>
                     <th>Product Name</th>
                     <th>Qty</th>
-                    <th>Commercial Total</th>
-                    <th>Payment Breakdown</th>
+                    <th>C-Total</th>
+                    <th>Pay Breakdown</th>
                     <th>Sell Total</th>
                     <th>Seller</th>
                     <th style="width:60px;">Action</th>
@@ -256,9 +253,8 @@
             </tbody>
         </table></div>
 
-        <!-- صندوق الخصم % بحد أقصى 25% -->
         <div class="discount-bar">
-            <label for="invoiceDiscountInput">Apply Invoice Discount % (Max 25%):</label>
+            <label for="invoiceDiscountInput">Invoice Disc % (Max 25%):</label>
             <input type="number" id="invoiceDiscountInput" min="0" max="25" value="0" oninput="handleDiscountChange(this)">
         </div>
 
@@ -300,11 +296,11 @@
                     <tr>
                         <th style="width:35px;">#</th>
                         <th>Product Name</th>
-                        <th>Available Stock</th>
-                        <th>Commercial Unit Price</th>
-                        <th id="thStockGuideHead">Guide Min Price (×3)</th>
+                        <th>Stock</th>
+                        <th>C-Price</th>
+                        <th id="thStockGuideHead">G-Min (×3)</th>
                         <th>Barcode</th>
-                        <th>Expiry Date</th>
+                        <th>Expiry</th>
                         <th style="width:210px;">Actions</th>
                     </tr>
                 </thead>
@@ -313,7 +309,7 @@
         </div>
     </div>
 
-    <!-- 3. Add Stock Tab (Manager Access) -->
+    <!-- 3. Add Stock Tab -->
     <div id="addStockTab" class="tab-content manager-only">
         <div class="section-title">➕ Add New Product</div>
         <div class="card" style="background:#eef7fe;">
@@ -367,7 +363,7 @@
         </div>
     </div>
 
-    <!-- 4. Expenses & Revenues Tab (Admin Only) -->
+    <!-- 4. Expenses & Revenues Tab -->
     <div id="financeTab" class="tab-content admin-only">
         <div class="section-title">💵 Expenses & Revenues Management (EGP Only)</div>
         
@@ -445,7 +441,7 @@
         </table></div>
     </div>
 
-    <!-- 5. Reports Tab (Admin Only) -->
+    <!-- 5. Reports Tab (تحديث العناوين وإضافة عمود الخصم %) -->
     <div id="reportsTab" class="tab-content admin-only">
         <div class="section-title">📊 Sales Reports & Backup</div>
         
@@ -458,11 +454,11 @@
             <div class="toolbar-row">
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
-                <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Guide Multiplier ⚙️</button>
+                <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Multiplier ⚙️</button>
                 <button class="btn btn-purple" onclick="printReportTable()">Print Report 🖨️</button>
                 <button class="btn btn-orange" onclick="exportReportPDF()">Export PDF 📄</button>
-                <button class="btn btn-blue" style="background:#27ae60;" onclick="handleBackupExportAction()">Backup JSON 💾</button>
-                <button class="btn btn-purple" style="background:#8e44ad;" onclick="handleBackupImportAction()">Restore Backup 📥</button>
+                <button class="btn btn-blue" style="background:#27ae60;" onclick="handleBackupExportAction()">Backup 💾</button>
+                <button class="btn btn-purple" style="background:#8e44ad;" onclick="handleBackupImportAction()">Restore 📥</button>
             </div>
         </div>
 
@@ -475,8 +471,8 @@
                 <div class="total-item">Total EGP <span id="repTotalEGP">0.00 EGP</span></div>
                 <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
-                <div class="total-item" style="background:rgba(231,76,60,0.2);">Commercial Total <span id="repTotalComm">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Sales Net Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+                <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">N-Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
             </div>
             
             <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
@@ -488,24 +484,25 @@
         <div class="table-responsive" id="reportsPrintArea"><table>
             <thead>
                 <tr>
-                    <th style="width:35px;">#</th>
-                    <th>Invoice ID</th>
-                    <th>Date</th>
-                    <th>Items Details</th>
-                    <th>Payments Breakdown</th>
-                    <th>Commercial Total</th>
-                    <th>Sales Total (EGP)</th>
-                    <th>Net Profit</th>
-                    <th style="width:160px;">Actions</th>
+                    <th style="width:30px;">#</th>
+                    <th style="width:65px;">Inv ID</th>
+                    <th style="width:110px;">Date</th>
+                    <th>Items</th>
+                    <th>Pay Breakdown</th>
+                    <th>C-Total</th>
+                    <th style="width:55px;">Disc %</th>
+                    <th>Sales Total</th>
+                    <th>N-Profit</th>
+                    <th style="width:140px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="savedInvoicesBody">
-                <tr><td colspan="9" style="color:#7f8c8d;">No saved invoices</td></tr>
+                <tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr>
             </tbody>
         </table></div>
     </div>
 
-    <!-- 6. Account Security Tab (Admin Only) -->
+    <!-- 6. Account Security Tab -->
     <div id="usersTab" class="tab-content admin-only">
         <div class="section-title">🔑 Change Account Passwords</div>
         <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
@@ -543,17 +540,11 @@
     let heldInvoiceItems = null;
     let invoiceDiscountPercent = 0;
 
-    // دالة إظهار/إخفاء الباسوورد في شاشة الدخول
     function togglePasswordVisibility() {
         const passInput = document.getElementById('entryPassInput');
-        if (passInput.type === 'password') {
-            passInput.type = 'text';
-        } else {
-            passInput.type = 'password';
-        }
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
-    // دالة صوت البيب
     function playBeepSound() {
         try {
             let ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -692,7 +683,7 @@
         if(document.getElementById('lblVISA')) document.getElementById('lblVISA').textContent = `VISA (× ${RATES.VISA})`;
         
         const thHead = document.getElementById('thStockGuideHead');
-        if (thHead) thHead.textContent = `Guide Min Price (×${RATES.GUIDE_MULT || 3})`;
+        if (thHead) thHead.textContent = `G-Min (×${RATES.GUIDE_MULT || 3})`;
     }
 
     function promptSetRates() {
@@ -1193,7 +1184,7 @@
         const qty = parseInt(document.getElementById('sellQty').value) || 1;
         if (qty > selectedProd.stock) return alert('⚠️ Quantity not available in stock! Available: ' + selectedProd.stock);
 
-        playBeepSound(); // بيب الصوت عند الإضافة
+        playBeepSound();
         const u = parseFloat(document.getElementById('pUSD').value) || 0;
         const eu = parseFloat(document.getElementById('pEUR').value) || 0;
         const g = parseFloat(document.getElementById('pGBP').value) || 0;
@@ -1286,7 +1277,6 @@
             `;}).join('');
         }
 
-        // تطبيق الخصم
         let discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
         let finalPayable = totalSellEGP - discountVal;
 
@@ -1792,7 +1782,6 @@
         }
     }
 
-    // عرض جدول المخزون وتلوين التحذيرات حسب حالة الصلاحية والمخزون
     function renderStockTable(filter = '') {
         const tbody = document.getElementById('stockTableBody');
         const matched = products.filter(i => (i.n && i.n.toLowerCase().includes(filter.toLowerCase())) || (i.barcode && i.barcode.toLowerCase().includes(filter.toLowerCase())));
@@ -1903,6 +1892,7 @@
                 </tbody>
             </table>
             <hr style="border-top:1px dashed #000; margin:6px 0;">
+            <h4 style="text-align:right;">Discount: ${inv.discount||0}%</h4>
             <h4 style="text-align:right;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
             <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
             <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
@@ -1928,6 +1918,7 @@
         window.print();
     }
 
+    // بناء التقرير وعرض الخصم بوضوح في الجدول
     function generateReport() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1942,7 +1933,7 @@
 
         const tbody = document.getElementById('savedInvoicesBody');
         if (filteredInvoices.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d;">No saved invoices found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d;">No saved invoices found</td></tr>';
             return;
         }
 
@@ -1975,6 +1966,7 @@
                 <td style="text-align:left; font-size:0.75rem; line-height:1.4;">${itemsList}</td>
                 <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
                 <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
+                <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
                 <td style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
                 <td style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
                 <td>
