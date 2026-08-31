@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; }
+        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; }
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
         
-        /* حركة ورقة الشجر */
         .animated-leaf {
             display: inline-block;
             animation: leafSway 2.5s ease-in-out infinite alternate;
@@ -39,7 +38,7 @@
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
-        .section-title { font-weight: bold; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1rem; }
+        .section-title { font-weight: bold; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1rem; text-align: right; }
         
         .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
         .results-list { max-height: 200px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
@@ -61,7 +60,7 @@
 
         .warning-box { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
 
-        .btn { background: #27ae60; color: white; border: none; padding: 10px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; font-size: 0.9rem; }
+        .btn { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
         .btn:hover { background: #219653; }
         .btn-blue { background: #3498db; }
         .btn-blue:hover { background: #2980b9; }
@@ -72,15 +71,14 @@
         .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
         .nav-controls .btn { width: auto; font-size: 0.8rem; padding: 6px 12px; margin-top: 0; }
 
-        .toolbar-row { display: flex; gap: 6px; align-items: center; overflow-x: auto; padding-bottom: 4px; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-        .toolbar-row .btn { width: auto; flex-shrink: 0; margin-top: 0; font-size: 0.8rem; padding: 7px 12px; white-space: nowrap; }
+        .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+        .toolbar-row .btn { flex: 1; min-width: 120px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
         table { width: 100%; min-width: 600px; border-collapse: collapse; }
         th, td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: break-word; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
-        /* ألوان تنبيهات الصلاحية والمخزون */
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
@@ -90,17 +88,20 @@
         .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
         
         .pass-container { position: relative; width: 100%; margin-bottom: 12px; }
-        .pass-toggle-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
+        .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
 
-        .discount-bar { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; padding: 8px; background: #eef7fe; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
+        .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 8px; background: #eef7fe; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
         .discount-bar input { width: 70px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #3498db; font-weight: bold; }
 
         .totals-box { background: #1e3c72; color: #fff; padding: 12px; border-radius: 8px; margin-top: 15px; }
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
-        .date-filter { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-        .date-filter input { padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; }
+
+        .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
+        .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
+        .date-inputs-row input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; outline: none; }
 
         .live-invoice-summary { background: #1e3c72; color: white; border-radius: 8px; padding: 10px; margin-top: 12px; }
         .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 6px; text-align: center; font-size: 0.75rem; }
@@ -134,11 +135,11 @@
         </select>
         
         <div class="pass-container">
-            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; padding-right:35px;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; padding-left:35px;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
             <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
         
-        <button class="btn btn-blue" onclick="validateEntryPassword()">Login System 🚀</button>
+        <button class="btn btn-blue" style="width: 100%;" onclick="validateEntryPassword()">Login System 🚀</button>
         <div class="footer-signature" style="margin-top:15px; font-size:0.65rem;">✨ D&P by Samy Lukas , Powered By Gemini</div>
     </div>
 </div>
@@ -172,13 +173,15 @@
     <div id="salesTab" class="tab-content active">
         <div class="section-title">🛒 Create / Edit Sales Invoice</div>
 
-        <div class="date-filter card" style="background:#fff3cd; border-color:#ffeeba;">
-            <div style="color:#856404; font-size:0.85rem; font-weight:bold;">💡 Sync & Shortcuts:</div>
-            <button class="btn btn-blue" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
-            <button class="btn btn-orange" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="prepareNewInvoice()">New Invoice ➕</button>
-            <button class="btn btn-purple" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
-            <button class="btn btn-purple" id="resumeHoldBtn" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
-            <button class="btn btn-red" style="width: auto; margin: 0; font-size:0.8rem; padding:6px 12px;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
+        <div class="card" style="background:#fff3cd; border-color:#ffeeba;">
+            <div style="color:#856404; font-size:0.85rem; font-weight:bold; margin-bottom: 6px;">💡 Sync & Shortcuts:</div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button class="btn btn-blue" style="flex:1;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
+                <button class="btn btn-orange" style="flex:1;" onclick="prepareNewInvoice()">New Invoice ➕</button>
+                <button class="btn btn-purple" style="flex:1;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
+                <button class="btn btn-purple" id="resumeHoldBtn" style="flex:1; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
+                <button class="btn btn-red" style="flex:1;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
+            </div>
         </div>
 
         <div class="info-row" style="background: #eef7fe; padding: 10px; border-radius: 6px; align-items: center;">
@@ -231,7 +234,7 @@
                 ⚠️ Warning: Total entered amount (<span id="enteredTotalVal">0</span> EGP) is below minimum threshold (<span id="requiredMinVal">0</span> EGP)!
             </div>
 
-            <button class="btn" onclick="addToInvoice()">Deduct Stock & Add to Invoice 🛒</button>
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="addToInvoice()">Deduct Stock & Add to Invoice 🛒</button>
         </div>
 
         <div class="section-title" style="margin-top: 20px;">📄 Current Invoice Items</div>
@@ -270,17 +273,16 @@
             </div>
         </div>
 
-        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px;" onclick="saveInvoice()">Save & Sync Invoice (Ctrl+S) 💾</button>
+        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px; width:100%;" onclick="saveInvoice()">Save & Sync Invoice (Ctrl+S) 💾</button>
     </div>
 
-    <!-- 2. Stock Tab (Manager Access) -->
+    <!-- 2. Stock Tab -->
     <div id="stockTab" class="tab-content manager-only">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 Inventory Details</span>
             <div style="display:flex; gap:6px;">
                 <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
                 <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">Print 🖨️</button>
-                <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="exportStockPDF()">Export PDF 📄</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
@@ -332,7 +334,7 @@
                 <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
             </div>
 
-            <button class="btn btn-purple" style="margin-top: 12px;" onclick="addNewProductToSystem()">Save & Sync Product 📦</button>
+            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="addNewProductToSystem()">Save & Sync Product 📦</button>
         </div>
 
         <div class="section-title" style="margin-top:20px;">➕ Recharge Existing Stock</div>
@@ -358,7 +360,7 @@
                     <label>Quantity to Add:</label>
                     <input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;">
                 </div>
-                <button class="btn" style="margin-top: 15px;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
+                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
             </div>
         </div>
     </div>
@@ -393,13 +395,15 @@
                     <input type="text" id="finNotes" placeholder="Additional notes...">
                 </div>
             </div>
-            <button class="btn btn-purple" style="margin-top: 12px;" onclick="saveFinanceEntry()">Save Entry 💾</button>
+            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="saveFinanceEntry()">Save Entry 💾</button>
         </div>
 
         <div class="date-filter card" style="margin-top: 15px;">
-            <div>From: <input type="date" id="finFromDate"></div>
-            <div>To: <input type="date" id="finToDate"></div>
-            <button class="btn btn-blue" style="width: auto; margin-top: 0;" onclick="renderFinanceTable()">Filter 📈</button>
+            <div class="date-inputs-row">
+                <div>From: <input type="date" id="finFromDate"></div>
+                <div>To: <input type="date" id="finToDate"></div>
+                <button class="btn btn-blue" onclick="renderFinanceTable()">Filter 📈</button>
+            </div>
             
             <div style="width:100%; margin-top:8px; display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:18px; height:18px;">
@@ -409,8 +413,8 @@
             </div>
             
             <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
-                <button class="btn btn-purple" style="width:auto; margin:0;" onclick="printFinanceReportPDF()">Print / Export PDF 📄</button>
-                <button class="btn btn-orange" style="width:auto; margin:0;" onclick="exportFinanceExcel()">Export Excel 📊</button>
+                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">Print Report 🖨️</button>
+                <button class="btn btn-orange" style="flex:1;" onclick="exportFinanceExcel()">Export Excel 📊</button>
             </div>
         </div>
 
@@ -441,12 +445,12 @@
         </table></div>
     </div>
 
-    <!-- 5. Reports Tab (تحديث العناوين وإضافة عمود الخصم %) -->
+    <!-- 5. Sales Reports Tab -->
     <div id="reportsTab" class="tab-content admin-only">
-        <div class="section-title">📊 Sales Reports & Backup</div>
+        <div class="section-title">📊 Sales Reports</div>
         
-        <div class="card">
-            <div class="date-filter" style="margin-bottom:8px;">
+        <div class="card date-filter-box">
+            <div class="date-inputs-row">
                 <div>From: <input type="date" id="fromDate"></div>
                 <div>To: <input type="date" id="toDate"></div>
             </div>
@@ -456,9 +460,7 @@
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
                 <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Multiplier ⚙️</button>
                 <button class="btn btn-purple" onclick="printReportTable()">Print Report 🖨️</button>
-                <button class="btn btn-orange" onclick="exportReportPDF()">Export PDF 📄</button>
-                <button class="btn btn-blue" style="background:#27ae60;" onclick="handleBackupExportAction()">Backup 💾</button>
-                <button class="btn btn-purple" style="background:#8e44ad;" onclick="handleBackupImportAction()">Restore 📥</button>
+                <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
             </div>
         </div>
 
@@ -518,7 +520,7 @@
                 <label>New Password:</label>
                 <input type="password" id="newAccountPass" placeholder="Enter new password...">
             </div>
-            <button class="btn btn-purple" onclick="changeUserPasswordSystem()">Update Password 💾</button>
+            <button class="btn btn-purple" style="width:100%;" onclick="changeUserPasswordSystem()">Update Password 💾</button>
         </div>
     </div>
 
@@ -1266,7 +1268,7 @@
                 return `
                 <tr>
                     <td style="font-weight:bold;">${index + 1}</td>
-                    <td style="font-weight:bold; text-align:left;">${item.name}</td>
+                    <td style="font-weight:bold; text-align:right;">${item.name}</td>
                     <td>${item.qty}</td>
                     <td>${(item.commTotal||0).toFixed(2)} EGP</td>
                     <td>$:${item.usd||0} | €:${item.eur||0} | £:${item.gbp||0} | EGP:${item.egp||0} | VISA:${item.visa||0}</td>
@@ -1443,9 +1445,9 @@
                     <td>${idx + 1}</td>
                     <td style="white-space:nowrap;">${f.date}</td>
                     <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                    <td style="text-align:left; font-weight:bold;">${f.category}</td>
+                    <td style="text-align:right; font-weight:bold;">${f.category}</td>
                     <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
-                    <td style="text-align:left; font-size:0.75rem;">${f.notes || '-'}</td>
+                    <td style="text-align:right; font-size:0.75rem;">${f.notes || '-'}</td>
                     <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
                 </tr>
             `;}).join('');
@@ -1536,7 +1538,7 @@
                 <title>Expenses & Revenues Report - Anjum Green Pharmacy</title>
                 <style>
                     @page { margin: 10mm 10mm; size: portrait; }
-                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; color: #333; font-size: 11px; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; color: #333; font-size: 11px; direction: rtl; }
                     .pdf-header { text-align: center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px; }
                     .pdf-header h2 { color: #1e3c72; margin: 0; font-size: 20px; }
                     .pdf-header h3 { color: #333; margin: 4px 0 0 0; font-size: 14px; }
@@ -1809,7 +1811,7 @@
             return `
             <tr class="${rowStyle}">
                 <td style="font-weight:bold;">${index + 1}</td>
-                <td style="text-align:left; font-weight:bold;">${i.n} ${i.q <= 3 ? '⚠️ (Low)' : ''}${expStatusText}</td>
+                <td style="text-align:right; font-weight:bold;">${i.n} ${i.q <= 3 ? '⚠️ (Low)' : ''}${expStatusText}</td>
                 <td style="font-weight:bold;">${i.q} units</td>
                 <td>${i.p.toFixed(2)} EGP</td>
                 <td>${(i.p * guideMult).toFixed(2)} EGP</td>
@@ -1836,7 +1838,7 @@
         tbody.innerHTML = matched.map((i, index) => `
             <tr class="low-stock-row">
                 <td style="font-weight:bold;">${index + 1}</td>
-                <td style="text-align:left; font-weight:bold;">${i.n} ⚠️ (Low Stock)</td>
+                <td style="text-align:right; font-weight:bold;">${i.n} ⚠️ (Low Stock)</td>
                 <td style="font-weight:bold;">${i.q} units</td>
                 <td>${i.p.toFixed(2)} EGP</td>
                 <td>${(i.p * guideMult).toFixed(2)} EGP</td>
@@ -1850,22 +1852,6 @@
         `).join('');
     }
 
-    function printStockTable() {
-        const win = window.open('', '', 'height=700,width=900');
-        win.document.write('<html><head><title>Print Inventory</title>');
-        win.document.write('<style>body{font-family:sans-serif;direction:rtl;text-align:center;padding:15px;} table{width:100%;border-collapse:collapse;margin-top:10px;} th,td{border:1px solid #333;padding:6px;font-size:11px;} th{background:#1e3c72;color:#fff;}</style>');
-        win.document.write('</head><body><h2 style="color:#1e3c72; margin-bottom:2px;">Anjum Green Pharmacy 🌿</h2><h3 style="margin-top:0;">جدول تفاصيل المخزون</h3><p>التاريخ: ' + new Date().toLocaleString() + '</p><table><thead><tr><th>م</th><th style="width:40%;">اسم المنتج</th><th>الكمية</th><th>السعر التجاري</th><th>الباركود</th><th>الصلاحية</th></tr></thead><tbody>');
-        products.forEach((i, idx) => { win.document.write(`<tr><td>${idx+1}</td><td style="text-align:right;">${i.n}</td><td>${i.q} قطعة</td><td>${i.p.toFixed(2)} ج.م</td><td>${i.barcode || '-'}</td><td>${i.expiry || '-'}</td></tr>`); });
-        win.document.write('</tbody></table><div style="text-align:center; margin-top:20px; font-size:10px; color:#7f8c8d;">✨ D&P by Samy Lukas , Powered By Gemini</div></body></html>');
-        win.document.close();
-        win.focus();
-        setTimeout(() => win.print(), 300);
-    }
-
-    function exportStockPDF() {
-        window.print();
-    }
-
     function printSingleReceipt(invId) {
         const inv = savedInvoices.find(i => i.id === invId);
         if (!inv) return;
@@ -1875,25 +1861,25 @@
             <p>Invoice ID: <b>#${inv.id}</b></p>
             <p>Date: ${(inv.date||'').replace('T', ' ')}</p>
             <hr style="border-top:1px dashed #000; margin:6px 0;">
-            <table style="width:100%; border-collapse:collapse; font-size:10px;">
-                <thead><tr><th style="text-align:left;">Item</th><th style="text-align:right;">Total</th></tr></thead>
+            <table style="width:100%; border-collapse:collapse; font-size:10px; direction:rtl;">
+                <thead><tr><th style="text-align:right;">Item</th><th style="text-align:left;">Total</th></tr></thead>
                 <tbody>
         `;
 
         if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
             inv.items.forEach(i => {
-                receiptHTML += `<tr><td style="text-align:left;">${i.name} (x${i.qty}) <br><small>By: ${i.seller || 'Unknown'}</small></td><td style="text-align:right;">${i.sellTotal.toFixed(2)}</td></tr>`;
+                receiptHTML += `<tr><td style="text-align:right;">${i.name} (x${i.qty}) <br><small>By: ${i.seller || 'Unknown'}</small></td><td style="text-align:left;">${i.sellTotal.toFixed(2)}</td></tr>`;
             });
         } else {
-            receiptHTML += `<tr><td colspan="2" style="text-align:left;">${cleanItemSummaryText(inv.itemsText)}</td></tr>`;
+            receiptHTML += `<tr><td colspan="2" style="text-align:right;">${cleanItemSummaryText(inv.itemsText)}</td></tr>`;
         }
 
         receiptHTML += `
                 </tbody>
             </table>
             <hr style="border-top:1px dashed #000; margin:6px 0;">
-            <h4 style="text-align:right;">Discount: ${inv.discount||0}%</h4>
-            <h4 style="text-align:right;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
+            <h4 style="text-align:left;">Discount: ${inv.discount||0}%</h4>
+            <h4 style="text-align:left;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
             <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
             <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
         `;
@@ -1910,15 +1896,130 @@
         }, 500);
     }
 
+    // دالة طباعة تقرير المبيعات بدقة A4 احترافية وبدون أزرار أو أجزاء شاشة إضافية
     function printReportTable() {
-        window.print();
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        const filteredInvoices = savedInvoices.filter(inv => {
+            if (!inv.date) return true;
+            const invD = inv.date.slice(0, 10);
+            if (fromD && invD < fromD) return false;
+            if (toD && invD > toD) return false;
+            return true;
+        });
+
+        const win = window.open('', '', 'height=850,width=1100');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Sales Report - Anjum Green Pharmacy</title>
+                <style>
+                    @page { size: A4 landscape; margin: 10mm; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; color: #333; }
+                    .header-title { border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
+                    .header-title h2 { color: #1e3c72; margin: 0; font-size: 22px; }
+                    .header-title p { color: #666; font-size: 11px; margin: 4px 0 0 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                    th, td { border: 1px solid #1e3c72; padding: 6px 8px; text-align: center; vertical-align: middle; }
+                    th { background-color: #1e3c72; color: #ffffff; font-size: 12px; }
+                    tr:nth-child(even) { background-color: #f8f9fa; }
+                    .item-cell { text-align: right; font-weight: bold; line-height: 1.4; width: 35%; word-wrap: break-word; white-space: normal; }
+                    .footer { margin-top: 15px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
+                </style>
+            </head>
+            <body>
+                <div class="header-title">
+                    <h2>Anjum Green Pharmacy 🌿</h2>
+                    <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
+                    <p>الفترة من: <b>${fromD || 'بداية السجلات'}</b> إلى: <b>${toD || 'تاريخ اليوم'}</b> | تاريخ الطباعة: ${new Date().toLocaleString()}</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">#</th>
+                            <th style="width:70px;">رقم الفاتورة</th>
+                            <th style="width:110px;">التاريخ</th>
+                            <th>الأصناف المباعة</th>
+                            <th style="width:120px;">تفاصيل الدفع</th>
+                            <th style="width:85px;">إجمالي تجاري</th>
+                            <th style="width:55px;">الخصم %</th>
+                            <th style="width:90px;">إجمالي البيع</th>
+                            <th style="width:85px;">صافي الربح</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `);
+
+        filteredInvoices.forEach((inv, idx) => {
+            let cleanItems = "";
+            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+                cleanItems = inv.items.map(i => `• ${i.name} (العدد: ${i.qty})`).join('<br>');
+            } else {
+                cleanItems = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
+            }
+
+            win.document.write(`
+                <tr>
+                    <td style="font-weight:bold;">${idx + 1}</td>
+                    <td style="font-weight:bold;">#${inv.id}</td>
+                    <td style="white-space:nowrap; direction:ltr;">${inv.date || '-'}</td>
+                    <td class="item-cell">${cleanItems}</td>
+                    <td style="font-size:10px;">$:${inv.usd||0} | €:${inv.eur||0} | £:${inv.gbp||0}<br>EGP:${inv.egp||0} | VISA:${inv.visa||0}</td>
+                    <td>${(inv.totalComm || 0).toFixed(2)} EGP</td>
+                    <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
+                    <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
+                    <td style="color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
+                </tr>
+            `);
+        });
+
+        win.document.write(`
+                    </tbody>
+                </table>
+                <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </body>
+            </html>
+        `);
+
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 500);
     }
 
-    function exportReportPDF() {
-        window.print();
+    function exportSalesReportExcel() {
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        const filteredInvoices = savedInvoices.filter(inv => {
+            if (!inv.date) return true;
+            const invD = inv.date.slice(0, 10);
+            if (fromD && invD < fromD) return false;
+            if (toD && invD > toD) return false;
+            return true;
+        });
+
+        let excelData = filteredInvoices.map((inv, i) => {
+            let cleanItems = inv.items && Array.isArray(inv.items) ? inv.items.map(item => `${item.name} (x${item.qty})`).join(' | ') : cleanItemSummaryText(inv.itemsText);
+            return {
+                "#": i + 1,
+                "Invoice ID": inv.id,
+                "Date": inv.date || "",
+                "Items Details": cleanItems,
+                "Commercial Total (EGP)": inv.totalComm || 0,
+                "Discount %": inv.discount || 0,
+                "Sales Total (EGP)": inv.totalEGP || 0,
+                "Net Profit (EGP)": inv.netProfit || 0
+            };
+        });
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sales_Report");
+        XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // بناء التقرير وعرض الخصم بوضوح في الجدول
     function generateReport() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1963,7 +2064,7 @@
                 <td><span class="seq-num">${index + 1}</span></td>
                 <td style="font-weight:bold;">#${inv.id}</td>
                 <td style="white-space:nowrap;">${cleanDateStr}</td>
-                <td style="text-align:left; font-size:0.75rem; line-height:1.4;">${itemsList}</td>
+                <td style="text-align:right; font-size:0.75rem; line-height:1.4;">${itemsList}</td>
                 <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
                 <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
                 <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
@@ -2089,57 +2190,6 @@
         document.getElementById('topProductsList').innerHTML = topHtml;
 
         document.getElementById('profitBox').style.display = 'block';
-    }
-
-    function handleBackupExportAction() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const backupData = {
-            products: products,
-            invoices: savedInvoices,
-            finances: savedFinances,
-            rates: RATES,
-            counter: invoiceCounter,
-            date: new Date().toISOString()
-        };
-
-        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `Anjum_Pharmacy_Full_Backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-    }
-
-    function handleBackupImportAction() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json';
-        input.onchange = e => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = event => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (data.products) products = data.products;
-                    if (data.invoices) savedInvoices = data.invoices;
-                    if (data.finances) savedFinances = data.finances;
-                    if (data.rates) RATES = data.rates;
-                    if (data.counter) invoiceCounter = data.counter;
-
-                    saveProductsToStorage();
-                    saveInvoicesToStorage();
-                    saveFinancesToStorage();
-                    localStorage.setItem('anjum_rates', JSON.stringify(RATES));
-
-                    alert('✅ Backup restored successfully!');
-                    location.reload();
-                } catch(err) {
-                    alert('❌ Invalid backup file!');
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
     }
 </script>
 </body>
