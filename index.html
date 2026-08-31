@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anjum Green Pharmacy POS 2026</title>
     <style>
-        :root { --primary: #1e3c72; --secondary: #2a5298; --accent: #27ae60; --danger: #e74c3c; --warning: #f1c40f; --bg: #f4f6f9; }
+        :root { --primary: #1e3c72; --secondary: #2a5298; --accent: #27ae60; --danger: #e74c3c; --bg: #f4f6f9; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; direction: rtl; }
         .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
         .header h1 { color: var(--primary); margin: 0; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        /* 1. أنيميشن ورقة الشجر المتحركة */
-        .leaf-icon { display: inline-block; animation: leafSway 2.5s ease-in-out infinite alternate; transform-origin: bottom center; }
+        /* 1. حركة ورقة الشجر */
+        .leaf-icon { display: inline-block; animation: leafSway 2s ease-in-out infinite alternate; }
         @keyframes leafSway {
             0% { transform: rotate(-10deg) scale(1); }
-            50% { transform: rotate(15deg) scale(1.1); }
-            100% { transform: rotate(-5deg) scale(1); }
+            100% { transform: rotate(15deg) scale(1.1); }
         }
 
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 13px; margin-top: 5px; font-weight: bold; }
@@ -40,7 +39,7 @@
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
         th { background: var(--primary); color: #fff; }
         
-        /* ألوان التنبيه للصلاحية */
+        /* تنبيهات الصلاحية */
         .exp-warning { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
 
@@ -67,6 +66,7 @@
         <button class="tab-btn" onclick="switchTab('stock')">🔒 Stock Details</button>
         <button class="tab-btn" onclick="switchTab('add-stock')">🔒 ➕ Add Inventory</button>
         <button class="tab-btn" onclick="switchTab('expenses')">🔒 💵 Expenses & Revenues</button>
+        <button class="tab-btn" onclick="switchTab('reports')">🔒 📊 Reports & Backup</button>
     </div>
 
     <!-- POS SECTION -->
@@ -102,7 +102,7 @@
             <tbody id="cartTable"></tbody>
         </table>
 
-        <!-- 3. صندوق نسبة الخصم % -->
+        <!-- 3. نسبة الخصم % (حد أقصى 25%) -->
         <div class="discount-container">
             <label for="discountInput">Discount % (Max 25%):</label>
             <input type="number" id="discountInput" min="0" max="25" value="0" oninput="applyDiscount(this)">
@@ -120,9 +120,9 @@
 
     <!-- STOCK SECTION -->
     <div id="stock" class="section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
             <h3>📦 Inventory Stock</h3>
-            <!-- 4. زر فرز تاريخ الصلاحية -->
+            <!-- 4. فرز الصلاحية -->
             <button class="btn btn-orange" onclick="sortByExpiry()">Sort by Expiry Warning ⚠️</button>
         </div>
         <table>
@@ -166,6 +166,12 @@
         <div class="form-group"><label>Amount (EGP)</label><input type="number" id="expAmount"></div>
         <button class="btn btn-blue" style="width:100%">Record Transaction</button>
     </div>
+
+    <!-- REPORTS SECTION -->
+    <div id="reports" class="section">
+        <h3>📊 Reports & Backup</h3>
+        <p>Sales summary and reports will be generated here automatically from synchronized invoices.</p>
+    </div>
 </div>
 
 <script>
@@ -178,20 +184,20 @@
 
     const RATES = { USD: 48.5, EUR: 52.0, GBP: 61.5 };
 
-    // 2. دالة تشغيل صوت البيب للباركود
+    // 2. صوت البيب
     function playBeep() {
         try {
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // تردد البيب الصوتية
+            osc.frequency.setValueAtTime(1800, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
             osc.stop(audioCtx.currentTime + 0.12);
-        } catch(e) { console.log("Audio play blocked"); }
+        } catch(e) {}
     }
 
     window.onload = function() { syncData(); };
@@ -248,15 +254,12 @@
         if (matches.length > 0) {
             resultsContainer.innerHTML = matches.map(p => `
                 <div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="addToCart('${p.id}')">
-                    <strong>${p.name}</strong> - ${p.price} EGP
+                    <strong>${p.name}</strong> - ${p.price} EGP (Stock: ${p.quantity})
                 </div>
             `).join('');
             resultsContainer.style.display = 'block';
             
-            // إصدار بيب عند العثور على مطابقة للباركود بالضبط
-            if (matches.some(p => p.barcode && p.barcode.toString() === val)) {
-                playBeep();
-            }
+            if (matches.some(p => p.barcode && p.barcode.toString() === val)) playBeep();
         } else {
             resultsContainer.style.display = 'none';
         }
@@ -266,8 +269,7 @@
         let prod = productsDB.find(p => p.id == prodId);
         if (!prod) return;
 
-        playBeep(); // بيب إضافة المنتج للسلة
-
+        playBeep();
         let exist = cart.find(c => c.id == prodId);
         if (exist) { exist.qty += 1; } else { cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 }); }
         document.getElementById('searchResults').style.display = 'none';
@@ -275,7 +277,6 @@
         renderCart();
     }
 
-    // 3. التحقق والتأكد من ألا تتجاوز نسبة الخصم 25%
     function applyDiscount(input) {
         let val = parseFloat(input.value) || 0;
         if (val > 25) {
@@ -308,7 +309,6 @@
             `;
         });
 
-        // تطبيق الخصم
         let discountAmount = (subtotal * discountPercent) / 100;
         let finalTotal = subtotal - discountAmount;
 
@@ -324,11 +324,10 @@
     function clearInvoice() { cart = []; document.getElementById('discountInput').value = 0; discountPercent = 0; renderCart(); }
     function newInvoice() { clearInvoice(); syncData(); }
 
-    // 4. عرض المخزون مع فحص التواريخ والتحذير الألوان
     function renderStockTable(list) {
         let today = new Date();
-        let threeMonthsFromNow = new Date();
-        threeMonthsFromNow.setMonth(today.getMonth() + 3);
+        let threeMonths = new Date();
+        threeMonths.setMonth(today.getMonth() + 3);
 
         document.getElementById('stockTable').innerHTML = list.map(p => {
             let expClass = '';
@@ -339,7 +338,7 @@
                 if (expDate < today) {
                     expClass = 'exp-expired';
                     statusText = 'Expired 🔴';
-                } else if (expDate <= threeMonthsFromNow) {
+                } else if (expDate <= threeMonths) {
                     expClass = 'exp-warning';
                     statusText = 'Near Expiry 🟡';
                 }
@@ -359,7 +358,6 @@
         }).join('');
     }
 
-    // فرز المنتجات بحسب الأقرب للانتهاء أو المنتهية للصلاحية
     function sortByExpiry() {
         let sorted = [...productsDB].sort((a, b) => {
             if (!a.expiry) return 1;
