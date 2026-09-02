@@ -8,8 +8,6 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة تصدير الـ PDF المباشر داخل التطبيق لتفادي تعليق الموبايل -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; }
@@ -538,7 +536,7 @@
         <div id="inAppReportContainer" style="display:none; margin-top:20px; background:#fff; padding:15px; border-radius:8px; border:2px solid #1e3c72;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
                 <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">📥 تصدير ملف PDF</button>
+                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">📥 تصدير PDF / طباعة</button>
             </div>
             
             <div id="pdfExportableArea">
@@ -547,7 +545,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #1e3c72; padding-top:10px; margin-top:15px; flex-wrap:wrap; gap:8px;">
                 <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">📥 تصدير ملف PDF</button>
+                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">📥 تصدير PDF / طباعة</button>
             </div>
         </div>
     </div>
@@ -799,21 +797,55 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تصدير التقرير كملف PDF مباشر باستخدام html2pdf.js بدون حظر الموبايل
+    // تصدير الطباعة عبر Iframe معزول ونظيف يضمن عدم وجود صفحات بيضاء إطلاقاً
     function downloadInAppReportPDF() {
-        const element = document.getElementById('pdfExportableArea');
-        if (!element) return;
+        const reportContent = document.getElementById('pdfExportableArea').innerHTML;
+        if (!reportContent) return;
 
-        const opt = {
-            margin:       8,
-            filename:     `Anjum_Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
+        let iframe = document.getElementById('print_frame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'print_frame';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+        }
 
-        alert("⏳ جاري تحضير وتنزيل ملف الـ PDF...");
-        html2pdf().set(opt).from(element).save();
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html lang="ar" dir="rtl">
+            <head>
+                <meta charset="UTF-8">
+                <title>Anjum Sales Report</title>
+                <style>
+                    @page { size: A4 landscape; margin: 8mm; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+                    th, td { border: 1px solid #1e3c72; padding: 5px; text-align: center; vertical-align: middle; }
+                    th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    tr { page-break-inside: avoid !important; }
+                </style>
+            </head>
+            <body>
+                ${reportContent}
+                <script>
+                    window.onload = function() {
+                        setTimeout(function(){
+                            window.focus();
+                            window.print();
+                        }, 200);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        doc.close();
     }
 
     function fetchInitialUsersOnly() {
