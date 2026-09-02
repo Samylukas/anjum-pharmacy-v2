@@ -109,6 +109,20 @@
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
 
+        /* كروت الإجماليات الاحترافية بالتقرير */
+        .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 15px; }
+        .report-card { background: #f8f9fa; border: 2px solid #1e3c72; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .report-card-title { font-size: 0.75rem; color: #555; font-weight: bold; margin-bottom: 4px; }
+        .report-card-value { font-size: 1rem; font-weight: bold; color: #1e3c72; }
+
+        /* الرسم البياني لأعلى 10 منتجات */
+        .top-products-chart { margin-top: 15px; background: #fafafa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.75rem; }
+        .chart-label { width: 140px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+        .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 16px; border-radius: 8px; overflow: hidden; }
+        .chart-bar { height: 100%; background: linear-gradient(90deg, #3498db, #1e3c72); border-radius: 8px; }
+        .chart-val { width: 45px; text-align: left; font-weight: bold; color: #1e3c72; }
+
         .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
         .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
@@ -123,45 +137,6 @@
 
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
-
-        .report-preview-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.85);
-            z-index: 999999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        .report-preview-modal {
-            background: #fff;
-            width: 100%;
-            max-width: 950px;
-            max-height: 90vh;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-        }
-
-        .report-modal-header {
-            background: #1e3c72;
-            color: white;
-            padding: 12px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .report-modal-body {
-            padding: 15px;
-            overflow-y: auto;
-            flex: 1;
-        }
 
         @media print {
             body.printing-receipt * { visibility: hidden; }
@@ -179,7 +154,7 @@
         </h2>
         
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
-            <option value="">⏳ Loading Users...</option>
+            <option value="">⏳ Loading Users from Cloud...</option>
         </select>
         
         <div class="pass-container">
@@ -513,7 +488,7 @@
             </div>
         </div>
 
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px; padding-top:35px;">
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
             <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
@@ -561,6 +536,10 @@
                 <tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr>
             </tbody>
         </table></div>
+
+        <!-- الرسم البياني وبطاقات الإجماليات بالشاشة -->
+        <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
+        <div id="topProductsChartContainer" class="top-products-chart"></div>
     </div>
 
     <!-- 6. Account Security Tab -->
@@ -640,7 +619,23 @@
         });
         
         loadLocalUsers();
+        fetchInitialUsersOnly(); // جلب مستخدمين جوجل فوراً عند فتح التطبيق
     });
+
+    // جلب مستخدمي شيت جوجل عند فتح الصفحة مباشرة لمنع الحاجة لتكرار الدخول
+    function fetchInitialUsersOnly() {
+        if (!navigator.onLine) return;
+
+        window.handleUsersOnlyResponse = function(resData) {
+            if (resData && resData.status === "success" && resData.users && resData.users.length > 0) {
+                saveLocalUsers(resData.users);
+            }
+        };
+
+        const script = document.createElement('script');
+        script.src = GOOGLE_SCRIPT_URL + "?callback=handleUsersOnlyResponse&nocache=" + Math.random();
+        document.body.appendChild(script);
+    }
 
     function updateOnlineStatus() {
         const ind = document.getElementById('syncIndicator');
@@ -895,7 +890,7 @@
         heldInvoiceItems = null;
         document.getElementById('resumeHoldBtn').style.display = 'none';
         renderInvoice();
-        alert('控制 Resumed!');
+        alert('⏯️ Held invoice resumed!');
     }
 
     function clearCurrentInvoice() {
@@ -1989,7 +1984,7 @@
         }, 500);
     }
 
-    // دالة طباعة تقرير المبيعات لحل تداخل العناوين وتوفير الإجماليات
+    // دالة طباعة تقرير المبيعات المنفصلة المعالجة بالرسم البياني والكروت المستقلة
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -2004,6 +1999,7 @@
 
         let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
         let grandTotalSell = 0, grandNetProfit = 0;
+        let productStats = {};
 
         filteredInvoices.forEach(inv => {
             grandTotalSell += inv.totalEGP || 0;
@@ -2016,15 +2012,50 @@
                     sumGBP += parseFloat(i.gbp || 0);
                     sumEGP += parseFloat(i.egp || 0);
                     sumVISA += parseFloat(i.visa || 0);
+
+                    if (i.name) {
+                        productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
+                    }
                 });
-            } else {
+            } else if (inv.itemsText) {
                 sumUSD += parseFloat(inv.usd || 0);
                 sumEUR += parseFloat(inv.eur || 0);
                 sumGBP += parseFloat(inv.gbp || 0);
                 sumEGP += parseFloat(inv.egp || 0);
                 sumVISA += parseFloat(inv.visa || 0);
+
+                let rawItems = inv.itemsText.split(' | ');
+                rawItems.forEach(raw => {
+                    let namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0];
+                    let qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/);
+                    let qty = qtyPart ? parseInt(qtyPart[1]) : 1;
+                    let cleanName = namePart.trim();
+                    if (cleanName) {
+                        productStats[cleanName] = (productStats[cleanName] || 0) + qty;
+                    }
+                });
             }
         });
+
+        // تحضير أعلى 10 منتجات للرسم البياني
+        let sortedTop = Object.keys(productStats).map(key => ({
+            name: key, qty: productStats[key]
+        })).sort((a,b) => b.qty - a.qty).slice(0, 10);
+
+        let maxQty = sortedTop.length > 0 ? sortedTop[0].qty : 1;
+
+        let chartHtml = sortedTop.map((p, idx) => {
+            let widthPercent = Math.round((p.qty / maxQty) * 100);
+            return `
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
+                    <div style="width:140px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx+1} ${p.name}</div>
+                    <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;">
+                        <div style="width:${widthPercent}%; background:#1e3c72; height:100%;"></div>
+                    </div>
+                    <div style="width:40px; text-align:left; font-weight:bold;">${p.qty}</div>
+                </div>
+            `;
+        }).join('');
 
         const win = window.open('', '_blank', 'height=850,width=1100');
         win.document.write(`
@@ -2034,9 +2065,9 @@
                 <meta charset="UTF-8">
                 <title>Sales Report - Anjum Green Pharmacy</title>
                 <style>
-                    @page { size: A4 landscape; margin: 12mm; }
+                    @page { size: A4 landscape; margin: 10mm; }
                     body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; color: #333; background: #fff; }
-                    .header-title { border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 15px; }
+                    .header-title { border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
                     .header-title h2 { color: #1e3c72; margin: 0; font-size: 22px; }
                     .header-title p { color: #666; font-size: 11px; margin: 4px 0 0 0; }
                     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
@@ -2045,8 +2076,12 @@
                     thead { display: table-row-group !important; }
                     tr { page-break-inside: avoid !important; }
                     .item-cell { text-align: right; font-weight: bold; line-height: 1.4; width: 35%; word-wrap: break-word; white-space: normal; }
-                    .totals-row { background-color: #eef7fe !important; font-weight: bold; font-size: 11px; }
-                    .footer { margin-top: 20px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
+                    .cards-container { display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; }
+                    .summary-card { border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; text-align: center; background: #fdfefe; }
+                    .summary-card-title { font-size: 10px; color: #555; font-weight: bold; }
+                    .summary-card-val { font-size: 13px; font-weight: bold; color: #1e3c72; margin-top: 2px; }
+                    .chart-box { margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; }
+                    .footer { margin-top: 15px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
                 </style>
             </head>
             <body>
@@ -2096,21 +2131,41 @@
             `);
         });
 
-        // طباعة صف الإجماليات لكل عملة ومبيعات وأرباح بشكل منفصل
         win.document.write(`
-                <tr class="totals-row">
-                    <td colspan="4" style="text-align:right; font-size:12px; font-weight:bold; background-color:#1e3c72; color:#fff;">📊 إجمالي التقرير بالفترة المحدد:</td>
-                    <td style="font-size:10px; color:#1e3c72; font-weight:bold;">
-                        $: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)}<br>
-                        £: ${sumGBP.toFixed(2)} | EGP: ${sumEGP.toFixed(2)}<br>
-                        VISA: ${sumVISA.toFixed(2)}
-                    </td>
-                    <td colspan="2" style="font-weight:bold; color:#1e3c72;">الإجمالي الصافي:</td>
-                    <td style="color:#27ae60; font-weight:bold; font-size:12px;">${grandTotalSell.toFixed(2)} EGP</td>
-                    <td style="color:#8e44ad; font-weight:bold; font-size:12px;">${grandNetProfit.toFixed(2)} EGP</td>
-                </tr>
                     </tbody>
                 </table>
+
+                <!-- كروت الإجماليات الشاملة بالـ PDF -->
+                <div class="cards-container">
+                    <div class="summary-card">
+                        <div class="summary-card-title">💵 إجمالي الكاش والعملات</div>
+                        <div class="summary-card-val" style="font-size:10px;">
+                            $:${sumUSD.toFixed(2)} | €:${sumEUR.toFixed(2)}<br>
+                            £:${sumGBP.toFixed(2)} | EGP:${sumEGP.toFixed(2)}
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-title">💳 إجمالي مدفوعات الفيزا</div>
+                        <div class="summary-card-val">${sumVISA.toFixed(2)} EGP</div>
+                    </div>
+                    <div class="summary-card" style="border-color:#27ae60;">
+                        <div class="summary-card-title" style="color:#27ae60;">🛒 إجمالي المبيعات الكلي</div>
+                        <div class="summary-card-val" style="color:#27ae60;">${grandTotalSell.toFixed(2)} EGP</div>
+                    </div>
+                    <div class="summary-card" style="border-color:#8e44ad;">
+                        <div class="summary-card-title" style="color:#8e44ad;">💰 إجمالي صافي الربح</div>
+                        <div class="summary-card-val" style="color:#8e44ad;">${grandNetProfit.toFixed(2)} EGP</div>
+                    </div>
+                </div>
+
+                <!-- الرسم البياني لأعلى 10 منتجات -->
+                ${sortedTop.length > 0 ? `
+                <div class="chart-box">
+                    <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>
+                    ${chartHtml}
+                </div>
+                ` : ''}
+
                 <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
                 <script>
                     window.onload = function() {
@@ -2232,7 +2287,6 @@
         XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // توليد التقرير بالشاشة مع إضافة التجميع لكل العملات في نهايته
     function generateReport() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -2248,11 +2302,14 @@
         const tbody = document.getElementById('savedInvoicesBody');
         if (filteredInvoices.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d;">No saved invoices found</td></tr>';
+            document.getElementById('reportSummaryCardsContainer').innerHTML = '';
+            document.getElementById('topProductsChartContainer').innerHTML = '';
             return;
         }
 
         let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
         let grandTotalSell = 0, grandNetProfit = 0;
+        let productStats = {};
 
         let htmlRows = filteredInvoices.map((inv, index) => {
             let u = 0, eu = 0, g = 0, eg = 0, v = 0;
@@ -2265,11 +2322,24 @@
                     g += parseFloat(i.gbp || 0);
                     eg += parseFloat(i.egp || 0);
                     v += parseFloat(i.visa || 0);
+
+                    if (i.name) {
+                        productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
+                    }
                     return `• ${getItemPaidText(i)}`;
                 }).join('<br>');
             } else {
                 itemsList = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
                 u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
+
+                let rawItems = inv.itemsText ? inv.itemsText.split(' | ') : [];
+                rawItems.forEach(raw => {
+                    let namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0];
+                    let qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/);
+                    let qty = qtyPart ? parseInt(qtyPart[1]) : 1;
+                    let cleanName = namePart.trim();
+                    if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty;
+                });
             }
 
             sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v;
@@ -2298,19 +2368,58 @@
             </tr>
         `;}).join('');
 
-        // إضافة صف الإجماليات الشامل النهائي بالجدول
-        htmlRows += `
-            <tr style="background-color:#1e3c72; color:#ffffff; font-weight:bold; font-size:0.82rem;">
-                <td colspan="4" style="text-align:right; padding:10px;">📊 Total Breakdown:</td>
-                <td style="font-size:0.72rem; color:#f1c40f;">$: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)} | £: ${sumGBP.toFixed(2)}<br>EGP: ${sumEGP.toFixed(2)} | VISA: ${sumVISA.toFixed(2)}</td>
-                <td colspan="2">Final Totals:</td>
-                <td style="color:#2ecc71; font-size:0.9rem;">${grandTotalSell.toFixed(2)} EGP</td>
-                <td style="color:#f1c40f; font-size:0.9rem;">${grandNetProfit.toFixed(2)} EGP</td>
-                <td>-</td>
-            </tr>
+        tbody.innerHTML = htmlRows;
+
+        // عرض كروت الإجماليات الشاملة بالشاشة
+        document.getElementById('reportSummaryCardsContainer').innerHTML = `
+            <div class="report-card">
+                <div class="report-card-title">💵 Cash Payments / كاش العملات</div>
+                <div class="report-card-value" style="font-size:0.8rem;">
+                    $: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)}<br>
+                    £: ${sumGBP.toFixed(2)} | EGP: ${sumEGP.toFixed(2)}
+                </div>
+            </div>
+            <div class="report-card">
+                <div class="report-card-title">💳 Total Visa Payments / إجمالي الفيزا</div>
+                <div class="report-card-value">${sumVISA.toFixed(2)} EGP</div>
+            </div>
+            <div class="report-card" style="border-color:#27ae60;">
+                <div class="report-card-title" style="color:#27ae60;">🛒 Total Net Sales / إجمالي المبيعات</div>
+                <div class="report-card-value" style="color:#27ae60;">${grandTotalSell.toFixed(2)} EGP</div>
+            </div>
+            <div class="report-card" style="border-color:#8e44ad;">
+                <div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit / صافي الربح</div>
+                <div class="report-card-value" style="color:#8e44ad;">${grandNetProfit.toFixed(2)} EGP</div>
+            </div>
         `;
 
-        tbody.innerHTML = htmlRows;
+        // عرض الرسم البياني لأعلى 10 منتجات مباعة بالشاشة
+        let sortedTop = Object.keys(productStats).map(key => ({
+            name: key, qty: productStats[key]
+        })).sort((a,b) => b.qty - a.qty).slice(0, 10);
+
+        if (sortedTop.length > 0) {
+            let maxQty = sortedTop[0].qty || 1;
+            let chartRows = sortedTop.map((p, idx) => {
+                let widthPercent = Math.round((p.qty / maxQty) * 100);
+                return `
+                    <div class="chart-row">
+                        <div class="chart-label">#${idx+1} ${p.name}</div>
+                        <div class="chart-bar-wrapper">
+                            <div class="chart-bar" style="width: ${widthPercent}%;"></div>
+                        </div>
+                        <div class="chart-val">${p.qty} u</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('topProductsChartContainer').innerHTML = `
+                <h4 style="margin-bottom:10px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products / أعلى 10 منتجات مبيعاً:</h4>
+                ${chartRows}
+            `;
+        } else {
+            document.getElementById('topProductsChartContainer').innerHTML = '';
+        }
     }
 
     function loadInvoiceToEdit(invId) {
