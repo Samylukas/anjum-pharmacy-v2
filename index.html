@@ -109,18 +109,16 @@
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
 
-        /* كروت الإجماليات الاحترافية بالتقرير */
-        .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 15px; }
+        .report-summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 15px; page-break-inside: avoid; }
         .report-card { background: #f8f9fa; border: 2px solid #1e3c72; border-radius: 8px; padding: 10px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .report-card-title { font-size: 0.75rem; color: #555; font-weight: bold; margin-bottom: 4px; }
         .report-card-value { font-size: 1rem; font-weight: bold; color: #1e3c72; }
 
-        /* الرسم البياني لأعلى 10 منتجات */
-        .top-products-chart { margin-top: 15px; background: #fafafa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .top-products-chart { margin-top: 15px; background: #fafafa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; page-break-inside: avoid !important; }
         .chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.75rem; }
-        .chart-label { width: 140px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
+        .chart-label { width: 150px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; }
         .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 16px; border-radius: 8px; overflow: hidden; }
-        .chart-bar { height: 100%; background: linear-gradient(90deg, #3498db, #1e3c72); border-radius: 8px; }
+        .chart-bar { height: 100%; background: #1e3c72 !important; border-radius: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .chart-val { width: 45px; text-align: left; font-weight: bold; color: #1e3c72; }
 
         .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
@@ -537,7 +535,6 @@
             </tbody>
         </table></div>
 
-        <!-- الرسم البياني وبطاقات الإجماليات بالشاشة -->
         <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
         <div id="topProductsChartContainer" class="top-products-chart"></div>
     </div>
@@ -619,10 +616,10 @@
         });
         
         loadLocalUsers();
-        fetchInitialUsersOnly(); // جلب مستخدمين جوجل فوراً عند فتح التطبيق
+        fetchInitialUsersOnly();
     });
 
-    // جلب مستخدمي شيت جوجل عند فتح الصفحة مباشرة لمنع الحاجة لتكرار الدخول
+    // جلب مستخدمين الجوجل شيت فورياً لمنع تكرار تسجيل الخروج والدخول
     function fetchInitialUsersOnly() {
         if (!navigator.onLine) return;
 
@@ -702,6 +699,9 @@
             document.getElementById('mainContainer').style.display = 'block';
             document.getElementById('userGreeting').textContent = `👤 User: ${matched.username.toUpperCase()} (${matched.role})`;
             
+            // تسجيل حالة الدخول أونلاين وتاريخ النشاط للشيت تلقائياً
+            syncToCloud("updateUserActivity", { username: matched.username, isOnline: true, lastLogin: new Date().toLocaleString() });
+
             applyRolePermissions();
             initSystem();
         } else {
@@ -710,6 +710,9 @@
     }
 
     function logout() {
+        if (currentUser) {
+            syncToCloud("updateUserActivity", { username: currentUser.username, isOnline: false, lastLogin: new Date().toLocaleString() });
+        }
         currentUser = null;
         stopAllScanners();
         document.getElementById('mainContainer').style.display = 'none';
@@ -1984,7 +1987,6 @@
         }, 500);
     }
 
-    // دالة طباعة تقرير المبيعات المنفصلة المعالجة بالرسم البياني والكروت المستقلة
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -2037,7 +2039,6 @@
             }
         });
 
-        // تحضير أعلى 10 منتجات للرسم البياني
         let sortedTop = Object.keys(productStats).map(key => ({
             name: key, qty: productStats[key]
         })).sort((a,b) => b.qty - a.qty).slice(0, 10);
@@ -2048,11 +2049,11 @@
             let widthPercent = Math.round((p.qty / maxQty) * 100);
             return `
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
-                    <div style="width:140px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx+1} ${p.name}</div>
+                    <div style="width:150px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx+1} ${p.name}</div>
                     <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;">
-                        <div style="width:${widthPercent}%; background:#1e3c72; height:100%;"></div>
+                        <div style="width:${widthPercent}%; background:#1e3c72 !important; height:100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>
                     </div>
-                    <div style="width:40px; text-align:left; font-weight:bold;">${p.qty}</div>
+                    <div style="width:40px; text-align:left; font-weight:bold;">${p.qty} u</div>
                 </div>
             `;
         }).join('');
@@ -2076,11 +2077,11 @@
                     thead { display: table-row-group !important; }
                     tr { page-break-inside: avoid !important; }
                     .item-cell { text-align: right; font-weight: bold; line-height: 1.4; width: 35%; word-wrap: break-word; white-space: normal; }
-                    .cards-container { display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; }
+                    .cards-container { display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; page-break-inside: avoid !important; }
                     .summary-card { border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; text-align: center; background: #fdfefe; }
                     .summary-card-title { font-size: 10px; color: #555; font-weight: bold; }
                     .summary-card-val { font-size: 13px; font-weight: bold; color: #1e3c72; margin-top: 2px; }
-                    .chart-box { margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; }
+                    .chart-box { margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; page-break-inside: avoid !important; }
                     .footer { margin-top: 15px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
                 </style>
             </head>
@@ -2135,7 +2136,6 @@
                     </tbody>
                 </table>
 
-                <!-- كروت الإجماليات الشاملة بالـ PDF -->
                 <div class="cards-container">
                     <div class="summary-card">
                         <div class="summary-card-title">💵 إجمالي الكاش والعملات</div>
@@ -2158,7 +2158,6 @@
                     </div>
                 </div>
 
-                <!-- الرسم البياني لأعلى 10 منتجات -->
                 ${sortedTop.length > 0 ? `
                 <div class="chart-box">
                     <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>
@@ -2370,7 +2369,6 @@
 
         tbody.innerHTML = htmlRows;
 
-        // عرض كروت الإجماليات الشاملة بالشاشة
         document.getElementById('reportSummaryCardsContainer').innerHTML = `
             <div class="report-card">
                 <div class="report-card-title">💵 Cash Payments / كاش العملات</div>
@@ -2393,7 +2391,6 @@
             </div>
         `;
 
-        // عرض الرسم البياني لأعلى 10 منتجات مباعة بالشاشة
         let sortedTop = Object.keys(productStats).map(key => ({
             name: key, qty: productStats[key]
         })).sort((a,b) => b.qty - a.qty).slice(0, 10);
