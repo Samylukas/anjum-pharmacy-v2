@@ -122,7 +122,6 @@
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
 
-        /* نافذة المعاينة المنبثقة للتقرير للطباعة */
         .report-preview-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -162,7 +161,6 @@
             flex: 1;
         }
 
-        /* تنسيقات خاصة بالطباعة للـ A4 والعزل عن الواجهة */
         @media print {
             body * { visibility: hidden !important; }
             #printableReportArea, #printableReportArea * { visibility: visible !important; }
@@ -185,10 +183,9 @@
             🔐 <span class="animated-leaf">🌿</span> Anjum Green Pharmacy
         </h2>
         
+        <!-- القائمة المنسدلة ديناميكية من الجوجل شيت بدون إظهار الـ Role -->
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
-            <option value="admin">ADMIN (Admin Role)</option>
-            <option value="cs2">CS2 (Manager Role)</option>
-            <option value="cashier">CASHIER (Cashier Role)</option>
+            <option value="">⏳ Loading Users...</option>
         </select>
         
         <div class="pass-container">
@@ -522,8 +519,10 @@
             </div>
         </div>
 
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
-            <button class="btn btn-red" style="position:absolute; left:8px; top:8px; width:auto; padding:2px 8px; font-size:0.75rem;" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px; padding-top:28px;">
+            <!-- تعديل تموضع زر الإغلاق ليكون متصدراً للزاوية بدون تغطية للعنوان أو النصوص -->
+            <button class="btn btn-red" style="position:absolute; left:8px; top:6px; width:auto; padding:3px 10px; font-size:0.75rem; z-index:10;" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
+            
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
             
             <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
@@ -578,9 +577,7 @@
             <div class="pay-box" style="margin-bottom:12px;">
                 <label>Select User:</label>
                 <select id="userSelectPass">
-                    <option value="admin">Admin</option>
-                    <option value="cs2">cs2</option>
-                    <option value="cashier">Cashier</option>
+                    <!-- تتولّد الخيارات تلقائياً من المستخدمين المحملين من الشيت -->
                 </select>
             </div>
             <div class="pay-box" style="margin-bottom:12px;">
@@ -594,18 +591,18 @@
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
 </div>
 
-<!-- نافذة المعاينة المدمجة للتقرير مع زر الإغلاق الثابت باللون الأحمر -->
+<!-- نافذة المعاينة المدمجة للتقرير مع إمكانية إغلاقها مباشرة -->
 <div id="reportModalOverlay" class="report-preview-overlay">
     <div class="report-preview-modal">
         <div class="report-modal-header no-print">
-            <span style="font-weight:bold; font-size:1rem;">📄 Sales Report Preview / المعاينة للطباعة</span>
+            <span style="font-weight:bold; font-size:1rem;">📄 Sales Report Preview</span>
             <div style="display:flex; gap:8px;">
                 <button class="btn btn-green" onclick="window.print()">Print / Save PDF 🖨️</button>
-                <button class="btn btn-red" onclick="closeReportModal()">❌ إغلاق النافذة (Close)</button>
+                <button class="btn btn-red" onclick="closeReportModal()">❌ Close Preview</button>
             </div>
         </div>
         <div class="report-modal-body" id="printableReportArea">
-            <!-- المحتوى يتولد هنا ديناميكياً -->
+            <!-- المحتوى يتولد ديناميكياً -->
         </div>
     </div>
 </div>
@@ -765,12 +762,32 @@
                 { username: 'cashier', password: '123', role: 'Cashier' }
             ];
         }
+        renderUserDropdowns();
     }
 
     function saveLocalUsers(users) {
         if (users && users.length > 0) {
             cloudUsers = users;
             localStorage.setItem('anjum_local_users', JSON.stringify(users));
+            renderUserDropdowns();
+        }
+    }
+
+    // بناء قائمة المستخدمين تلقائياً بدون إظهار الـ Role
+    function renderUserDropdowns() {
+        const selectEl = document.getElementById('entryUserSelect');
+        const passSelectEl = document.getElementById('userSelectPass');
+        
+        if (selectEl && cloudUsers.length > 0) {
+            selectEl.innerHTML = cloudUsers.map(u => `
+                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
+            `).join('');
+        }
+
+        if (passSelectEl && cloudUsers.length > 0) {
+            passSelectEl.innerHTML = cloudUsers.map(u => `
+                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
+            `).join('');
         }
     }
 
@@ -780,7 +797,7 @@
 
         if (!usernameInput || !passwordInput) return alert('Enter password!');
 
-        let matched = cloudUsers.find(u => u.username === usernameInput && u.password === passwordInput);
+        let matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && u.password === passwordInput);
 
         if (matched) {
             currentUser = matched;
@@ -1765,7 +1782,7 @@
 
         if (!newPass) return alert("Please enter new password!");
 
-        let uObj = cloudUsers.find(u => u.username === targetUser);
+        let uObj = cloudUsers.find(u => u.username.toLowerCase() === targetUser.toLowerCase());
         if (uObj) {
             uObj.password = newPass;
             saveLocalUsers(cloudUsers);
