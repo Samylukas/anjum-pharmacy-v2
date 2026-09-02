@@ -75,7 +75,7 @@
         .toolbar-row .btn { flex: 1; min-width: 120px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
-        table { width: 100%; min-width: 850px; border-collapse: collapse; }
+        table { width: 100%; min-width: 900px; border-collapse: collapse; }
         th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: normal; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
@@ -83,7 +83,7 @@
             text-align: right !important;
             font-size: 0.82rem !important;
             line-height: 1.6 !important;
-            min-width: 250px !important;
+            min-width: 280px !important;
             white-space: nowrap !important;
             word-break: normal !important;
         }
@@ -480,6 +480,17 @@
             </div>
         </div>
 
+        <!-- أداة التقرير التفصيلي لمنتج محدد -->
+        <div class="card" style="background:#eef7fe; border-color:#3498db; margin-top:12px;">
+            <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <input type="text" id="singleProdSearchInput" class="search-box" style="flex:1; margin-bottom:0;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
+                <button class="btn btn-blue" style="width:auto;" onclick="searchSingleProductReport()">Generate Report 📋</button>
+            </div>
+            <div id="singleProductReportResults" class="results-list" style="margin-top:5px;"></div>
+            <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:10px; border-radius:6px; border:1px solid #3498db;"></div>
+        </div>
+
         <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
             <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             
@@ -627,6 +638,130 @@
         loadLocalUsers();
         fetchInitialUsersOnly();
     });
+
+    // دالة البحث واستخراج تقرير المبيعات لمنتج مخصص
+    function searchSingleProductReport() {
+        const query = document.getElementById('singleProdSearchInput').value.toLowerCase().trim();
+        const list = document.getElementById('singleProductReportResults');
+        const display = document.getElementById('singleProdReportDisplay');
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        if (!query) {
+            list.style.display = 'none';
+            display.style.display = 'none';
+            return;
+        }
+
+        const matchedProds = products.filter(p => p.n && p.n.toLowerCase().includes(query));
+
+        if (matchedProds.length > 0 && query.length < 3) {
+            list.innerHTML = matchedProds.map(p => `
+                <div class="result-item" onclick="generateSingleProductDetailsReport('${p.n.replace(/'/g, "\\'")}')">
+                    <span style="font-weight:bold; color:#1e3c72;">${p.n}</span>
+                </div>
+            `).join('');
+            list.style.display = 'block';
+        } else {
+            list.style.display = 'none';
+            generateSingleProductDetailsReport(query);
+        }
+    }
+
+    function generateSingleProductDetailsReport(productName) {
+        document.getElementById('singleProdSearchInput').value = productName;
+        document.getElementById('singleProductReportResults').style.display = 'none';
+        const display = document.getElementById('singleProdReportDisplay');
+        const fromD = document.getElementById('fromDate').value;
+        const toD = document.getElementById('toDate').value;
+
+        let totalQtySold = 0;
+        let totalRevenue = 0;
+        let salesHistory = [];
+
+        savedInvoices.forEach(inv => {
+            if (!inv.date) return;
+            const invD = inv.date.slice(0, 10);
+            if (fromD && invD < fromD) return;
+            if (toD && invD > toD) return;
+
+            if (inv.items && Array.isArray(inv.items)) {
+                inv.items.forEach(i => {
+                    if (i.name && i.name.toLowerCase().includes(productName.toLowerCase())) {
+                        totalQtySold += parseInt(i.qty) || 1;
+                        totalRevenue += parseFloat(i.sellTotal) || 0;
+                        salesHistory.push({
+                            invId: inv.id,
+                            date: inv.date,
+                            qty: i.qty,
+                            sellTotal: i.sellTotal,
+                            seller: i.seller || 'Unknown'
+                        });
+                    }
+                });
+            } else if (inv.itemsText && inv.itemsText.toLowerCase().includes(productName.toLowerCase())) {
+                salesHistory.push({
+                    invId: inv.id,
+                    date: inv.date,
+                    qty: 1,
+                    sellTotal: inv.totalEGP || 0,
+                    seller: 'Recorded Item'
+                });
+                totalQtySold += 1;
+                totalRevenue += inv.totalEGP || 0;
+            }
+        });
+
+        if (salesHistory.length === 0) {
+            display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; padding:10px;">⚠️ No sales history found for product [${productName}] in the selected period!</div>`;
+            display.style.display = 'block';
+            return;
+        }
+
+        let html = `
+            <h3 style="color:#1e3c72; text-align:center; margin-bottom:8px;">📦 Sales Report for: <span style="color:#27ae60;">${productName}</span></h3>
+            <div class="info-row" style="background:#eef7fe; padding:8px; border-radius:6px; margin-bottom:10px;">
+                <div>Total Sold Qty: <span style="color:#1e3c72;">${totalQtySold} units</span></div>
+                <div>Total Revenue: <span style="color:#27ae60;">${totalRevenue.toFixed(2)} EGP</span></div>
+            </div>
+
+            <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr style="background:#1e3c72;">
+                        <th>#</th>
+                        <th>Inv ID</th>
+                        <th>Date & Time</th>
+                        <th>Sold Qty</th>
+                        <th>Total Amount</th>
+                        <th>Seller</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        salesHistory.forEach((h, idx) => {
+            html += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td style="font-weight:bold;">#${h.invId}</td>
+                    <td style="direction:ltr;">${h.date}</td>
+                    <td style="font-weight:bold; color:#1e3c72;">${h.qty}</td>
+                    <td style="font-weight:bold; color:#27ae60;">${parseFloat(h.sellTotal).toFixed(2)} EGP</td>
+                    <td style="font-weight:bold;">${h.seller}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+            </div>
+        `;
+
+        display.innerHTML = html;
+        display.style.display = 'block';
+    }
 
     function renderInAppReportView() {
         const fromD = document.getElementById('fromDate').value;
@@ -794,7 +929,6 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تصدير الطباعة عبر Iframe مع عزل تام ومقاس منكمش يتسع لورقة A4 Landscape بالكامل
     function downloadInAppReportPDF() {
         const reportContent = document.getElementById('pdfExportableArea').innerHTML;
         if (!reportContent) return;
