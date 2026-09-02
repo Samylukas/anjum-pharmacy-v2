@@ -102,8 +102,7 @@
         .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 8px; background: #eef7fe; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
         .discount-bar input { width: 70px; padding: 5px; text-align: center; border-radius: 4px; border: 1px solid #3498db; font-weight: bold; }
 
-        /* تعديل الموضعية والتنسيق لزر إغلاق الملخص لعدم التغطية */
-        .totals-box { background: #1e3c72; color: #fff; padding: 15px; padding-top: 35px; border-radius: 8px; margin-top: 15px; position: relative; }
+        .totals-box { background: #1e3c72; color: #fff; padding: 12px; padding-top: 35px; border-radius: 8px; margin-top: 15px; position: relative; }
         .close-summary-btn { position: absolute; top: 6px; left: 8px; width: auto; padding: 3px 10px; font-size: 0.72rem; z-index: 10; }
 
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
@@ -124,6 +123,45 @@
 
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
+
+        .report-preview-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85);
+            z-index: 999999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .report-preview-modal {
+            background: #fff;
+            width: 100%;
+            max-width: 950px;
+            max-height: 90vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+        }
+
+        .report-modal-header {
+            background: #1e3c72;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-modal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
 
         @media print {
             body.printing-receipt * { visibility: hidden; }
@@ -475,7 +513,7 @@
             </div>
         </div>
 
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px; padding-top:35px;">
             <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
@@ -638,7 +676,6 @@
         }
     }
 
-    // جلب مستخدمي الجوجل شيت بدون عرض الـ Role
     function renderUserDropdowns() {
         const selectEl = document.getElementById('entryUserSelect');
         const passSelectEl = document.getElementById('userSelectPass');
@@ -858,7 +895,7 @@
         heldInvoiceItems = null;
         document.getElementById('resumeHoldBtn').style.display = 'none';
         renderInvoice();
-        alert('⏯️ Held invoice resumed!');
+        alert('控制 Resumed!');
     }
 
     function clearCurrentInvoice() {
@@ -1952,7 +1989,7 @@
         }, 500);
     }
 
-    // دالة طباعة تقرير المبيعات لحل تداخل العناوين والـ PDF جذرياً
+    // دالة طباعة تقرير المبيعات لحل تداخل العناوين وتوفير الإجماليات
     function printReportTable() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -1963,6 +2000,30 @@
             if (fromD && invD < fromD) return false;
             if (toD && invD > toD) return false;
             return true;
+        });
+
+        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
+        let grandTotalSell = 0, grandNetProfit = 0;
+
+        filteredInvoices.forEach(inv => {
+            grandTotalSell += inv.totalEGP || 0;
+            grandNetProfit += inv.netProfit || 0;
+
+            if (inv.items && Array.isArray(inv.items)) {
+                inv.items.forEach(i => {
+                    sumUSD += parseFloat(i.usd || 0);
+                    sumEUR += parseFloat(i.eur || 0);
+                    sumGBP += parseFloat(i.gbp || 0);
+                    sumEGP += parseFloat(i.egp || 0);
+                    sumVISA += parseFloat(i.visa || 0);
+                });
+            } else {
+                sumUSD += parseFloat(inv.usd || 0);
+                sumEUR += parseFloat(inv.eur || 0);
+                sumGBP += parseFloat(inv.gbp || 0);
+                sumEGP += parseFloat(inv.egp || 0);
+                sumVISA += parseFloat(inv.visa || 0);
+            }
         });
 
         const win = window.open('', '_blank', 'height=850,width=1100');
@@ -1984,6 +2045,7 @@
                     thead { display: table-row-group !important; }
                     tr { page-break-inside: avoid !important; }
                     .item-cell { text-align: right; font-weight: bold; line-height: 1.4; width: 35%; word-wrap: break-word; white-space: normal; }
+                    .totals-row { background-color: #eef7fe !important; font-weight: bold; font-size: 11px; }
                     .footer { margin-top: 20px; font-size: 10px; color: #7f8c8d; text-align: center; border-top: 1px solid #ddd; padding-top: 6px; }
                 </style>
             </head>
@@ -2034,7 +2096,19 @@
             `);
         });
 
+        // طباعة صف الإجماليات لكل عملة ومبيعات وأرباح بشكل منفصل
         win.document.write(`
+                <tr class="totals-row">
+                    <td colspan="4" style="text-align:right; font-size:12px; font-weight:bold; background-color:#1e3c72; color:#fff;">📊 إجمالي التقرير بالفترة المحدد:</td>
+                    <td style="font-size:10px; color:#1e3c72; font-weight:bold;">
+                        $: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)}<br>
+                        £: ${sumGBP.toFixed(2)} | EGP: ${sumEGP.toFixed(2)}<br>
+                        VISA: ${sumVISA.toFixed(2)}
+                    </td>
+                    <td colspan="2" style="font-weight:bold; color:#1e3c72;">الإجمالي الصافي:</td>
+                    <td style="color:#27ae60; font-weight:bold; font-size:12px;">${grandTotalSell.toFixed(2)} EGP</td>
+                    <td style="color:#8e44ad; font-weight:bold; font-size:12px;">${grandNetProfit.toFixed(2)} EGP</td>
+                </tr>
                     </tbody>
                 </table>
                 <div class="footer">✨ D&P by Samy Lukas , Powered By Gemini</div>
@@ -2158,6 +2232,7 @@
         XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    // توليد التقرير بالشاشة مع إضافة التجميع لكل العملات في نهايته
     function generateReport() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -2176,7 +2251,10 @@
             return;
         }
 
-        tbody.innerHTML = filteredInvoices.map((inv, index) => {
+        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
+        let grandTotalSell = 0, grandNetProfit = 0;
+
+        let htmlRows = filteredInvoices.map((inv, index) => {
             let u = 0, eu = 0, g = 0, eg = 0, v = 0;
             let itemsList = "";
 
@@ -2193,6 +2271,10 @@
                 itemsList = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
                 u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
             }
+
+            sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v;
+            grandTotalSell += inv.totalEGP || 0;
+            grandNetProfit += inv.netProfit || 0;
 
             const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`;
             const cleanDateStr = inv.date ? inv.date.replace('T', ' ').replace('.000Z', '') : '-';
@@ -2215,6 +2297,20 @@
                 </td>
             </tr>
         `;}).join('');
+
+        // إضافة صف الإجماليات الشامل النهائي بالجدول
+        htmlRows += `
+            <tr style="background-color:#1e3c72; color:#ffffff; font-weight:bold; font-size:0.82rem;">
+                <td colspan="4" style="text-align:right; padding:10px;">📊 Total Breakdown:</td>
+                <td style="font-size:0.72rem; color:#f1c40f;">$: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)} | £: ${sumGBP.toFixed(2)}<br>EGP: ${sumEGP.toFixed(2)} | VISA: ${sumVISA.toFixed(2)}</td>
+                <td colspan="2">Final Totals:</td>
+                <td style="color:#2ecc71; font-size:0.9rem;">${grandTotalSell.toFixed(2)} EGP</td>
+                <td style="color:#f1c40f; font-size:0.9rem;">${grandNetProfit.toFixed(2)} EGP</td>
+                <td>-</td>
+            </tr>
+        `;
+
+        tbody.innerHTML = htmlRows;
     }
 
     function loadInvoiceToEdit(invId) {
