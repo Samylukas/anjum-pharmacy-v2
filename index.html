@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- إضافة مكتبة تحويل HTML إلى PDF مباشرة للـ APK -->
+    <!-- مكتبة html2pdf المحدثة لتوليد ملفات PDF بشكل ممتاز -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
@@ -516,7 +516,6 @@
             </div>
         </div>
 
-        <!-- أداة التقرير التفصيلي المكبر لمنتج محدد مع زر مسح البحث Clear -->
         <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
             <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -650,26 +649,21 @@
         } catch(e) {}
     }
 
-    // إدارة زر التراجع بالهاتف (Hardware Back Button Support)
+    // دعم زر التراجع في الهواتف ذكياً دون الخروج من التطبيق
     window.addEventListener('popstate', function (event) {
         const repContainer = document.getElementById('inAppReportContainer');
         const profBox = document.getElementById('profitBox');
         const singleRepDisplay = document.getElementById('singleProdReportDisplay');
         
-        let closedSomething = false;
-
         if (repContainer && repContainer.style.display === 'block') {
             repContainer.style.display = 'none';
             document.getElementById('pdfExportableArea').innerHTML = '';
-            closedSomething = true;
         }
         if (profBox && profBox.style.display === 'block') {
             profBox.style.display = 'none';
-            closedSomething = true;
         }
         if (singleRepDisplay && singleRepDisplay.style.display === 'block') {
             singleRepDisplay.style.display = 'none';
-            closedSomething = true;
         }
     });
 
@@ -998,24 +992,83 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تنزيل ملف PDF مباشر ومجرب داخل تطبيقات الـ APK والموبايل
+    // دالة تصدير وطباعة الـ PDF المعالجة كلياً لمنع الصفحات الفارغة بالمتصفح والـ APK
     function downloadInAppReportPDF() {
-        const element = document.getElementById('pdfExportableArea');
-        if (!element || !element.innerHTML.trim()) return alert("⚠️ No report content to export!");
+        const srcElement = document.getElementById('pdfExportableArea');
+        if (!srcElement || !srcElement.innerHTML.trim()) return alert("⚠️ No report content to export!");
 
-        alert("⏳ Preparing PDF file, please wait...");
+        // اختبار البيئة: متصفح حقيقي أم WebView/APK
+        const isStandaloneBrowser = !window.matchMedia('(display-mode: standalone)').matches && 
+                                    !navigator.userAgent.includes('wv') && 
+                                    !window.cordova;
+
+        // خيار المتصفح: طباعة مباشرة سريعة بجودة عالية جداً
+        if (isStandaloneBrowser) {
+            const printWin = window.open('', '_blank');
+            if (printWin) {
+                printWin.document.write(`
+                    <!DOCTYPE html>
+                    <html lang="ar" dir="rtl">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Anjum Sales Report PDF</title>
+                        <style>
+                            @page { size: A4 landscape; margin: 8mm; }
+                            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
+                            th, td { border: 1px solid #1e3c72; padding: 5px; text-align: center; vertical-align: middle; }
+                            th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
+                            tr { page-break-inside: avoid !important; }
+                        </style>
+                    </head>
+                    <body>
+                        ${srcElement.innerHTML}
+                        <script>
+                            window.onload = function() {
+                                setTimeout(function(){
+                                    window.focus();
+                                    window.print();
+                                    window.close();
+                                }, 400);
+                            };
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                printWin.document.close();
+                return;
+            }
+        }
+
+        // خيار الـ APK والتنزيل المباشر: إنتاج حاوية مؤقتة خارج الشاشة لتفادي القص والإطار الفارغ
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '-9999px';
+        tempDiv.style.width = '1100px';
+        tempDiv.style.background = '#ffffff';
+        tempDiv.style.direction = 'rtl';
+        tempDiv.innerHTML = srcElement.innerHTML;
+        document.body.appendChild(tempDiv);
 
         const opt = {
             margin:       [5, 5, 5, 5],
             filename:     `Anjum_Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true, 
+                scrollX: 0, 
+                scrollY: 0,
+                windowWidth: 1200
+            },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
         };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            alert("✅ PDF Downloaded successfully!");
+        html2pdf().set(opt).from(tempDiv).save().then(() => {
+            if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
         }).catch(err => {
+            if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
             alert("❌ PDF Generation failed: " + err);
         });
     }
