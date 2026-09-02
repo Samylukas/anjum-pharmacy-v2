@@ -136,7 +136,6 @@
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
 
-        /* زر الصعود لأعلى الصفحة المتنقل Float Button */
         .btn-scroll-top {
             position: fixed;
             bottom: 20px;
@@ -319,7 +318,7 @@
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
                 <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (< 1 Mo) ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">Print / PDF 🖨️</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">PDF 📄</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
@@ -598,7 +597,6 @@
         </div>
     </div>
 
-    <!-- زر الصعود العائم لأعلى الصفحة UP -->
     <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
 
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
@@ -959,34 +957,20 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
+    // تصدير PDF مباشر وآمن ومتوافق مع الموبايل 100% بدون تعليق
     function downloadInAppReportPDF() {
         const reportContent = document.getElementById('pdfExportableArea').innerHTML;
         if (!reportContent) return;
 
-        let iframe = document.getElementById('print_frame');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'print_frame';
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = '0';
-            document.body.appendChild(iframe);
-        }
-
-        const doc = iframe.contentWindow.document;
-        doc.open();
-        doc.write(`
+        const htmlBlob = new Blob([`
             <!DOCTYPE html>
             <html lang="ar" dir="rtl">
             <head>
                 <meta charset="UTF-8">
-                <title>Anjum Sales Report</title>
+                <title>Anjum Sales Report PDF</title>
                 <style>
-                    @page { size: A4 landscape; margin: 6mm; }
-                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 5px; direction: rtl; text-align: center; background: #fff; color: #333; zoom: 80%; }
+                    @page { size: A4 landscape; margin: 8mm; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; zoom: 80%; }
                     table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
                     th, td { border: 1px solid #1e3c72; padding: 4px; text-align: center; vertical-align: middle; }
                     th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
@@ -998,15 +982,19 @@
                 <script>
                     window.onload = function() {
                         setTimeout(function(){
-                            window.focus();
                             window.print();
-                        }, 250);
+                        }, 200);
                     };
                 <\/script>
             </body>
             </html>
-        `);
-        doc.close();
+        `], { type: 'text/html' });
+
+        const blobUrl = URL.createObjectURL(htmlBlob);
+        const win = window.open(blobUrl, '_blank');
+        if (!win) {
+            window.location.href = blobUrl;
+        }
     }
 
     function fetchInitialUsersOnly() {
