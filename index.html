@@ -162,16 +162,9 @@
         }
 
         @media print {
-            body * { visibility: hidden !important; }
-            #printableReportArea, #printableReportArea * { visibility: visible !important; }
-            #printableReportArea {
-                position: absolute !important;
-                left: 0 !important; top: 0 !important;
-                width: 100% !important;
-                margin: 0 !important; padding: 10mm !important;
-                background: #fff !important;
-            }
-            .no-print { display: none !important; }
+            body.printing-receipt * { visibility: hidden; }
+            #receiptPrintSection, #receiptPrintSection * { visibility: visible; }
+            #receiptPrintSection { position: absolute; left: 0; top: 0; width: 80mm; font-family: monospace; font-size: 11px; text-align: center; }
         }
     </style>
 </head>
@@ -183,7 +176,6 @@
             🔐 <span class="animated-leaf">🌿</span> Anjum Green Pharmacy
         </h2>
         
-        <!-- القائمة المنسدلة ديناميكية من الجوجل شيت بدون إظهار الـ Role -->
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
             <option value="">⏳ Loading Users...</option>
         </select>
@@ -514,13 +506,12 @@
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
                 <button class="btn btn-purple" onclick="promptSetRates()">Set FX & Multiplier ⚙️</button>
-                <button class="btn btn-purple" onclick="openReportModal()">Print / PDF 📄</button>
+                <button class="btn btn-purple" onclick="printReportTable()">Print / PDF 📄</button>
                 <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
             </div>
         </div>
 
         <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px; padding-top:28px;">
-            <!-- تعديل تموضع زر الإغلاق ليكون متصدراً للزاوية بدون تغطية للعنوان أو النصوص -->
             <button class="btn btn-red" style="position:absolute; left:8px; top:6px; width:auto; padding:3px 10px; font-size:0.75rem; z-index:10;" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
             
             <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
@@ -577,7 +568,6 @@
             <div class="pay-box" style="margin-bottom:12px;">
                 <label>Select User:</label>
                 <select id="userSelectPass">
-                    <!-- تتولّد الخيارات تلقائياً من المستخدمين المحملين من الشيت -->
                 </select>
             </div>
             <div class="pay-box" style="margin-bottom:12px;">
@@ -589,22 +579,6 @@
     </div>
 
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
-</div>
-
-<!-- نافذة المعاينة المدمجة للتقرير مع إمكانية إغلاقها مباشرة -->
-<div id="reportModalOverlay" class="report-preview-overlay">
-    <div class="report-preview-modal">
-        <div class="report-modal-header no-print">
-            <span style="font-weight:bold; font-size:1rem;">📄 Sales Report Preview</span>
-            <div style="display:flex; gap:8px;">
-                <button class="btn btn-green" onclick="window.print()">Print / Save PDF 🖨️</button>
-                <button class="btn btn-red" onclick="closeReportModal()">❌ Close Preview</button>
-            </div>
-        </div>
-        <div class="report-modal-body" id="printableReportArea">
-            <!-- المحتوى يتولد ديناميكياً -->
-        </div>
-    </div>
 </div>
 
 <div id="receiptPrintSection"></div>
@@ -666,79 +640,6 @@
         loadLocalUsers();
     });
 
-    function openReportModal() {
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        let html = `
-            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px;">
-                <h2 style="color: #1e3c72; margin: 0; font-size: 22px;">Anjum Green Pharmacy 🌿</h2>
-                <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
-                <p style="font-size:11px; color:#666;">الفترة من: <b>${fromD || 'بداية السجلات'}</b> إلى: <b>${toD || 'تاريخ اليوم'}</b> | تاريخ الطباعة: ${new Date().toLocaleString()}</p>
-            </div>
-
-            <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
-                <thead>
-                    <tr style="background-color:#1e3c72; color:#ffffff;">
-                        <th style="width:30px; padding:6px;">#</th>
-                        <th style="width:70px; padding:6px;">رقم الفاتورة</th>
-                        <th style="width:110px; padding:6px;">التاريخ</th>
-                        <th style="padding:6px;">الأصناف المباعة</th>
-                        <th style="width:120px; padding:6px;">تفاصيل الدفع</th>
-                        <th style="width:85px; padding:6px;">إجمالي تجاري</th>
-                        <th style="width:55px; padding:6px;">الخصم %</th>
-                        <th style="width:90px; padding:6px;">إجمالي البيع</th>
-                        <th style="width:85px; padding:6px;">صافي الربح</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        filteredInvoices.forEach((inv, idx) => {
-            let cleanItems = "";
-            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-                cleanItems = inv.items.map(i => `• ${i.name} (العدد: ${i.qty})`).join('<br>');
-            } else {
-                cleanItems = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
-            }
-
-            html += `
-                <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-                    <td style="border:1px solid #ddd; padding:6px; font-weight:bold;">${idx + 1}</td>
-                    <td style="border:1px solid #ddd; padding:6px; font-weight:bold;">#${inv.id}</td>
-                    <td style="border:1px solid #ddd; padding:6px; white-space:nowrap; direction:ltr;">${inv.date || '-'}</td>
-                    <td style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold; line-height:1.4; white-space:nowrap;">${cleanItems}</td>
-                    <td style="border:1px solid #ddd; padding:6px; font-size:10px;">$:${inv.usd||0} | €:${inv.eur||0} | £:${inv.gbp||0}<br>EGP:${inv.egp||0} | VISA:${inv.visa||0}</td>
-                    <td style="border:1px solid #ddd; padding:6px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                </tbody>
-            </table>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-        `;
-
-        document.getElementById('printableReportArea').innerHTML = html;
-        document.getElementById('reportModalOverlay').style.display = 'flex';
-    }
-
-    function closeReportModal() {
-        document.getElementById('reportModalOverlay').style.display = 'none';
-    }
-
     function updateOnlineStatus() {
         const ind = document.getElementById('syncIndicator');
         if (navigator.onLine) {
@@ -773,7 +674,6 @@
         }
     }
 
-    // بناء قائمة المستخدمين تلقائياً بدون إظهار الـ Role
     function renderUserDropdowns() {
         const selectEl = document.getElementById('entryUserSelect');
         const passSelectEl = document.getElementById('userSelectPass');
