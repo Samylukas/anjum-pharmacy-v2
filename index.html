@@ -74,18 +74,19 @@
         .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
         .toolbar-row .btn { flex: 1; min-width: 120px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; }
-        table { width: 100%; min-width: 900px; border-collapse: collapse; }
-        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; word-break: normal; vertical-align: middle; }
+        /* تعديل الجداول لمنع انقسام الحقول وضبط التمرير الأفقي بشكل متناسق */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
+        table { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
         .items-column-cell {
             text-align: right !important;
-            font-size: 0.82rem !important;
+            font-size: 0.85rem !important;
             line-height: 1.6 !important;
-            min-width: 280px !important;
-            white-space: nowrap !important;
-            word-break: normal !important;
+            min-width: 320px !important;
+            white-space: normal !important;
+            word-break: break-word !important;
         }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
@@ -526,7 +527,7 @@
                     <th style="width:30px;">#</th>
                     <th style="width:65px;">Inv ID</th>
                     <th style="width:110px;">Date</th>
-                    <th style="min-width:220px;">Items Details</th>
+                    <th style="min-width:260px;">Items Details</th>
                     <th>Pay Breakdown</th>
                     <th>C-Total</th>
                     <th style="width:55px;">Disc %</th>
@@ -639,7 +640,6 @@
         fetchInitialUsersOnly();
     });
 
-    // دالة البحث واستخراج تقرير المبيعات لمنتج مخصص
     function searchSingleProductReport() {
         const query = document.getElementById('singleProdSearchInput').value.toLowerCase().trim();
         const list = document.getElementById('singleProductReportResults');
