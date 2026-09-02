@@ -41,8 +41,23 @@
         .section-title { font-weight: bold; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1rem; text-align: right; }
         
         .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
-        .results-list { max-height: 200px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .result-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.85rem; }
+        
+        /* تكبير وتوسيع نافذة البحث عن منتج منفرد */
+        .large-search-box {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 2px solid #1e3c72;
+            border-radius: 8px;
+            outline: none;
+            box-sizing: border-box;
+            background: #fff;
+            color: #1e3c72;
+        }
+
+        .results-list { max-height: 250px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .result-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.9rem; }
 
         .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; width: 100%; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
@@ -144,9 +159,9 @@
             color: #fff;
             border: 2px solid #fff;
             border-radius: 50px;
-            padding: 8px 16px;
+            padding: 10px 18px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 99999;
@@ -500,16 +515,16 @@
             </div>
         </div>
 
-        <!-- أداة التقرير التفصيلي لمنتج محدد مع زر مسح البحث Clear -->
-        <div class="card" style="background:#eef7fe; border-color:#3498db; margin-top:12px;">
-            <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <input type="text" id="singleProdSearchInput" class="search-box" style="flex:1; margin-bottom:0;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
-                <button class="btn btn-red" style="width:auto; padding:0 12px;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
-                <button class="btn btn-blue" style="width:auto;" onclick="searchSingleProductReport()">Generate Report 📋</button>
+        <!-- أداة التقرير التفصيلي المكبر لمنتج محدد مع زر مسح البحث Clear -->
+        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
+            <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:240px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
+                <button class="btn btn-red" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
+                <button class="btn btn-blue" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
             </div>
-            <div id="singleProductReportResults" class="results-list" style="margin-top:5px;"></div>
-            <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:10px; border-radius:6px; border:1px solid #3498db;"></div>
+            <div id="singleProductReportResults" class="results-list" style="margin-top:6px;"></div>
+            <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px; border:2px solid #3498db;"></div>
         </div>
 
         <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
@@ -957,43 +972,45 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تصدير PDF مباشر وآمن ومتوافق مع الموبايل 100% بدون تعليق
+    // تصدير الطباعة المباشرة المعزولة والمجربة للـ APK
     function downloadInAppReportPDF() {
         const reportContent = document.getElementById('pdfExportableArea').innerHTML;
         if (!reportContent) return;
 
-        const htmlBlob = new Blob([`
-            <!DOCTYPE html>
-            <html lang="ar" dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <title>Anjum Sales Report PDF</title>
-                <style>
-                    @page { size: A4 landscape; margin: 8mm; }
-                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; zoom: 80%; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
-                    th, td { border: 1px solid #1e3c72; padding: 4px; text-align: center; vertical-align: middle; }
-                    th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
-                    tr { page-break-inside: avoid !important; }
-                </style>
-            </head>
-            <body>
-                ${reportContent}
-                <script>
-                    window.onload = function() {
-                        setTimeout(function(){
-                            window.print();
-                        }, 200);
-                    };
-                <\/script>
-            </body>
-            </html>
-        `], { type: 'text/html' });
-
-        const blobUrl = URL.createObjectURL(htmlBlob);
-        const win = window.open(blobUrl, '_blank');
-        if (!win) {
-            window.location.href = blobUrl;
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Anjum Sales Report PDF</title>
+                    <style>
+                        @page { size: A4 landscape; margin: 6mm; }
+                        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; zoom: 82%; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
+                        th, td { border: 1px solid #1e3c72; padding: 4px; text-align: center; vertical-align: middle; }
+                        th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
+                        tr { page-break-inside: avoid !important; }
+                    </style>
+                </head>
+                <body>
+                    ${reportContent}
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function(){
+                                window.focus();
+                                window.print();
+                                window.close();
+                            }, 300);
+                        };
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } else {
+            window.print();
         }
     }
 
