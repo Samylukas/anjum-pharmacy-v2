@@ -83,7 +83,7 @@
             text-align: right !important;
             font-size: 0.82rem !important;
             line-height: 1.6 !important;
-            min-width: 280px !important;
+            min-width: 250px !important;
             white-space: nowrap !important;
             word-break: normal !important;
         }
@@ -532,7 +532,6 @@
         <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
         <div id="topProductsChartContainer" class="top-products-chart"></div>
 
-        <!-- قسم عرض التقرير الصريح داخل نفس التطبيق للموبايل -->
         <div id="inAppReportContainer" style="display:none; margin-top:20px; background:#fff; padding:15px; border-radius:8px; border:2px solid #1e3c72;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
                 <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
@@ -540,7 +539,6 @@
             </div>
             
             <div id="pdfExportableArea">
-                <!-- محتوى التقرير المنقح والمعد للتصدير يتولد هنا -->
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #1e3c72; padding-top:10px; margin-top:15px; flex-wrap:wrap; gap:8px;">
@@ -630,7 +628,6 @@
         fetchInitialUsersOnly();
     });
 
-    // توليد التقرير داخل شاشة الأبليكيشن كعنصر صريح دون تعليق الموبايل
     function renderInAppReportView() {
         const fromD = document.getElementById('fromDate').value;
         const toD = document.getElementById('toDate').value;
@@ -710,18 +707,18 @@
             </div>
 
             <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center; min-width:850px;">
+            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px;">
                 <thead>
                     <tr style="background-color:#1e3c72; color:#ffffff;">
                         <th style="width:30px; padding:6px;">#</th>
-                        <th style="width:70px; padding:6px;">رقم الفاتورة</th>
-                        <th style="width:110px; padding:6px;">التاريخ</th>
-                        <th style="padding:6px; min-width:260px;">الأصناف المباعة</th>
-                        <th style="width:120px; padding:6px;">تفاصيل الدفع</th>
-                        <th style="width:85px; padding:6px;">إجمالي تجاري</th>
-                        <th style="width:55px; padding:6px;">الخصم %</th>
-                        <th style="width:90px; padding:6px;">إجمالي البيع</th>
-                        <th style="width:85px; padding:6px;">صافي الربح</th>
+                        <th style="width:65px; padding:6px;">رقم الفاتورة</th>
+                        <th style="width:100px; padding:6px;">التاريخ</th>
+                        <th style="padding:6px; min-width:230px;">الأصناف المباعة</th>
+                        <th style="width:115px; padding:6px;">تفاصيل الدفع</th>
+                        <th style="width:80px; padding:6px;">إجمالي تجاري</th>
+                        <th style="width:50px; padding:6px;">الخصم %</th>
+                        <th style="width:85px; padding:6px;">إجمالي البيع</th>
+                        <th style="width:80px; padding:6px;">صافي الربح</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -737,15 +734,15 @@
 
             html += `
                 <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-                    <td style="border:1px solid #ddd; padding:6px; font-weight:bold;">${idx + 1}</td>
-                    <td style="border:1px solid #ddd; padding:6px; font-weight:bold;">#${inv.id}</td>
-                    <td style="border:1px solid #ddd; padding:6px; white-space:nowrap; direction:ltr;">${inv.date || '-'}</td>
-                    <td style="border:1px solid #ddd; padding:6px; text-align:right; font-weight:bold; line-height:1.5; white-space:nowrap;">${cleanItems}</td>
-                    <td style="border:1px solid #ddd; padding:6px; font-size:10px;">$:${inv.usd||0} | €:${inv.eur||0} | £:${inv.gbp||0}<br>EGP:${inv.egp||0} | VISA:${inv.visa||0}</td>
-                    <td style="border:1px solid #ddd; padding:6px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ddd; padding:6px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
+                    <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">#${inv.id}</td>
+                    <td style="border:1px solid #ddd; padding:5px; white-space:nowrap; direction:ltr;">${inv.date || '-'}</td>
+                    <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold; line-height:1.4; word-break:break-word;">${cleanItems}</td>
+                    <td style="border:1px solid #ddd; padding:5px; font-size:9.5px;">$:${inv.usd||0} | €:${inv.eur||0} | £:${inv.gbp||0}<br>EGP:${inv.egp||0} | VISA:${inv.visa||0}</td>
+                    <td style="border:1px solid #ddd; padding:5px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ddd; padding:5px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
+                    <td style="border:1px solid #ddd; padding:5px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ddd; padding:5px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
                 </tr>
             `;
         });
@@ -756,22 +753,22 @@
             </div>
 
             <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap;">
-                <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:140px; text-align: center; background: #fdfefe;">
+                <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #555; font-weight: bold;">💵 إجمالي الكاش والعملات</div>
                     <div style="font-size: 10px; font-weight: bold; color: #1e3c72; margin-top: 2px;">
                         $:${sumUSD.toFixed(2)} | €:${sumEUR.toFixed(2)}<br>
                         £:${sumGBP.toFixed(2)} | EGP:${sumEGP.toFixed(2)}
                     </div>
                 </div>
-                <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:140px; text-align: center; background: #fdfefe;">
+                <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #555; font-weight: bold;">💳 إجمالي مدفوعات الفيزا</div>
                     <div style="font-size: 13px; font-weight: bold; color: #1e3c72; margin-top: 2px;">${sumVISA.toFixed(2)} EGP</div>
                 </div>
-                <div style="border: 1.5px solid #27ae60; border-radius: 6px; padding: 8px; flex: 1; min-width:140px; text-align: center; background: #fdfefe;">
+                <div style="border: 1.5px solid #27ae60; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #27ae60; font-weight: bold;">🛒 إجمالي المبيعات الكلي</div>
                     <div style="font-size: 13px; font-weight: bold; color: #27ae60; margin-top: 2px;">${grandTotalSell.toFixed(2)} EGP</div>
                 </div>
-                <div style="border: 1.5px solid #8e44ad; border-radius: 6px; padding: 8px; flex: 1; min-width:140px; text-align: center; background: #fdfefe;">
+                <div style="border: 1.5px solid #8e44ad; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #8e44ad; font-weight: bold;">💰 إجمالي صافي الربح</div>
                     <div style="font-size: 13px; font-weight: bold; color: #8e44ad; margin-top: 2px;">${grandNetProfit.toFixed(2)} EGP</div>
                 </div>
@@ -797,7 +794,7 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تصدير الطباعة عبر Iframe معزول ونظيف يضمن عدم وجود صفحات بيضاء إطلاقاً
+    // تصدير الطباعة عبر Iframe مع عزل تام ومقاس منكمش يتسع لورقة A4 Landscape بالكامل
     function downloadInAppReportPDF() {
         const reportContent = document.getElementById('pdfExportableArea').innerHTML;
         if (!reportContent) return;
@@ -824,11 +821,11 @@
                 <meta charset="UTF-8">
                 <title>Anjum Sales Report</title>
                 <style>
-                    @page { size: A4 landscape; margin: 8mm; }
-                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-                    th, td { border: 1px solid #1e3c72; padding: 5px; text-align: center; vertical-align: middle; }
-                    th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    @page { size: A4 landscape; margin: 6mm; }
+                    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 5px; direction: rtl; text-align: center; background: #fff; color: #333; zoom: 80%; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
+                    th, td { border: 1px solid #1e3c72; padding: 4px; text-align: center; vertical-align: middle; }
+                    th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
                     tr { page-break-inside: avoid !important; }
                 </style>
             </head>
@@ -839,7 +836,7 @@
                         setTimeout(function(){
                             window.focus();
                             window.print();
-                        }, 200);
+                        }, 250);
                     };
                 <\/script>
             </body>
