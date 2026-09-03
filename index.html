@@ -170,15 +170,12 @@
         }
         .btn-scroll-top:hover { background: #2c3e50; }
 
-        @media print {
-            body * { visibility: hidden !important; }
-            #printableNativeSection, #printableNativeSection * { visibility: visible !important; }
-            #printableNativeSection { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
-            .no-print-el { display: none !important; }
-        }
-    </style>
-</head>
-<body>
+@media print {
+    body { background: #fff !important; }
+    .app-container, .btn-scroll-top, .no-print-el { display: none !important; }
+    #printableNativeSection, #printableNativeSection * { visibility: visible !important; display: block !important; }
+    #printableNativeSection { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; }
+}
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
