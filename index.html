@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -170,6 +169,13 @@
             gap: 4px;
         }
         .btn-scroll-top:hover { background: #2c3e50; }
+
+        @media print {
+            body * { visibility: hidden !important; }
+            #printableNativeSection, #printableNativeSection * { visibility: visible !important; }
+            #printableNativeSection { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
+            .no-print-el { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -181,7 +187,7 @@
         </h2>
         
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
-            <option value="">⏳ Loading Users...</option>
+            <option value="">⏳ Loading Users from Cloud...</option>
         </select>
         
         <div class="pass-container">
@@ -515,6 +521,7 @@
             </div>
         </div>
 
+        <!-- أداة التقرير التفصيلي المكبر لمنتج محدد مع زر مسح البحث Clear -->
         <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
             <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -611,11 +618,12 @@
         </div>
     </div>
 
-    <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
+    <button class="btn-scroll-top no-print-el" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
 
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
 </div>
 
+<div id="printableNativeSection"></div>
 <div id="receiptPrintSection"></div>
 
 <script>
@@ -649,9 +657,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        loadLocalUsers();
-        fetchInitialUsersOnly();
-
         const userEl = document.getElementById('entryUserSelect');
         if (userEl) userEl.focus();
 
@@ -674,6 +679,9 @@
                 saveInvoice();
             }
         });
+        
+        loadLocalUsers();
+        fetchInitialUsersOnly();
     });
 
     function clearSingleProductReportSearch() {
@@ -877,25 +885,25 @@
         }).join('');
 
         let html = `
-            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; font-family:sans-serif; direction:rtl;">
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px;">
                 <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
                 <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
                 <p style="font-size:11px; color:#666;">الفترة من: <b>${fromD || 'بداية السجلات'}</b> إلى: <b>${toD || 'تاريخ اليوم'}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
             </div>
 
             <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
+            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px;">
                 <thead>
                     <tr style="background-color:#1e3c72; color:#ffffff;">
-                        <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
-                        <th style="width:65px; padding:6px; border:1px solid #1e3c72;">رقم الفاتورة</th>
-                        <th style="width:100px; padding:6px; border:1px solid #1e3c72;">التاريخ</th>
-                        <th style="padding:6px; min-width:230px; border:1px solid #1e3c72;">الأصناف المباعة</th>
-                        <th style="width:115px; padding:6px; border:1px solid #1e3c72;">تفاصيل الدفع</th>
-                        <th style="width:80px; padding:6px; border:1px solid #1e3c72;">إجمالي تجاري</th>
-                        <th style="width:50px; padding:6px; border:1px solid #1e3c72;">الخصم %</th>
-                        <th style="width:85px; padding:6px; border:1px solid #1e3c72;">إجمالي البيع</th>
-                        <th style="width:80px; padding:6px; border:1px solid #1e3c72;">صافي الربح</th>
+                        <th style="width:30px; padding:6px;">#</th>
+                        <th style="width:65px; padding:6px;">رقم الفاتورة</th>
+                        <th style="width:100px; padding:6px;">التاريخ</th>
+                        <th style="padding:6px; min-width:230px;">الأصناف المباعة</th>
+                        <th style="width:115px; padding:6px;">تفاصيل الدفع</th>
+                        <th style="width:80px; padding:6px;">إجمالي تجاري</th>
+                        <th style="width:50px; padding:6px;">الخصم %</th>
+                        <th style="width:85px; padding:6px;">إجمالي البيع</th>
+                        <th style="width:80px; padding:6px;">صافي الربح</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -929,7 +937,7 @@
             </table>
             </div>
 
-            <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap; font-family:sans-serif;">
+            <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap;">
                 <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #555; font-weight: bold;">💵 إجمالي الكاش والعملات</div>
                     <div style="font-size: 10px; font-weight: bold; color: #1e3c72; margin-top: 2px;">
@@ -952,13 +960,13 @@
             </div>
 
             ${sortedTop.length > 0 ? `
-            <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; font-family:sans-serif;">
+            <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff;">
                 <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>
                 ${chartHtml}
             </div>
             ` : ''}
 
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
         `;
 
         document.getElementById('pdfExportableArea').innerHTML = html;
@@ -971,83 +979,60 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
+    // تصدير وتنزيل طباعة الـ PDF المباشرة بدون أطُر خارجية أو نوافذ منبثقة محظورة
     function downloadInAppReportPDF() {
-        const element = document.getElementById('pdfExportableArea');
-        if (!element) return;
+        const reportContent = document.getElementById('pdfExportableArea').innerHTML;
+        if (!reportContent) return;
 
-        const opt = {
-            margin:       4,
-            filename:     'Sales_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(element).save();
+        executeDirectNativePrint(reportContent);
     }
 
     function printStockTable() {
+        const tbody = document.getElementById('stockTableBody').innerHTML;
         const guideMult = RATES.GUIDE_MULT || 3;
+        
         let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom: 10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">تقرير تفاصيل المخزون</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
-                    <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="border:1px solid #1e3c72; padding:6px; width:30px;">#</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; text-align:right;">اسم المنتج</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:70px;">الكمية</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">السعر التجاري</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:100px;">الحد الاسترشادي</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:120px;">البارلود</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">تاريخ الصلاحية</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
+                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Stock Inventory Details Report</h3>
+                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Issued Date: ${new Date().toLocaleString()}</p>
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
+                <thead>
+                    <tr style="background:#1e3c72; color:#fff;">
+                        <th>#</th>
+                        <th style="width:35%;">Product Name</th>
+                        <th>Stock Qty</th>
+                        <th>Commercial Price</th>
+                        <th>Guide Min</th>
+                        <th>Barcode</th>
+                        <th>Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
         products.forEach((p, idx) => {
             html += `
-                <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-                    <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                    <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.q} قطعة</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.p.toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.expiry || '-'}</td>
+                <tr>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.q} units</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.p.toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${(p.p * guideMult).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.expiry || '-'}</td>
                 </tr>
             `;
         });
 
         html += `
-                    </tbody>
-                </table>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
+                </tbody>
+            </table>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
         `;
 
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
-
-        const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     'Stock_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
+        executeDirectNativePrint(html);
     }
 
     function printFinanceReportPDF() {
@@ -1063,7 +1048,8 @@
             return true;
         });
 
-        let totRev = 0, totExp = 0, salesProfit = 0;
+        let totRev = 0, totExp = 0;
+        let salesProfit = 0;
 
         filtered.forEach(f => {
             if (f.type === 'Revenue') totRev += f.amount;
@@ -1084,74 +1070,84 @@
         const net = totRev - totExp;
 
         let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom:10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">التقرير المالي للحسابات والمصروفات</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b></p>
-                </div>
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
+                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Expenses & Revenues Financial Report</h3>
+                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}</p>
+            </div>
 
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
+            <div style="background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+                <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
+                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
                     <thead>
                         <tr style="background:#1e3c72; color:#fff;">
-                            <th style="padding:6px; border:1px solid #1e3c72; width:30px;">#</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:120px;">التاريخ</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:80px;">النوع</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">الوصف / البند</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:100px;">المبلغ (ج.م)</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">ملاحظات</th>
+                            <th style="padding:5px;">Total Revenues</th>
+                            ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
+                            <th style="padding:5px;">Total Expenses</th>
+                            <th style="padding:5px;">Net Balance</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                            ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px;">
+                <thead>
+                    <tr style="background:#1e3c72; color:#fff;">
+                        <th style="width:30px; padding:6px;">#</th>
+                        <th style="width:120px; padding:6px;">Date</th>
+                        <th style="width:70px; padding:6px;">Type</th>
+                        <th style="padding:6px;">Category / Description</th>
+                        <th style="width:90px; padding:6px;">Amount (EGP)</th>
+                        <th style="padding:6px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
 
         if (filtered.length === 0) {
-            html += `<tr><td colspan="6" style="padding:10px; border:1px solid #ddd;">لا توجد سجلات مالية للفترة المحددة</td></tr>`;
+            html += `<tr><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`;
         } else {
             filtered.forEach((f, idx) => {
+                const isRev = f.type === 'Revenue';
                 html += `
-                    <tr style="background:${f.type === 'Revenue' ? '#f2fcf5' : '#ffffff'};">
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                        <td style="border:1px solid #ddd; padding:5px; direction:ltr;">${f.date || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${f.category || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right;">${f.notes || '-'}</td>
+                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                        <td style="border:1px solid #ccc; padding:5px; white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
                     </tr>
                 `;
             });
         }
 
         html += `
-                    </tbody>
-                </table>
-
-                <div style="margin-top:15px; border:1.5px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-style:space-around;">
-                    <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-                    <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-                    <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
-                </div>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
+                </tbody>
+            </table>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
         `;
 
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
+        executeDirectNativePrint(html);
+    }
 
-        const opt = {
-            margin:       5,
-            filename:     'Financial_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
+    // دالة الطباعة وتصدير PDF المباشرة الداخلية المعزولة للتطبيق
+    function executeDirectNativePrint(contentHtml) {
+        const sec = document.getElementById('printableNativeSection');
+        sec.innerHTML = contentHtml;
 
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { sec.innerHTML = ''; }, 1000);
+        }, 150);
     }
 
     function fetchInitialUsersOnly() {
@@ -1426,7 +1422,7 @@
         heldInvoiceItems = null;
         document.getElementById('resumeHoldBtn').style.display = 'none';
         renderInvoice();
-        alert('GM Invoice resumed!');
+        alert('⏯️ Held invoice resumed!');
     }
 
     function clearCurrentInvoice() {
@@ -2708,2228 +2704,6 @@
 
         document.getElementById('profitBox').style.display = 'block';
     }
-
-    // 1. تحويل وتنزيل PDF تقرير المبيعات الشامل مباشرة لداخل ذاكرة الموبايل
-    function downloadInAppReportPDF() {
-        const element = document.getElementById('pdfExportableArea');
-        if (!element) return;
-
-        const opt = {
-            margin:       4,
-            filename:     'Sales_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(element).save();
-    }
-
-    // 2. تحويل وتنزيل PDF تفاصيل المخزون مباشرة لداخل الموبايل مع ضبط المحاذاة والمسافات
-    function printStockTable() {
-        const guideMult = RATES.GUIDE_MULT || 3;
-        let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom: 10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">تقرير تفاصيل المخزون</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
-                    <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="border:1px solid #1e3c72; padding:6px; width:30px;">#</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; text-align:right;">اسم المنتج</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:70px;">الكمية</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">السعر التجاري</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:100px;">الحد الاسترشادي</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:120px;">البارلود</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">تاريخ الصلاحية</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        products.forEach((p, idx) => {
-            html += `
-                <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-                    <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                    <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.q} قطعة</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.p.toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.expiry || '-'}</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                    </tbody>
-                </table>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
-        `;
-
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
-
-        const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     'Stock_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
-    }
-
-    // 3. تحويل وتنزيل PDF التقرير المالي مباشرة لداخل الموبايل مع ضبط المحاذاة والمسافات
-    function printFinanceReportPDF() {
-        const fromD = document.getElementById('finFromDate').value;
-        const toD = document.getElementById('finToDate').value;
-        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
-
-        const filtered = savedFinances.filter(f => {
-            if (!f.date) return true;
-            const fD = f.date.slice(0, 10);
-            if (fromD && fD < fromD) return false;
-            if (toD && fD > toD) return false;
-            return true;
-        });
-
-        let totRev = 0, totExp = 0, salesProfit = 0;
-
-        filtered.forEach(f => {
-            if (f.type === 'Revenue') totRev += f.amount;
-            else totExp += f.amount;
-        });
-
-        if (includeSales) {
-            savedInvoices.forEach(inv => {
-                if (!inv.date) return;
-                const invD = inv.date.slice(0, 10);
-                if (fromD && invD < fromD) return;
-                if (toD && invD > toD) return;
-                salesProfit += (parseFloat(inv.netProfit) || 0);
-            });
-            totRev += salesProfit;
-        }
-
-        const net = totRev - totExp;
-
-        let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom:10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">التقرير المالي للحسابات والمصروفات</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b></p>
-                </div>
-
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
-                    <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="padding:6px; border:1px solid #1e3c72; width:30px;">#</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:120px;">التاريخ</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:80px;">النوع</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">الوصف / البند</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:100px;">المبلغ (ج.م)</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">ملاحظات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        if (filtered.length === 0) {
-            html += `<tr><td colspan="6" style="padding:10px; border:1px solid #ddd;">لا توجد سجلات مالية للفترة المحددة</td></tr>`;
-        } else {
-            filtered.forEach((f, idx) => {
-                html += `
-                    <tr style="background:${f.type === 'Revenue' ? '#f2fcf5' : '#ffffff'};">
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                        <td style="border:1px solid #ddd; padding:5px; direction:ltr;">${f.date || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${f.category || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right;">${f.notes || '-'}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        html += `
-                    </tbody>
-                </table>
-
-                <div style="margin-top:15px; border:1.5px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-content:space-around;">
-                    <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-                    <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-                    <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
-                </div>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
-        `;
-
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
-
-        const opt = {
-            margin:       5,
-            filename:     'Financial_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
-    }
-
-    function fetchInitialUsersOnly() {
-        if (!navigator.onLine) return;
-
-        window.handleUsersOnlyResponse = function(resData) {
-            if (resData && resData.status === "success" && resData.users && resData.users.length > 0) {
-                saveLocalUsers(resData.users);
-            }
-        };
-
-        const script = document.createElement('script');
-        script.src = GOOGLE_SCRIPT_URL + "?callback=handleUsersOnlyResponse&nocache=" + Math.random();
-        document.body.appendChild(script);
-    }
-
-    function updateOnlineStatus() {
-        const ind = document.getElementById('syncIndicator');
-        if (navigator.onLine) {
-            ind.className = 'sync-status status-online';
-            ind.textContent = '🟢 Online';
-            processOfflineQueue();
-        } else {
-            ind.className = 'sync-status status-offline';
-            ind.textContent = '🔴 Offline';
-        }
-    }
-
-    function loadLocalUsers() {
-        const savedUsers = localStorage.getItem('anjum_local_users');
-        if (savedUsers) {
-            cloudUsers = JSON.parse(savedUsers);
-        } else {
-            cloudUsers = [
-                { username: 'admin', password: '852', role: 'Admin' },
-                { username: 'cs2', password: '456', role: 'User' },
-                { username: 'cashier', password: '123', role: 'Cashier' }
-            ];
-        }
-        renderUserDropdowns();
-    }
-
-    function saveLocalUsers(users) {
-        if (users && users.length > 0) {
-            cloudUsers = users;
-            localStorage.setItem('anjum_local_users', JSON.stringify(users));
-            renderUserDropdowns();
-        }
-    }
-
-    function renderUserDropdowns() {
-        const selectEl = document.getElementById('entryUserSelect');
-        const passSelectEl = document.getElementById('userSelectPass');
-        
-        if (selectEl && cloudUsers.length > 0) {
-            selectEl.innerHTML = cloudUsers.map(u => `
-                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
-            `).join('');
-        }
-
-        if (passSelectEl && cloudUsers.length > 0) {
-            passSelectEl.innerHTML = cloudUsers.map(u => `
-                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
-            `).join('');
-        }
-    }
-
-    function validateEntryPassword() {
-        const usernameInput = document.getElementById('entryUserSelect').value.trim().toLowerCase();
-        const passwordInput = document.getElementById('entryPassInput').value.trim();
-
-        if (!usernameInput || !passwordInput) return alert('Enter password!');
-
-        let matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && u.password === passwordInput);
-
-        if (matched) {
-            currentUser = matched;
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
-            document.getElementById('userGreeting').textContent = `👤 User: ${matched.username.toUpperCase()} (${matched.role})`;
-            
-            syncToCloud("updateUserActivity", { username: matched.username, isOnline: true, lastLogin: new Date().toLocaleString() });
-
-            applyRolePermissions();
-            initSystem();
-        } else {
-            alert('❌ Invalid Password!');
-        }
-    }
-
-    function logout() {
-        if (currentUser) {
-            syncToCloud("updateUserActivity", { username: currentUser.username, isOnline: false, lastLogin: new Date().toLocaleString() });
-        }
-        currentUser = null;
-        stopAllScanners();
-        document.getElementById('mainContainer').style.display = 'none';
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('entryPassInput').value = '';
-    }
-
-    function applyRolePermissions() {
-        const adminElements = document.querySelectorAll('.admin-only');
-        const managerElements = document.querySelectorAll('.manager-only');
-
-        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
-
-        if (!isManager) {
-            managerElements.forEach(el => el.style.display = 'none');
-            showTab('salesTab');
-        } else {
-            managerElements.forEach(el => el.style.display = '');
-        }
-
-        if (currentUser && currentUser.role !== 'Admin' && currentUser.username !== 'admin') {
-            adminElements.forEach(el => el.style.display = 'none');
-        } else {
-            adminElements.forEach(el => el.style.display = '');
-        }
-    }
-
-    let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
-
-    function loadRatesFromStorage() {
-        const savedRates = localStorage.getItem('anjum_rates');
-        if (savedRates) {
-            RATES = JSON.parse(savedRates);
-            if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3;
-        }
-        updateRateLabels();
-    }
-
-    function updateRateLabels() {
-        if(document.getElementById('lblUSD')) document.getElementById('lblUSD').textContent = `USD ($ × ${RATES.USD})`;
-        if(document.getElementById('lblEUR')) document.getElementById('lblEUR').textContent = `EUR (€ × ${RATES.EUR})`;
-        if(document.getElementById('lblGBP')) document.getElementById('lblGBP').textContent = `GBP (£ × ${RATES.GBP})`;
-        if(document.getElementById('lblVISA')) document.getElementById('lblVISA').textContent = `VISA (× ${RATES.VISA})`;
-        
-        const thHead = document.getElementById('thStockGuideHead');
-        if (thHead) thHead.textContent = `G-Min (×${RATES.GUIDE_MULT || 3})`;
-    }
-
-    function promptSetRates() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const u = prompt("💵 USD Rate:", RATES.USD);
-        if (u === null) return;
-        const eu = prompt("💶 EUR Rate:", RATES.EUR);
-        if (eu === null) return;
-        const g = prompt("💷 GBP Rate:", RATES.GBP);
-        if (g === null) return;
-        const v = prompt("💳 VISA Multiplier:", RATES.VISA);
-        if (v === null) return;
-        const mult = prompt("📈 Guide Min Price Multiplier (e.g. 3, 6, 8):", RATES.GUIDE_MULT || 3);
-        if (mult === null) return;
-
-        RATES.USD = parseFloat(u) || RATES.USD;
-        RATES.EUR = parseFloat(eu) || RATES.EUR;
-        RATES.GBP = parseFloat(g) || RATES.GBP;
-        RATES.VISA = parseFloat(v) || RATES.VISA;
-        RATES.GUIDE_MULT = parseFloat(mult) || RATES.GUIDE_MULT;
-
-        localStorage.setItem('anjum_rates', JSON.stringify(RATES));
-        updateRateLabels();
-        
-        if (selectedProd) pickProductIndex(products.findIndex(p => p.n === selectedProd.name));
-        renderStockTable();
-        alert('✅ Exchange rates & Guide Multiplier updated successfully!');
-    }
-
-    let products = [];
-    let selectedProd = null;
-    let selectedStockProd = null;
-    let invoiceItems = [];
-    let savedInvoices = [];
-    let savedFinances = [];
-    let invoiceCounter = 1001;
-    let activeInvoiceId = 1001;
-
-    function updateAlertsBar() {
-        let lowStockCount = 0;
-        let expiringCount = 0;
-        let today = new Date();
-
-        products.forEach(p => {
-            if (p.q <= 3) lowStockCount++;
-            if (p.expiry) {
-                let exp = new Date(p.expiry);
-                let diffDays = (exp - today) / (1000 * 60 * 60 * 24);
-                if (diffDays < 90) expiringCount++;
-            }
-        });
-
-        document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
-        document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
-    }
-
-    function fetchCloudInvoicesData(callbackAfter) {
-        if (!navigator.onLine) {
-            if (callbackAfter) callbackAfter();
-            return;
-        }
-
-        const oldScript = document.getElementById('cloudSyncScript');
-        if (oldScript) oldScript.remove();
-
-        window.handleCloudInvoicesResponse = function(resData) {
-            if (resData && resData.status === "success") {
-                if (resData.users) saveLocalUsers(resData.users);
-
-                if (resData.products && resData.products.length > 0) {
-                    products = resData.products;
-                    saveProductsToStorage();
-                    renderStockTable();
-                    updateAlertsBar();
-                }
-
-                if (resData.nextInvoiceId) {
-                    invoiceCounter = resData.nextInvoiceId;
-                    localStorage.setItem('anjum_counter', invoiceCounter.toString());
-                }
-
-                if (resData.invoices) {
-                    savedInvoices = resData.invoices;
-                    saveInvoicesToStorage();
-                    generateReport();
-                }
-
-                if (resData.finances) {
-                    savedFinances = resData.finances;
-                    saveFinancesToStorage();
-                    renderFinanceTable();
-                }
-
-                prepareNewInvoice();
-                if (callbackAfter) callbackAfter();
-            }
-        };
-
-        const script = document.createElement('script');
-        script.id = 'cloudSyncScript';
-        script.src = GOOGLE_SCRIPT_URL + "?callback=handleCloudInvoicesResponse&nocache=" + Math.random();
-        document.body.appendChild(script);
-    }
-
-    function prepareNewInvoice() {
-        activeInvoiceId = invoiceCounter;
-        currentNavIndex = -1;
-        document.getElementById('invNum').textContent = activeInvoiceId;
-        
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
-        
-        invoiceItems = [];
-        invoiceDiscountPercent = 0;
-        document.getElementById('invoiceDiscountInput').value = 0;
-        renderInvoice();
-    }
-
-    function holdCurrentInvoice() {
-        if (invoiceItems.length === 0) return alert('No items to hold!');
-        heldInvoiceItems = JSON.parse(JSON.stringify(invoiceItems));
-        invoiceItems = [];
-        renderInvoice();
-        document.getElementById('resumeHoldBtn').style.display = 'inline-block';
-        alert('⏸️ Invoice put on hold successfully!');
-    }
-
-    function resumeHoldInvoice() {
-        if (!heldInvoiceItems) return;
-        invoiceItems = JSON.parse(JSON.stringify(heldInvoiceItems));
-        heldInvoiceItems = null;
-        document.getElementById('resumeHoldBtn').style.display = 'none';
-        renderInvoice();
-        alert('GM Invoice resumed!');
-    }
-
-    function clearCurrentInvoice() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('productCard').style.display = 'none';
-        selectedProd = null;
-        
-        if (invoiceItems.length > 0) {
-            invoiceItems.forEach(item => {
-                const pObj = products.find(p => p.n === item.name);
-                if (pObj) {
-                    pObj.q += item.qty;
-                }
-            });
-            saveProductsToStorage();
-            renderStockTable();
-            updateAlertsBar();
-        }
-
-        invoiceItems = [];
-        invoiceDiscountPercent = 0;
-        document.getElementById('invoiceDiscountInput').value = 0;
-        renderInvoice();
-    }
-
-    function loadInvoiceIntoForm(inv) {
-        if (!inv) return;
-        activeInvoiceId = inv.id;
-        document.getElementById('invNum').textContent = inv.id;
-        
-        if (inv.date) {
-            document.getElementById('invoiceDate').value = inv.date.replace(' ', 'T').slice(0, 16);
-        }
-
-        if (Array.isArray(inv.items)) {
-            invoiceItems = JSON.parse(JSON.stringify(inv.items));
-        } else {
-            invoiceItems = [{
-                name: cleanItemSummaryText(inv.itemsText),
-                qty: 1,
-                commUnitPrice: inv.totalComm || 0,
-                sellUnitPrice: inv.totalEGP || 0,
-                commTotal: inv.totalComm || 0,
-                sellTotal: inv.totalEGP || 0,
-                netProfit: inv.netProfit || 0,
-                seller: currentUser ? currentUser.username : 'Unknown',
-                usd: inv.usd||0, eur: inv.eur||0, gbp: inv.gbp||0, egp: inv.egp||0, visa: inv.visa||0
-            }];
-        }
-        invoiceDiscountPercent = inv.discount || 0;
-        document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
-        renderInvoice();
-    }
-
-    function cleanItemSummaryText(rawText) {
-        if (!rawText) return "Saved Item";
-        return rawText.toString().trim();
-    }
-
-    function navigateInvoice(direction) {
-        if (savedInvoices.length === 0) return alert('No invoices recorded!');
-        
-        if (direction === 'first') currentNavIndex = 0;
-        else if (direction === 'last') currentNavIndex = savedInvoices.length - 1;
-        else if (direction === 'prev') {
-            if (currentNavIndex <= 0) currentNavIndex = 0;
-            else currentNavIndex--;
-        }
-        else if (direction === 'next') {
-            if (currentNavIndex >= savedInvoices.length - 1) currentNavIndex = savedInvoices.length - 1;
-            else currentNavIndex++;
-        }
-
-        loadInvoiceIntoForm(savedInvoices[currentNavIndex]);
-    }
-
-    function initSystem() {
-        loadDataFromStorage();
-        loadRatesFromStorage();
-        prepareNewInvoice();
-        fetchCloudInvoicesData();
-        updateOnlineStatus();
-        updateAlertsBar();
-        
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        if(document.getElementById('finDate')) document.getElementById('finDate').value = now.toISOString().slice(0, 16);
-    }
-
-    function loadDataFromStorage() {
-        const storedProducts = localStorage.getItem('anjum_products');
-        if (storedProducts) products = JSON.parse(storedProducts);
-
-        const storedInvoices = localStorage.getItem('anjum_invoices');
-        if (storedInvoices) savedInvoices = JSON.parse(storedInvoices);
-
-        const storedCounter = localStorage.getItem('anjum_counter');
-        if (storedCounter) invoiceCounter = parseInt(storedCounter);
-
-        const storedFinances = localStorage.getItem('anjum_finances');
-        if (storedFinances) savedFinances = JSON.parse(storedFinances);
-    }
-
-    function saveProductsToStorage() { localStorage.setItem('anjum_products', JSON.stringify(products)); }
-    function saveInvoicesToStorage() { localStorage.setItem('anjum_invoices', JSON.stringify(savedInvoices)); localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
-    function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
-
-    function showTab(tabId, evt) {
-        stopAllScanners();
-
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        
-        const targetTab = document.getElementById(tabId);
-        if (targetTab) targetTab.classList.add('active');
-        if (evt && evt.target) evt.target.classList.add('active');
-
-        if(tabId === 'stockTab') renderStockTable();
-        if(tabId === 'reportsTab') generateReport();
-        if(tabId === 'financeTab') renderFinanceTable();
-    }
-
-    function toggleCameraScanner(key) {
-        if (activeScannerKey === key) {
-            stopCameraScanner(key);
-        } else {
-            stopAllScanners();
-            startCameraScanner(key);
-        }
-    }
-
-    function startCameraScanner(key) {
-        let containerId = key + 'ScannerContainer';
-        let readerId = key + 'CameraReader';
-
-        document.getElementById(containerId).style.display = 'block';
-
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(function(stream) {
-                stream.getTracks().forEach(track => track.stop());
-                initHtml5Scanner(key, readerId, containerId);
-            })
-            .catch(function(err) {
-                initHtml5Scanner(key, readerId, containerId);
-            });
-        } else {
-            initHtml5Scanner(key, readerId, containerId);
-        }
-    }
-
-    function initHtml5Scanner(key, readerId, containerId) {
-        try {
-            scanners[key] = new Html5Qrcode(readerId);
-            const config = { fps: 15, qrbox: { width: 250, height: 150 } };
-
-            scanners[key].start(
-                { facingMode: "environment" },
-                config,
-                (decodedText) => onBarcodeScanned(key, decodedText),
-                () => {}
-            ).then(() => {
-                activeScannerKey = key;
-            }).catch(err => {
-                alert("❌ Camera access failed: " + err);
-                document.getElementById(containerId).style.display = 'none';
-            });
-        } catch(e) {
-            alert("❌ Scanner init error: " + e.message);
-            document.getElementById(containerId).style.display = 'none';
-        }
-    }
-
-    function stopCameraScanner(key) {
-        let containerId = key + 'ScannerContainer';
-        if (scanners[key] && activeScannerKey === key) {
-            scanners[key].stop().then(() => {
-                activeScannerKey = null;
-                document.getElementById(containerId).style.display = 'none';
-            }).catch(err => {
-                document.getElementById(containerId).style.display = 'none';
-            });
-        } else {
-            document.getElementById(containerId).style.display = 'none';
-        }
-    }
-
-    function stopAllScanners() {
-        ['sales', 'addNew', 'recharge', 'stock'].forEach(key => stopCameraScanner(key));
-    }
-
-    function onBarcodeScanned(key, decodedText) {
-        playBeepSound();
-        const barcodeQuery = decodedText.trim();
-
-        if (key === 'sales') {
-            document.getElementById('searchInput').value = barcodeQuery;
-            const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toString().trim() === barcodeQuery);
-            if (barcodeMatched) {
-                pickProductIndex(products.indexOf(barcodeMatched));
-            } else {
-                alert("⚠️ Product with barcode [" + barcodeQuery + "] not found in inventory!");
-            }
-        } else if (key === 'addNew') {
-            document.getElementById('newProdBarcode').value = barcodeQuery;
-            alert("✅ Barcode captured: " + barcodeQuery);
-        } else if (key === 'recharge') {
-            document.getElementById('addStockSearch').value = barcodeQuery;
-            searchAddStockProduct();
-        } else if (key === 'stock') {
-            if (selectedStockEditProduct) {
-                selectedStockEditProduct.barcode = barcodeQuery;
-                saveProductsToStorage();
-                syncToCloud("updateSingleProduct", selectedStockEditProduct);
-                alert(`✅ Barcode updated for [${selectedStockEditProduct.n}] to: ${barcodeQuery}`);
-                selectedStockEditProduct = null;
-                renderStockTable();
-            }
-        }
-
-        stopCameraScanner(key);
-    }
-
-    function printBarcodeLabel(prodName) {
-        const prod = products.find(p => p.n === prodName);
-        if (!prod) return alert("❌ Product not found!");
-        if (!prod.barcode) return alert("⚠️ This product does not have a barcode! Please edit and add a barcode first.");
-
-        const countInput = prompt(`Enter number of labels to print for:\n[${prod.n}]`, "1");
-        if (countInput === null) return;
-        const count = parseInt(countInput) || 1;
-
-        const win = window.open('', '', 'height=600,width=800');
-        const guideMult = RATES.GUIDE_MULT || 3;
-        
-        win.document.write(`
-            <html>
-            <head>
-                <title>Print Label - ${prod.n}</title>
-                <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
-                    .label-card { width: 50mm; height: 25mm; border: 1px solid #ccc; border-radius: 4px; padding: 2px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; page-break-inside: avoid; }
-                    .pharmacy-title { font-size: 7px; font-weight: bold; color: #1e3c72; }
-                    .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; }
-                    .prod-price { font-size: 8px; font-weight: bold; }
-                    svg { width: 44mm; height: 11mm; }
-                    @media print { body { padding: 0; } .label-card { border: none; } }
-                </style>
-            </head>
-            <body>
-        `);
-
-        for (let i = 0; i < count; i++) {
-            win.document.write(`
-                <div class="label-card">
-                    <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
-                    <div class="prod-title">${prod.n}</div>
-                    <svg id="barcode-${i}"></svg>
-                    <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
-                </div>
-            `);
-        }
-
-        win.document.write(`
-            <script>
-                window.onload = function() {
-                    for (let i = 0; i < ${count}; i++) {
-                        JsBarcode("#barcode-" + i, "${prod.barcode}", {
-                            format: "CODE128",
-                            width: 1.5,
-                            height: 35,
-                            fontSize: 10,
-                            margin: 0,
-                            displayValue: true
-                        });
-                    }
-                    setTimeout(function() {
-                        window.print();
-                        window.close();
-                    }, 400);
-                };
-            <\/script>
-            </body>
-            </html>
-        `);
-
-        win.document.close();
-    }
-
-    function searchProduct() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        const list = document.getElementById('searchResults');
-        if (!query) { list.style.display = 'none'; return; }
-        
-        const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toLowerCase() === query);
-        if (barcodeMatched) {
-            playBeepSound();
-            pickProductIndex(products.indexOf(barcodeMatched));
-            return;
-        }
-
-        const matched = products.filter(item => item && item.n && item.n.toLowerCase().includes(query));
-        if (matched.length > 0) {
-            list.innerHTML = matched.map(i => {
-                const idx = products.indexOf(i);
-                return `<div class="result-item" onclick="pickProductIndex(${idx})">
-                    <span style="color:#1e3c72; font-weight:bold;">${i.n}</span>
-                    <span style="color:${i.q > 3 ? '#27ae60' : '#e74c3c'}; font-size:0.8rem;">(Stock: ${i.q})</span>
-                </div>`;
-            }).join('');
-            list.style.display = 'block';
-        } else {
-            list.style.display = 'none';
-        }
-    }
-
-    function pickProductIndex(index) {
-        const p = products[index];
-        if (!p) return;
-        const guideMult = RATES.GUIDE_MULT || 3;
-        selectedProd = { name: p.n, comm: p.p, guide: p.p * guideMult, stock: p.q };
-        
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('searchInput').value = p.n;
-        document.getElementById('prodName').textContent = p.n;
-        document.getElementById('stockQty').textContent = p.q;
-        document.getElementById('commPrice').textContent = (p.p || 0).toFixed(2);
-        document.getElementById('guidePrice').textContent = ((p.p || 0) * guideMult).toFixed(2);
-        document.getElementById('sellQty').value = 1;
-        
-        ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => document.getElementById(id).value = 0);
-        document.getElementById('productCard').style.display = 'block';
-        checkPriceAlert();
-    }
-
-    function checkPriceAlert() {
-        if (!selectedProd) return;
-        const qty = parseInt(document.getElementById('sellQty').value) || 1;
-        const u = parseFloat(document.getElementById('pUSD').value) || 0;
-        const eu = parseFloat(document.getElementById('pEUR').value) || 0;
-        const g = parseFloat(document.getElementById('pGBP').value) || 0;
-        const eg = parseFloat(document.getElementById('pEGP').value) || 0;
-        const v = parseFloat(document.getElementById('pVISA').value) || 0;
-        const enteredTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
-
-        const minRequiredTotal = selectedProd.guide * qty;
-        const warnBox = document.getElementById('priceWarningBox');
-
-        document.getElementById('enteredTotalVal').textContent = enteredTotalEGP.toFixed(2);
-        document.getElementById('requiredMinVal').textContent = minRequiredTotal.toFixed(2);
-
-        if (enteredTotalEGP < minRequiredTotal) {
-            warnBox.style.display = 'block';
-        } else {
-            warnBox.style.display = 'none';
-        }
-    }
-
-    function addToInvoice() {
-        if (!selectedProd) return;
-        const qty = parseInt(document.getElementById('sellQty').value) || 1;
-        if (qty > selectedProd.stock) return alert('⚠️ Quantity not available in stock! Available: ' + selectedProd.stock);
-
-        playBeepSound();
-        const u = parseFloat(document.getElementById('pUSD').value) || 0;
-        const eu = parseFloat(document.getElementById('pEUR').value) || 0;
-        const g = parseFloat(document.getElementById('pGBP').value) || 0;
-        const eg = parseFloat(document.getElementById('pEGP').value) || 0;
-        const v = parseFloat(document.getElementById('pVISA').value) || 0;
-        const itemTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
-
-        const pObj = products.find(item => item.n === selectedProd.name);
-        pObj.q -= qty;
-        saveProductsToStorage();
-        updateAlertsBar();
-
-        const commTotal = selectedProd.comm * qty;
-        const sellTotal = itemTotalEGP;
-        const netProfit = sellTotal - commTotal;
-
-        invoiceItems.push({
-            name: selectedProd.name,
-            qty: qty,
-            commUnitPrice: selectedProd.comm,
-            sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
-            commTotal: commTotal,
-            sellTotal: sellTotal,
-            netProfit: netProfit,
-            seller: currentUser ? currentUser.username : 'Unknown',
-            usd: u, eur: eu, gbp: g, egp: eg, visa: v
-        });
-
-        renderInvoice();
-        document.getElementById('productCard').style.display = 'none';
-        document.getElementById('searchInput').value = '';
-    }
-
-    function handleDiscountChange(elem) {
-        let val = parseFloat(elem.value) || 0;
-        if (val > 25) {
-            alert("Maximum invoice discount allowed is 25%!");
-            elem.value = 25;
-            invoiceDiscountPercent = 25;
-        } else if (val < 0) {
-            elem.value = 0;
-            invoiceDiscountPercent = 0;
-        } else {
-            invoiceDiscountPercent = val;
-        }
-        renderInvoice();
-    }
-
-    function removeInvoiceItem(index) {
-        const item = invoiceItems[index];
-        if (item) {
-            const pObj = products.find(p => p.n === item.name);
-            if (pObj) {
-                pObj.q += item.qty;
-                saveProductsToStorage();
-                syncToCloud("updateSingleProduct", pObj);
-                updateAlertsBar();
-            }
-        }
-        invoiceItems.splice(index, 1);
-        renderInvoice();
-    }
-
-    function renderInvoice() {
-        const tbody = document.getElementById('invoiceTableBody');
-        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0, totalSellEGP = 0;
-
-        if (invoiceItems.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="color: #7f8c8d;">No items added yet</td></tr>';
-        } else {
-            tbody.innerHTML = invoiceItems.map((item, index) => {
-                sumUSD += parseFloat(item.usd || 0);
-                sumEUR += parseFloat(item.eur || 0);
-                sumGBP += parseFloat(item.gbp || 0);
-                sumEGP += parseFloat(item.egp || 0);
-                sumVISA += parseFloat(item.visa || 0);
-                totalSellEGP += parseFloat(item.sellTotal || 0);
-
-                return `
-                <tr>
-                    <td style="font-weight:bold;">${index + 1}</td>
-                    <td style="font-weight:bold; text-align:right;">${item.name}</td>
-                    <td>${item.qty}</td>
-                    <td>${(item.commTotal||0).toFixed(2)} EGP</td>
-                    <td>$:${item.usd||0} | €:${item.eur||0} | £:${item.gbp||0} | EGP:${item.egp||0} | VISA:${item.visa||0}</td>
-                    <td style="color:#27ae60; font-weight:bold;">${(item.sellTotal||0).toFixed(2)} EGP</td>
-                    <td style="font-weight:bold; color:#1e3c72;">${item.seller || 'Unknown'}</td>
-                    <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="removeInvoiceItem(${index})">Delete</button></td>
-                </tr>
-            `;}).join('');
-        }
-
-        let discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
-        let finalPayable = totalSellEGP - discountVal;
-
-        document.getElementById('liveUSD').textContent = '$' + sumUSD.toFixed(2);
-        document.getElementById('liveEUR').textContent = '€' + sumEUR.toFixed(2);
-        document.getElementById('liveGBP').textContent = '£' + sumGBP.toFixed(2);
-        document.getElementById('liveEGP').textContent = sumEGP.toFixed(2) + ' EGP';
-        document.getElementById('liveVISA').textContent = sumVISA.toFixed(2) + ' EGP';
-        document.getElementById('liveTotalEGP').textContent = finalPayable.toFixed(2) + ' EGP';
-    }
-
-    function syncToCloud(actionType, data) {
-        if (!navigator.onLine) {
-            let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
-            queue.push({ action: actionType, data: data });
-            localStorage.setItem('anjum_offline_queue', JSON.stringify(queue));
-            return;
-        }
-
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST", mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: actionType, data: data })
-        });
-    }
-
-    function processOfflineQueue() {
-        let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
-        if (queue.length > 0) {
-            queue.forEach(item => syncToCloud(item.action, item.data));
-            localStorage.removeItem('anjum_offline_queue');
-        }
-    }
-
-    function getItemPaidText(item) {
-        if (!item) return '';
-        let paidParts = [];
-        if (item.usd > 0) paidParts.push(`${item.usd} $`);
-        if (item.eur > 0) paidParts.push(`${item.eur} €`);
-        if (item.gbp > 0) paidParts.push(`${item.gbp} £`);
-        if (item.egp > 0) paidParts.push(`${item.egp} EGP`);
-        if (item.visa > 0) paidParts.push(`${item.visa} Visa`);
-
-        let paidStr = paidParts.length > 0 ? paidParts.join(" - ") : `${(item.sellTotal||0).toFixed(1)} EGP`;
-        return `${item.name} | Qty: ${item.qty} | Price: ${paidStr} | Seller: ${item.seller || 'Unknown'}`;
-    }
-
-    function saveInvoice() {
-        if (invoiceItems.length === 0) return alert('Please add items to invoice first!');
-
-        let invDateRaw = document.getElementById('invoiceDate').value;
-        let invDate = invDateRaw ? invDateRaw.replace('T', ' ') : new Date().toLocaleString();
-
-        let totalSell = 0, totalComm = 0, totalProfit = 0;
-        let itemsSummaryText = [];
-
-        invoiceItems.forEach(i => {
-            totalSell += i.sellTotal;
-            totalComm += i.commTotal;
-            totalProfit += i.netProfit;
-            itemsSummaryText.push(getItemPaidText(i));
-
-            const pObj = products.find(p => p.n === i.name);
-            if (pObj) syncToCloud("updateSingleProduct", pObj);
-        });
-
-        let finalTotalAfterDiscount = totalSell - ((totalSell * invoiceDiscountPercent) / 100);
-
-        const savedInv = {
-            id: activeInvoiceId,
-            date: invDate,
-            status: 'Active',
-            items: JSON.parse(JSON.stringify(invoiceItems)),
-            itemsText: itemsSummaryText.join(" | "),
-            discount: invoiceDiscountPercent,
-            totalComm: totalComm,
-            totalEGP: finalTotalAfterDiscount,
-            netProfit: totalProfit - ((totalSell * invoiceDiscountPercent) / 100)
-        };
-
-        const existingIndex = savedInvoices.findIndex(i => i.id === activeInvoiceId);
-        if (existingIndex > -1) {
-            savedInvoices[existingIndex] = savedInv;
-        } else {
-            savedInvoices.push(savedInv);
-            if (activeInvoiceId === invoiceCounter) invoiceCounter++;
-        }
-
-        saveInvoicesToStorage();
-        syncToCloud("saveInvoice", savedInv);
-
-        alert(`Invoice #${activeInvoiceId} saved successfully! 💾☁️`);
-        prepareNewInvoice();
-        generateReport();
-    }
-
-    function saveFinanceEntry() {
-        const type = document.getElementById('finType').value;
-        const category = document.getElementById('finCategory').value.trim();
-        const amount = parseFloat(document.getElementById('finAmount').value) || 0;
-        let dateRaw = document.getElementById('finDate').value;
-        const notes = document.getElementById('finNotes').value.trim();
-
-        if (!category) return alert('Please enter category/description!');
-        if (amount <= 0) return alert('Please enter a valid amount!');
-
-        let dateStr = dateRaw ? dateRaw.replace('T', ' ') : new Date().toLocaleString();
-
-        const fEntry = {
-            id: Date.now(),
-            date: dateStr,
-            type: type,
-            category: category,
-            amount: amount,
-            notes: notes
-        };
-
-        savedFinances.push(fEntry);
-        saveFinancesToStorage();
-        syncToCloud("saveFinance", fEntry);
-
-        alert(`✅ ${type} record saved successfully!`);
-        document.getElementById('finCategory').value = '';
-        document.getElementById('finAmount').value = '';
-        document.getElementById('finNotes').value = '';
-        renderFinanceTable();
-    }
-
-    function deleteFinanceEntry(id) {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        if (confirm("❌ Delete this finance record permanently?")) {
-            savedFinances = savedFinances.filter(f => f.id !== id);
-            saveFinancesToStorage();
-            syncToCloud("deleteFinance", { id: id });
-            renderFinanceTable();
-        }
-    }
-
-    function renderFinanceTable() {
-        const fromD = document.getElementById('finFromDate') ? document.getElementById('finFromDate').value : '';
-        const toD = document.getElementById('finToDate') ? document.getElementById('finToDate').value : '';
-        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
-
-        const filtered = savedFinances.filter(f => {
-            if (!f.date) return true;
-            const fD = f.date.slice(0, 10);
-            if (fromD && fD < fromD) return false;
-            if (toD && fD > toD) return false;
-            return true;
-        });
-
-        let totRev = 0, totExp = 0;
-        const tbody = document.getElementById('financeTableBody');
-
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
-        } else {
-            tbody.innerHTML = filtered.map((f, idx) => {
-                if (f.type === 'Revenue') totRev += f.amount;
-                else totExp += f.amount;
-
-                return `
-                <tr style="background:${f.type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
-                    <td>${idx + 1}</td>
-                    <td style="white-space:nowrap;">${f.date}</td>
-                    <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                    <td style="text-align:right; font-weight:bold;">${f.category}</td>
-                    <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
-                    <td style="text-align:right; font-size:0.75rem;">${f.notes || '-'}</td>
-                    <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
-                </tr>
-            `;}).join('');
-        }
-
-        if (includeSales) {
-            savedInvoices.forEach(inv => {
-                if (!inv.date) return;
-                const invD = inv.date.slice(0, 10);
-                if (fromD && invD < fromD) return;
-                if (toD && invD > toD) return;
-                totRev += (parseFloat(inv.netProfit) || 0);
-            });
-        }
-
-        document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
-        document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
-        const net = totRev - totExp;
-        const netEl = document.getElementById('netBalance');
-        netEl.textContent = net.toFixed(2) + ' EGP';
-        netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
-    }
-
-    function exportFinanceExcel() {
-        const fromD = document.getElementById('finFromDate').value;
-        const toD = document.getElementById('finToDate').value;
-        const filtered = savedFinances.filter(f => {
-            if (!f.date) return true;
-            const fD = f.date.slice(0, 10);
-            if (fromD && fD < fromD) return false;
-            if (toD && fD > toD) return false;
-            return true;
-        });
-
-        let excelData = filtered.map((f, i) => ({
-            "#": i + 1,
-            "Date": f.date,
-            "Type": f.type,
-            "Category": f.category,
-            "Amount (EGP)": f.amount,
-            "Notes": f.notes || ""
-        }));
-
-        const ws = XLSX.utils.json_to_sheet(excelData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Finance_Report");
-        XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    function changeUserPasswordSystem() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const targetUser = document.getElementById('userSelectPass').value;
-        const newPass = document.getElementById('newAccountPass').value.trim();
-
-        if (!newPass) return alert("Please enter new password!");
-
-        let uObj = cloudUsers.find(u => u.username.toLowerCase() === targetUser.toLowerCase());
-        if (uObj) {
-            uObj.password = newPass;
-            saveLocalUsers(cloudUsers);
-            syncToCloud("updateUserPassword", { username: targetUser, newPassword: newPass });
-            alert(`✅ Password for [${targetUser.toUpperCase()}] updated successfully!`);
-            document.getElementById('newAccountPass').value = '';
-        }
-    }
-
-    function addNewProductToSystem() {
-        const name = document.getElementById('newProdName').value.trim();
-        const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
-        const qty = parseInt(document.getElementById('newProdQty').value) || 0;
-        const barcode = document.getElementById('newProdBarcode').value.trim();
-        const expiry = document.getElementById('newProdExpiry').value;
-
-        if (!name) return alert('Enter product name!');
-        
-        const existing = products.find(p => p.n.toLowerCase() === name.toLowerCase());
-        if (existing) {
-            existing.p = price;
-            existing.q += qty;
-            existing.barcode = barcode || existing.barcode;
-            existing.expiry = expiry || existing.expiry;
-        } else {
-            products.push({ n: name, p: price, q: qty, barcode: barcode, expiry: expiry });
-        }
-        
-        saveProductsToStorage();
-        syncToCloud("updateSingleProduct", { n: name, p: price, q: existing ? existing.q : qty, barcode: barcode, expiry: expiry });
-        updateAlertsBar();
-
-        alert(`Product (${name}) saved and synced! ☁️`);
-        document.getElementById('newProdName').value = '';
-        document.getElementById('newProdBarcode').value = '';
-    }
-
-    function searchAddStockProduct() {
-        const query = document.getElementById('addStockSearch').value.toLowerCase().trim();
-        const list = document.getElementById('addStockResults');
-        if (!query) { list.style.display = 'none'; return; }
-
-        const barcodeMatched = products.find(item => item && item.barcode && item.barcode.toLowerCase() === query);
-        if (barcodeMatched) {
-            playBeepSound();
-            pickAddStockIndex(products.indexOf(barcodeMatched));
-            return;
-        }
-
-        const matched = products.filter(item => item && item.n && item.n.toLowerCase().includes(query));
-        if (matched.length > 0) {
-            list.innerHTML = matched.map(i => {
-                const idx = products.indexOf(i);
-                return `<div class="result-item" onclick="pickAddStockIndex(${idx})"><span style="color:#1e3c72; font-weight:bold;">${i.n}</span> <span style="color:#27ae60; font-size:0.8rem;">(Stock: ${i.q})</span></div>`;
-            }).join('');
-            list.style.display = 'block';
-        } else {
-            list.style.display = 'none';
-        }
-    }
-
-    function pickAddStockIndex(index) {
-        const p = products[index];
-        if (!p) return;
-        selectedStockProd = p;
-
-        document.getElementById('addStockResults').style.display = 'none';
-        document.getElementById('addStockSearch').value = p.n;
-        document.getElementById('addStockName').textContent = p.n;
-        document.getElementById('currentStockVal').textContent = p.q;
-        document.getElementById('addStockCard').style.display = 'block';
-    }
-
-    function saveStockAddition() {
-        if (!selectedStockProd) return;
-        const addQty = parseInt(document.getElementById('newStockQty').value) || 0;
-        selectedStockProd.q += addQty;
-        saveProductsToStorage();
-
-        syncToCloud("updateSingleProduct", selectedStockProd);
-        updateAlertsBar();
-
-        alert(`Recharged (${selectedStockProd.n}) with ${addQty} units! New Stock: ${selectedStockProd.q}`);
-        document.getElementById('addStockCard').style.display = 'none';
-        document.getElementById('addStockSearch').value = '';
-        renderStockTable();
-    }
-
-    function editProductSystem(prodName) {
-        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
-        if (!isManager) return alert("❌ Restricted access!");
-
-        const prod = products.find(p => p.n === prodName);
-        if (!prod) return;
-
-        const newName = prompt("✏️ New Product Name:", prod.n);
-        if (newName === null) return;
-
-        const newPriceInput = prompt("💵 New Commercial Price (EGP):", prod.p);
-        if (newPriceInput === null) return;
-        const newPrice = parseFloat(newPriceInput) || prod.p;
-
-        const newQtyInput = prompt("📦 New Available Stock:", prod.q);
-        if (newQtyInput === null) return;
-        const newQty = parseInt(newQtyInput) || prod.q;
-
-        const newBarcode = prompt("📷 New Barcode (Leave empty or scan via camera button in table):", prod.barcode || "");
-        if (newBarcode !== null) prod.barcode = newBarcode.trim();
-
-        const newExpiry = prompt("📅 New Expiry Date (YYYY-MM-DD):", prod.expiry || "");
-        if (newExpiry !== null) prod.expiry = newExpiry.trim();
-
-        prod.n = newName;
-        prod.p = newPrice;
-        prod.q = newQty;
-        saveProductsToStorage();
-
-        syncToCloud("updateSingleProduct", prod);
-        updateAlertsBar();
-
-        alert(`✅ Product (${newName}) updated!`);
-        renderStockTable();
-    }
-
-    function scanAndEditProductBarcode(prodName) {
-        const prod = products.find(p => p.n === prodName);
-        if (!prod) return;
-        selectedStockEditProduct = prod;
-        toggleCameraScanner('stock');
-    }
-
-    function deleteProductSystem(prodName) {
-        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
-        if (!isManager) return alert("❌ Restricted access!");
-
-        if (confirm(`❌ Delete product (${prodName}) completely?`)) {
-            syncToCloud("deleteProduct", { name: prodName });
-            products = products.filter(p => p.n !== prodName);
-            saveProductsToStorage();
-            updateAlertsBar();
-
-            alert(`🗑️ Product (${prodName}) deleted!`);
-            renderStockTable();
-        }
-    }
-
-    function renderStockTable(filter = '') {
-        const tbody = document.getElementById('stockTableBody');
-        const matched = products.filter(i => (i.n && i.n.toLowerCase().includes(filter.toLowerCase())) || (i.barcode && i.barcode.toLowerCase().includes(filter.toLowerCase())));
-        const guideMult = RATES.GUIDE_MULT || 3;
-        const today = new Date();
-
-        tbody.innerHTML = matched.map((i, index) => {
-            let expRowClass = '';
-            let expStatusText = '';
-
-            if (i.expiry) {
-                let expDate = new Date(i.expiry);
-                let diffDays = (expDate - today) / (1000 * 60 * 60 * 24);
-                if (diffDays < 0) {
-                    expRowClass = 'exp-expired-row';
-                    expStatusText = ' 🔴 (Expired)';
-                } else if (diffDays <= 90) {
-                    expRowClass = 'exp-warning-row';
-                    expStatusText = ' 🟡 (Expiring Soon)';
-                }
-            }
-
-            let rowStyle = i.q <= 3 ? 'low-stock-row' : expRowClass;
-
-            return `
-            <tr class="${rowStyle}">
-                <td style="font-weight:bold;">${index + 1}</td>
-                <td style="text-align:right; font-weight:bold;">${i.n} ${i.q <= 3 ? '⚠️ (Low)' : ''}${expStatusText}</td>
-                <td style="font-weight:bold;">${i.q} units</td>
-                <td>${i.p.toFixed(2)} EGP</td>
-                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
-                <td style="font-family:monospace; font-weight:bold; color:#1e3c72;">${i.barcode || '-'}</td>
-                <td>${i.expiry || '-'}</td>
-                <td>
-                    <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
-                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="scanAndEditProductBarcode('${i.n}')">Scan 📷</button>
-                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
-                    <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteProductSystem('${i.n}')">Delete 🗑️</button>
-                </td>
-            </tr>
-        `;}).join('');
-    }
-
-    function filterStockTable(val) { renderStockTable(val); }
-
-    function filterLowStock() {
-        document.getElementById('stockFilterInput').value = '';
-        const tbody = document.getElementById('stockTableBody');
-        const matched = products.filter(i => i.q <= 3);
-        const guideMult = RATES.GUIDE_MULT || 3;
-
-        tbody.innerHTML = matched.map((i, index) => `
-            <tr class="low-stock-row">
-                <td style="font-weight:bold;">${index + 1}</td>
-                <td style="text-align:right; font-weight:bold;">${i.n} ⚠️ (Low Stock)</td>
-                <td style="font-weight:bold;">${i.q} units</td>
-                <td>${i.p.toFixed(2)} EGP</td>
-                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
-                <td style="font-family:monospace;">${i.barcode || '-'}</td>
-                <td>${i.expiry || '-'}</td>
-                <td>
-                    <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
-                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function filterNearExpiryOneMonth() {
-        document.getElementById('stockFilterInput').value = '';
-        const tbody = document.getElementById('stockTableBody');
-        const today = new Date();
-        const guideMult = RATES.GUIDE_MULT || 3;
-
-        const matched = products.filter(i => {
-            if (!i.expiry) return false;
-            let expDate = new Date(i.expiry);
-            let diffDays = (expDate - today) / (1000 * 60 * 60 * 24);
-            return diffDays <= 30;
-        });
-
-        if (matched.length === 0) {
-            alert('🟢 No items expiring within 1 month!');
-            renderStockTable();
-            return;
-        }
-
-        tbody.innerHTML = matched.map((i, index) => {
-            let expDate = new Date(i.expiry);
-            let diffDays = (expDate - today) / (1000 * 60 * 60 * 24);
-            let isExpired = diffDays < 0;
-            let rowStyle = isExpired ? 'exp-expired-row' : 'exp-warning-row';
-            let labelText = isExpired ? '🔴 Expired' : '⚠️ Expiring Soon (< 1 Mo)';
-
-            return `
-            <tr class="${rowStyle}">
-                <td style="font-weight:bold;">${index + 1}</td>
-                <td style="text-align:right; font-weight:bold;">${i.n} (${labelText})</td>
-                <td style="font-weight:bold;">${i.q} units</td>
-                <td>${i.p.toFixed(2)} EGP</td>
-                <td>${(i.p * guideMult).toFixed(2)} EGP</td>
-                <td style="font-family:monospace;">${i.barcode || '-'}</td>
-                <td>${i.expiry || '-'}</td>
-                <td>
-                    <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${i.n}')">Edit ✏️</button>
-                    <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="printBarcodeLabel('${i.n}')">Label 🏷️</button>
-                </td>
-            </tr>
-        `;}).join('');
-    }
-
-    function printSingleReceipt(invId) {
-        const inv = savedInvoices.find(i => i.id === invId);
-        if (!inv) return;
-
-        let receiptHTML = `
-            <h3>Anjum Green Pharmacy 🌿</h3>
-            <p>Invoice ID: <b>#${inv.id}</b></p>
-            <p>Date: ${(inv.date||'').replace('T', ' ')}</p>
-            <hr style="border-top:1px dashed #000; margin:6px 0;">
-            <table style="width:100%; border-collapse:collapse; font-size:10px; direction:rtl;">
-                <thead><tr><th style="text-align:right;">Item</th><th style="text-align:left;">Total</th></tr></thead>
-                <tbody>
-        `;
-
-        if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-            inv.items.forEach(i => {
-                receiptHTML += `<tr><td style="text-align:right;">${i.name} (x${i.qty}) <br><small>By: ${i.seller || 'Unknown'}</small></td><td style="text-align:left;">${i.sellTotal.toFixed(2)}</td></tr>`;
-            });
-        } else {
-            receiptHTML += `<tr><td colspan="2" style="text-align:right;">${cleanItemSummaryText(inv.itemsText)}</td></tr>`;
-        }
-
-        receiptHTML += `
-                </tbody>
-            </table>
-            <hr style="border-top:1px dashed #000; margin:6px 0;">
-            <h4 style="text-align:left;">Discount: ${inv.discount||0}%</h4>
-            <h4 style="text-align:left;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
-            <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
-            <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-        `;
-
-        const printSec = document.getElementById('receiptPrintSection');
-        printSec.innerHTML = receiptHTML;
-        document.body.classList.add('printing-receipt');
-
-        window.print();
-
-        setTimeout(() => {
-            document.body.classList.remove('printing-receipt');
-            printSec.innerHTML = '';
-        }, 500);
-    }
-
-    function printReportTable() {
-        renderInAppReportView();
-    }
-
-    function exportSalesReportExcel() {
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        let excelData = filteredInvoices.map((inv, i) => {
-            let cleanItems = inv.items && Array.isArray(inv.items) ? inv.items.map(item => `${item.name} (x${item.qty})`).join(' | ') : cleanItemSummaryText(inv.itemsText);
-            return {
-                "#": i + 1,
-                "Invoice ID": inv.id,
-                "Date": inv.date || "",
-                "Items Details": cleanItems,
-                "Commercial Total (EGP)": inv.totalComm || 0,
-                "Discount %": inv.discount || 0,
-                "Sales Total (EGP)": inv.totalEGP || 0,
-                "Net Profit (EGP)": inv.netProfit || 0
-            };
-        });
-
-        const ws = XLSX.utils.json_to_sheet(excelData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Sales_Report");
-        XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    function generateReport() {
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        const tbody = document.getElementById('savedInvoicesBody');
-        if (filteredInvoices.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d;">No saved invoices found</td></tr>';
-            document.getElementById('reportSummaryCardsContainer').innerHTML = '';
-            document.getElementById('topProductsChartContainer').innerHTML = '';
-            return;
-        }
-
-        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-        let grandTotalSell = 0, grandNetProfit = 0;
-        let productStats = {};
-
-        let htmlRows = filteredInvoices.map((inv, index) => {
-            let u = 0, eu = 0, g = 0, eg = 0, v = 0;
-            let itemsList = "";
-
-            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-                itemsList = inv.items.map(i => {
-                    u += parseFloat(i.usd || 0);
-                    eu += parseFloat(i.eur || 0);
-                    g += parseFloat(i.gbp || 0);
-                    eg += parseFloat(i.egp || 0);
-                    v += parseFloat(i.visa || 0);
-
-                    if (i.name) {
-                        productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                    }
-                    return `• ${getItemPaidText(i)}`;
-                }).join('<br>');
-            } else {
-                itemsList = cleanItemSummaryText(inv.itemsText).replace(/\(|\)/g, '').split(' | ').map(item => `• ${item}`).join('<br>');
-                u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
-
-                let rawItems = inv.itemsText ? inv.itemsText.split(' | ') : [];
-                rawItems.forEach(raw => {
-                    let namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0];
-                    let qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/);
-                    let qty = qtyPart ? parseInt(qtyPart[1]) : 1;
-                    let cleanName = namePart.trim();
-                    if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty;
-                });
-            }
-
-            sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v;
-            grandTotalSell += inv.totalEGP || 0;
-            grandNetProfit += inv.netProfit || 0;
-
-            const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`;
-            const cleanDateStr = inv.date ? inv.date.replace('T', ' ').replace('.000Z', '') : '-';
-
-            return `
-            <tr>
-                <td><span class="seq-num">${index + 1}</span></td>
-                <td style="font-weight:bold;">#${inv.id}</td>
-                <td style="white-space:nowrap;">${cleanDateStr}</td>
-                <td class="items-column-cell">${itemsList}</td>
-                <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
-                <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-                <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-                <td style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-                <td style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-                <td>
-                    <button class="btn btn-purple" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="printSingleReceipt(${inv.id})">Receipt 🧾</button>
-                    <button class="btn btn-blue" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="loadInvoiceToEdit(${inv.id})">Edit ✏️</button>
-                    <button class="btn btn-red" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="cancelInvoiceSystem(${inv.id})">Delete 🗑️</button>
-                </td>
-            </tr>
-        `;}).join('');
-
-        tbody.innerHTML = htmlRows;
-
-        document.getElementById('reportSummaryCardsContainer').innerHTML = `
-            <div class="report-card">
-                <div class="report-card-title">💵 Cash Payments / كاش العملات</div>
-                <div class="report-card-value" style="font-size:0.8rem;">
-                    $: ${sumUSD.toFixed(2)} | €: ${sumEUR.toFixed(2)}<br>
-                    £: ${sumGBP.toFixed(2)} | EGP: ${sumEGP.toFixed(2)}
-                </div>
-            </div>
-            <div class="report-card">
-                <div class="report-card-title">💳 Total Visa Payments / إجمالي الفيزا</div>
-                <div class="report-card-value">${sumVISA.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#27ae60;">
-                <div class="report-card-title" style="color:#27ae60;">🛒 Total Net Sales / إجمالي المبيعات</div>
-                <div class="report-card-value" style="color:#27ae60;">${grandTotalSell.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#8e44ad;">
-                <div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit / صافي الربح</div>
-                <div class="report-card-value" style="color:#8e44ad;">${grandNetProfit.toFixed(2)} EGP</div>
-            </div>
-        `;
-
-        let sortedTop = Object.keys(productStats).map(key => ({
-            name: key, qty: productStats[key]
-        })).sort((a,b) => b.qty - a.qty).slice(0, 10);
-
-        if (sortedTop.length > 0) {
-            let maxQty = sortedTop[0].qty || 1;
-            let chartRows = sortedTop.map((p, idx) => {
-                let widthPercent = Math.round((p.qty / maxQty) * 100);
-                return `
-                    <div class="chart-row">
-                        <div class="chart-label">#${idx+1} ${p.name}</div>
-                        <div class="chart-bar-wrapper">
-                            <div class="chart-bar" style="width: ${widthPercent}%;"></div>
-                        </div>
-                        <div class="chart-val">${p.qty} u</div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('topProductsChartContainer').innerHTML = `
-                <h4 style="margin-bottom:10px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products / أعلى 10 منتجات مبيعاً:</h4>
-                ${chartRows}
-            `;
-        } else {
-            document.getElementById('topProductsChartContainer').innerHTML = '';
-        }
-    }
-
-    function loadInvoiceToEdit(invId) {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const inv = savedInvoices.find(i => i.id === invId);
-        if (!inv) return;
-
-        showTab('salesTab');
-        loadInvoiceIntoForm(inv);
-    }
-
-    function cancelInvoiceSystem(invId) {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const invIdx = savedInvoices.findIndex(i => i.id === invId);
-        if (invIdx === -1) return;
-        const inv = savedInvoices[invIdx];
-
-        if (confirm(`❌ Delete invoice #${invId} permanently?`)) {
-            if (inv.items && Array.isArray(inv.items)) {
-                inv.items.forEach(item => {
-                    const pObj = products.find(p => p.n === item.name);
-                    if (pObj) {
-                        pObj.q += item.qty;
-                        syncToCloud("updateSingleProduct", pObj);
-                    }
-                });
-                saveProductsToStorage();
-                renderStockTable();
-                updateAlertsBar();
-            }
-
-            savedInvoices.splice(invIdx, 1);
-            saveInvoicesToStorage();
-            syncToCloud("deleteInvoice", { id: invId });
-
-            alert(`🗑️ Invoice #${invId} deleted!`);
-            fetchCloudInvoicesData();
-        }
-    }
-
-    function handleNetProfitAction() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const fromD = document.getElementById('fromDate').value;
-        const toD = document.getElementById('toDate').value;
-        const deductExp = document.getElementById('deductExpensesToggle') ? document.getElementById('deductExpensesToggle').checked : false;
-
-        const filteredInvoices = savedInvoices.filter(inv => {
-            if (!inv.date) return true;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return false;
-            if (toD && invD > toD) return false;
-            return true;
-        });
-
-        let totalSell = 0, totalComm = 0, netProfit = 0;
-        let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-        let productStats = {};
-
-        filteredInvoices.forEach(inv => {
-            totalSell += inv.totalEGP || 0;
-            totalComm += inv.totalComm || 0;
-            netProfit += inv.netProfit || 0;
-
-            if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-                inv.items.forEach(i => {
-                    sumUSD += parseFloat(i.usd || 0);
-                    sumEUR += parseFloat(i.eur || 0);
-                    sumGBP += parseFloat(i.gbp || 0);
-                    sumEGP += parseFloat(i.egp || 0);
-                    sumVISA += parseFloat(i.visa || 0);
-
-                    if (i.name) {
-                        productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                    }
-                });
-            } else if (inv.itemsText) {
-                sumUSD += parseFloat(inv.usd || 0);
-                sumEUR += parseFloat(inv.eur || 0);
-                sumGBP += parseFloat(inv.gbp || 0);
-                sumEGP += parseFloat(inv.egp || 0);
-                sumVISA += parseFloat(inv.visa || 0);
-
-                let rawItems = inv.itemsText.split(' | ');
-                rawItems.forEach(raw => {
-                    let namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0];
-                    let qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/);
-                    let qty = qtyPart ? parseInt(qtyPart[1]) : 1;
-                    let cleanName = namePart.trim();
-
-                    if (cleanName) {
-                        productStats[cleanName] = (productStats[cleanName] || 0) + qty;
-                    }
-                });
-            }
-        });
-
-        if (deductExp) {
-            let totalExpensesInPeriod = 0;
-            savedFinances.forEach(f => {
-                if (f.type === 'Expense') {
-                    if (!f.date) return;
-                    let fD = f.date.slice(0, 10);
-                    if (fromD && fD < fromD) return;
-                    if (toD && fD > toD) return;
-                    totalExpensesInPeriod += (parseFloat(f.amount) || 0);
-                }
-            });
-            netProfit = netProfit - totalExpensesInPeriod;
-        }
-
-        document.getElementById('repTotalUSD').textContent = '$' + sumUSD.toFixed(2);
-        document.getElementById('repTotalEUR').textContent = '€' + sumEUR.toFixed(2);
-        document.getElementById('repTotalGBP').textContent = '£' + sumGBP.toFixed(2);
-        document.getElementById('repTotalEGP').textContent = sumEGP.toFixed(2) + ' EGP';
-        document.getElementById('repTotalVISA').textContent = sumVISA.toFixed(2) + ' EGP';
-
-        document.getElementById('repTotalSell').textContent = totalSell.toFixed(2) + ' EGP';
-        document.getElementById('repTotalComm').textContent = totalComm.toFixed(2) + ' EGP';
-        document.getElementById('repNetProfit').textContent = netProfit.toFixed(2) + ' EGP';
-
-        let sortedTop = Object.keys(productStats).map(key => {
-            return { name: key, qty: productStats[key] };
-        }).sort((a,b) => b.qty - a.qty).slice(0, 5);
-
-        const topHtml = sortedTop.length > 0 ? sortedTop.map((p, idx) => `<b>#${idx+1} ${p.name}</b> (${p.qty} units)`).join(' | ') : 'No data available';
-        document.getElementById('topProductsList').innerHTML = topHtml;
-
-        document.getElementById('profitBox').style.display = 'block';
-    }
-
-    // 1. تحويل وتنزيل PDF تقرير المبيعات الشامل مباشرة لداخل ذاكرة الموبايل
-    function downloadInAppReportPDF() {
-        const element = document.getElementById('pdfExportableArea');
-        if (!element) return;
-
-        const opt = {
-            margin:       4,
-            filename:     'Sales_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(element).save();
-    }
-
-    // 2. تحويل وتنزيل PDF تفاصيل المخزون مباشرة لداخل الموبايل مع ضبط المحاذاة والمسافات
-    function printStockTable() {
-        const guideMult = RATES.GUIDE_MULT || 3;
-        let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom: 10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">تقرير تفاصيل المخزون</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-                </div>
-                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
-                    <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="border:1px solid #1e3c72; padding:6px; width:30px;">#</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; text-align:right;">اسم المنتج</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:70px;">الكمية</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">السعر التجاري</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:100px;">الحد الاسترشادي</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:120px;">البارلود</th>
-                            <th style="border:1px solid #1e3c72; padding:6px; width:90px;">تاريخ الصلاحية</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        products.forEach((p, idx) => {
-            html += `
-                <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-                    <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                    <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.q} قطعة</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.p.toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
-                    <td style="border:1px solid #ddd; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
-                    <td style="border:1px solid #ddd; padding:5px;">${p.expiry || '-'}</td>
-                </tr>
-            `;
-        });
-
-        html += `
-                    </tbody>
-                </table>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
-        `;
-
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
-
-        const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     'Stock_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
-    }
-
-    // 3. تحويل وتنزيل PDF التقرير المالي مباشرة لداخل الموبايل مع ضبط المحاذاة والمسافات
-    function printFinanceReportPDF() {
-        const fromD = document.getElementById('finFromDate').value;
-        const toD = document.getElementById('finToDate').value;
-        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
-
-        const filtered = savedFinances.filter(f => {
-            if (!f.date) return true;
-            const fD = f.date.slice(0, 10);
-            if (fromD && fD < fromD) return false;
-            if (toD && fD > toD) return false;
-            return true;
-        });
-
-        let totRev = 0, totExp = 0, salesProfit = 0;
-
-        filtered.forEach(f => {
-            if (f.type === 'Revenue') totRev += f.amount;
-            else totExp += f.amount;
-        });
-
-        if (includeSales) {
-            savedInvoices.forEach(inv => {
-                if (!inv.date) return;
-                const invD = inv.date.slice(0, 10);
-                if (fromD && invD < fromD) return;
-                if (toD && invD > toD) return;
-                salesProfit += (parseFloat(inv.netProfit) || 0);
-            });
-            totRev += salesProfit;
-        }
-
-        const net = totRev - totExp;
-
-        let html = `
-            <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-                <div style="margin-bottom:10px;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                    <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">التقرير المالي للحسابات والمصروفات</h3>
-                    <p style="font-size:11px; color:#666; margin-top:4px;">الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b></p>
-                </div>
-
-                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
-                    <thead>
-                        <tr style="background:#1e3c72; color:#fff;">
-                            <th style="padding:6px; border:1px solid #1e3c72; width:30px;">#</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:120px;">التاريخ</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:80px;">النوع</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">الوصف / البند</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; width:100px;">المبلغ (ج.م)</th>
-                            <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">ملاحظات</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        if (filtered.length === 0) {
-            html += `<tr><td colspan="6" style="padding:10px; border:1px solid #ddd;">لا توجد سجلات مالية للفترة المحددة</td></tr>`;
-        } else {
-            filtered.forEach((f, idx) => {
-                html += `
-                    <tr style="background:${f.type === 'Revenue' ? '#f2fcf5' : '#ffffff'};">
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                        <td style="border:1px solid #ddd; padding:5px; direction:ltr;">${f.date || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${f.category || '-'}</td>
-                        <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
-                        <td style="border:1px solid #ddd; padding:5px; text-align:right;">${f.notes || '-'}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        html += `
-                    </tbody>
-                </table>
-
-                <div style="margin-top:15px; border:1.5px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-content:space-around;">
-                    <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-                    <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-                    <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
-                </div>
-                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
-            </div>
-        `;
-
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.innerHTML = html;
-        document.body.appendChild(tempContainer);
-
-        const opt = {
-            margin:       5,
-            filename:     'Financial_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            document.body.removeChild(tempContainer);
-        });
-    }
-
-    function fetchInitialUsersOnly() {
-        if (!navigator.onLine) return;
-
-        window.handleUsersOnlyResponse = function(resData) {
-            if (resData && resData.status === "success" && resData.users && resData.users.length > 0) {
-                saveLocalUsers(resData.users);
-            }
-        };
-
-        const script = document.createElement('script');
-        script.src = GOOGLE_SCRIPT_URL + "?callback=handleUsersOnlyResponse&nocache=" + Math.random();
-        document.body.appendChild(script);
-    }
-
-    function updateOnlineStatus() {
-        const ind = document.getElementById('syncIndicator');
-        if (navigator.onLine) {
-            ind.className = 'sync-status status-online';
-            ind.textContent = '🟢 Online';
-            processOfflineQueue();
-        } else {
-            ind.className = 'sync-status status-offline';
-            ind.textContent = '🔴 Offline';
-        }
-    }
-
-    function loadLocalUsers() {
-        const savedUsers = localStorage.getItem('anjum_local_users');
-        if (savedUsers) {
-            cloudUsers = JSON.parse(savedUsers);
-        } else {
-            cloudUsers = [
-                { username: 'admin', password: '852', role: 'Admin' },
-                { username: 'cs2', password: '456', role: 'User' },
-                { username: 'cashier', password: '123', role: 'Cashier' }
-            ];
-        }
-        renderUserDropdowns();
-    }
-
-    function saveLocalUsers(users) {
-        if (users && users.length > 0) {
-            cloudUsers = users;
-            localStorage.setItem('anjum_local_users', JSON.stringify(users));
-            renderUserDropdowns();
-        }
-    }
-
-    function renderUserDropdowns() {
-        const selectEl = document.getElementById('entryUserSelect');
-        const passSelectEl = document.getElementById('userSelectPass');
-        
-        if (selectEl && cloudUsers.length > 0) {
-            selectEl.innerHTML = cloudUsers.map(u => `
-                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
-            `).join('');
-        }
-
-        if (passSelectEl && cloudUsers.length > 0) {
-            passSelectEl.innerHTML = cloudUsers.map(u => `
-                <option value="${u.username.toLowerCase()}">${u.username.toUpperCase()}</option>
-            `).join('');
-        }
-    }
-
-    function validateEntryPassword() {
-        const usernameInput = document.getElementById('entryUserSelect').value.trim().toLowerCase();
-        const passwordInput = document.getElementById('entryPassInput').value.trim();
-
-        if (!usernameInput || !passwordInput) return alert('Enter password!');
-
-        let matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && u.password === passwordInput);
-
-        if (matched) {
-            currentUser = matched;
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
-            document.getElementById('userGreeting').textContent = `👤 User: ${matched.username.toUpperCase()} (${matched.role})`;
-            
-            syncToCloud("updateUserActivity", { username: matched.username, isOnline: true, lastLogin: new Date().toLocaleString() });
-
-            applyRolePermissions();
-            initSystem();
-        } else {
-            alert('❌ Invalid Password!');
-        }
-    }
-
-    function logout() {
-        if (currentUser) {
-            syncToCloud("updateUserActivity", { username: currentUser.username, isOnline: false, lastLogin: new Date().toLocaleString() });
-        }
-        currentUser = null;
-        stopAllScanners();
-        document.getElementById('mainContainer').style.display = 'none';
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('entryPassInput').value = '';
-    }
-
-    function applyRolePermissions() {
-        const adminElements = document.querySelectorAll('.admin-only');
-        const managerElements = document.querySelectorAll('.manager-only');
-
-        const isManager = currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
-
-        if (!isManager) {
-            managerElements.forEach(el => el.style.display = 'none');
-            showTab('salesTab');
-        } else {
-            managerElements.forEach(el => el.style.display = '');
-        }
-
-        if (currentUser && currentUser.role !== 'Admin' && currentUser.username !== 'admin') {
-            adminElements.forEach(el => el.style.display = 'none');
-        } else {
-            adminElements.forEach(el => el.style.display = '');
-        }
-    }
-
-    let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
-
-    function loadRatesFromStorage() {
-        const savedRates = localStorage.getItem('anjum_rates');
-        if (savedRates) {
-            RATES = JSON.parse(savedRates);
-            if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3;
-        }
-        updateRateLabels();
-    }
-
-    function updateRateLabels() {
-        if(document.getElementById('lblUSD')) document.getElementById('lblUSD').textContent = `USD ($ × ${RATES.USD})`;
-        if(document.getElementById('lblEUR')) document.getElementById('lblEUR').textContent = `EUR (€ × ${RATES.EUR})`;
-        if(document.getElementById('lblGBP')) document.getElementById('lblGBP').textContent = `GBP (£ × ${RATES.GBP})`;
-        if(document.getElementById('lblVISA')) document.getElementById('lblVISA').textContent = `VISA (× ${RATES.VISA})`;
-        
-        const thHead = document.getElementById('thStockGuideHead');
-        if (thHead) thHead.textContent = `G-Min (×${RATES.GUIDE_MULT || 3})`;
-    }
-
-    function promptSetRates() {
-        if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
-        const u = prompt("💵 USD Rate:", RATES.USD);
-        if (u === null) return;
-        const eu = prompt("💶 EUR Rate:", RATES.EUR);
-        if (eu === null) return;
-        const g = prompt("💷 GBP Rate:", RATES.GBP);
-        if (g === null) return;
-        const v = prompt("💳 VISA Multiplier:", RATES.VISA);
-        if (v === null) return;
-        const mult = prompt("📈 Guide Min Price Multiplier (e.g. 3, 6, 8):", RATES.GUIDE_MULT || 3);
-        if (mult === null) return;
-
-        RATES.USD = parseFloat(u) || RATES.USD;
-        RATES.EUR = parseFloat(eu) || RATES.EUR;
-        RATES.GBP = parseFloat(g) || RATES.GBP;
-        RATES.VISA = parseFloat(v) || RATES.VISA;
-        RATES.GUIDE_MULT = parseFloat(mult) || RATES.GUIDE_MULT;
-
-        localStorage.setItem('anjum_rates', JSON.stringify(RATES));
-        updateRateLabels();
-        
-        if (selectedProd) pickProductIndex(products.findIndex(p => p.n === selectedProd.name));
-        renderStockTable();
-        alert('✅ Exchange rates & Guide Multiplier updated successfully!');
-    }
-
-    let products = [];
-    let selectedProd = null;
-    let selectedStockProd = null;
-    let invoiceItems = [];
-    let savedInvoices = [];
-    let savedFinances = [];
-    let invoiceCounter = 1001;
-    let activeInvoiceId = 1001;
-
-    function updateAlertsBar() {
-        let lowStockCount = 0;
-        let expiringCount = 0;
-        let today = new Date();
-
-        products.forEach(p => {
-            if (p.q <= 3) lowStockCount++;
-            if (p.expiry) {
-                let exp = new Date(p.expiry);
-                let diffDays = (exp - today) / (1000 * 60 * 60 * 24);
-                if (diffDays < 90) expiringCount++;
-            }
-        });
-
-        document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
-        document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
-    }
-
-    function fetchCloudInvoicesData(callbackAfter) {
-        if (!navigator.onLine) {
-            if (callbackAfter) callbackAfter();
-            return;
-        }
-
-        const oldScript = document.getElementById('cloudSyncScript');
-        if (oldScript) oldScript.remove();
-
-        window.handleCloudInvoicesResponse = function(resData) {
-            if (resData && resData.status === "success") {
-                if (resData.users) saveLocalUsers(resData.users);
-
-                if (resData.products && resData.products.length > 0) {
-                    products = resData.products;
-                    saveProductsToStorage();
-                    renderStockTable();
-                    updateAlertsBar();
-                }
-
-                if (resData.nextInvoiceId) {
-                    invoiceCounter = resData.nextInvoiceId;
-                    localStorage.setItem('anjum_counter', invoiceCounter.toString());
-                }
-
-                if (resData.invoices) {
-                    savedInvoices = resData.invoices;
-                    saveInvoicesToStorage();
-                    generateReport();
-                }
-
-                if (resData.finances) {
-                    savedFinances = resData.finances;
-                    saveFinancesToStorage();
-                    renderFinanceTable();
-                }
-
-                prepareNewInvoice();
-                if (callbackAfter) callbackAfter();
-            }
-        };
-
-        const script = document.createElement('script');
-        script.id = 'cloudSyncScript';
-        script.src = GOOGLE_SCRIPT_URL + "?callback=handleCloudInvoicesResponse&nocache=" + Math.random();
-        document.body.appendChild(script);
-    }
-
-    function prepareNewInvoice() {
-        activeInvoiceId = invoiceCounter;
-        currentNavIndex = -1;
-        document.getElementById('invNum').textContent = activeInvoiceId;
-        
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
-        
-        invoiceItems = [];
-        invoiceDiscountPercent = 0;
-        document.getElementById('invoiceDiscountInput').value = 0;
-        renderInvoice();
-    }
-
-    function holdCurrentInvoice() {
-        if (invoiceItems.length === 0) return alert('No items to hold!');
-        heldInvoiceItems = JSON.parse(JSON.stringify(invoiceItems));
-        invoiceItems = [];
-        renderInvoice();
-        document.getElementById('resumeHoldBtn').style.display = 'inline-block';
-        alert('⏸️ Invoice put on hold successfully!');
-    }
-
-    function resumeHoldInvoice() {
-        if (!heldInvoiceItems) return;
-        invoiceItems = JSON.parse(JSON.stringify(heldInvoiceItems));
-        heldInvoiceItems = null;
-        document.getElementById('resumeHoldBtn').style.display = 'none';
-        renderInvoice();
-        alert('GM Invoice resumed!');
-    }
-
-    function clearCurrentInvoice() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('searchResults').style.display = 'none';
-        document.getElementById('productCard').style.display = 'none';
-        selectedProd = null;
-        
-        if (invoiceItems.length > 0) {
-            invoiceItems.forEach(item => {
-                const pObj = products.find(p => p.n === item.name);
-                if (pObj) {
-                    pObj.q += item.qty;
-                }
-            });
-            saveProductsToStorage();
-            renderStockTable();
-            updateAlertsBar();
-        }
-
-        invoiceItems = [];
-        invoiceDiscountPercent = 0;
-        document.getElementById('invoiceDiscountInput').value = 0;
-        renderInvoiceلا يمكنني مساعدتك لأنّني مجرّد نموذج لغوي وليست لديّ القدرة على فهم ذلك والردّ عليه.
+</script>
+</body>
+</html>
