@@ -120,7 +120,6 @@
         .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #1e3c72; color: #fff; border: 2px solid #fff; border-radius: 50px; padding: 10px 18px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 99999; display: flex; align-items: center; gap: 4px; }
         .btn-scroll-top:hover { background: #2c3e50; }
 
-        /* --- NEW: toast notifications (replaces most alert()) --- */
         #toastStack { position: fixed; top: 12px; right: 12px; z-index: 99999999; display: flex; flex-direction: column; gap: 8px; max-width: 90vw; }
         .toast { background: #1e3c72; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); animation: toastIn 0.25s ease-out; max-width: 320px; }
         .toast.success { background: #219653; }
@@ -128,13 +127,19 @@
         .toast.warn { background: #d68910; }
         @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- NEW: lightweight modal (replaces prompt() chains) --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; }
         .modal-box h3 { color: #1e3c72; margin-bottom: 12px; font-size: 1.05rem; text-align: center; }
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
+        
+        #receiptPrintSection { display: none; }
+        @media print {
+            body.printing-receipt * { visibility: hidden; }
+            body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible; }
+            body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -463,7 +468,6 @@
             <div class="pay-box" style="margin-bottom:12px;"><label>Select User:</label><select id="userSelectPass"></select></div>
             <div class="pay-box" style="margin-bottom:12px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
             <button class="btn btn-purple" style="width:100%;" onclick="changeUserPasswordSystem()">Update Password 💾</button>
-            <p style="font-size:0.72rem; color:#7f8c8d; margin-top:10px; text-align:center;">Passwords are hashed (SHA-256) before being stored locally. Note: real account security still requires a proper authenticated backend — this app's login check ultimately happens in the browser.</p>
         </div>
     </div>
 
@@ -474,29 +478,9 @@
 <div id="receiptPrintSection"></div>
 
 <script>
-/* =========================================================================
-   Anjum Green Pharmacy — cleaned build
-   Fixes vs. the original file:
-   1) Every function is defined ONCE (the original repeated ~2500 lines 3x).
-   2) All dynamic text inserted into innerHTML is escaped -> no XSS via
-      product/customer/finance text fields.
-   3) Products carry a stable "id" (uuid) instead of being referenced by
-      array index or by name — safe even with duplicate names / re-sorting.
-   4) Local passwords are stored as SHA-256 hashes, not plaintext.
-      (Still a client-only app — see note in the Account Security tab.)
-   5) The three near-identical product search functions now share one
-      generic implementation.
-   6) alert() replaced with non-blocking toast() for status messages;
-      destructive actions still use a confirm-style modal.
-      prompt() chains (edit product / set rates) replaced with real forms.
-   7) Cloud sync no longer uses "no-cors" blindly — it tries a normal
-      fetch first (so failures are detectable) and only falls back to
-      the offline queue when the request genuinely fails.
-   ========================================================================= */
-
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
-/* ---------- small utilities ---------- */
+/* ---------- Global Utilities ---------- */
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -514,13 +498,14 @@ function uid() {
 }
 
 async function sha256Hex(text) {
-    if (!(window.crypto && crypto.subtle)) return text; // very old browser fallback (no hashing available)
+    if (!(window.crypto && crypto.subtle)) return text;
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function toast(message, type = 'info', ms = 3200) {
     const stack = document.getElementById('toastStack');
+    if (!stack) return;
     const el = document.createElement('div');
     el.className = 'toast ' + (type === 'success' || type === 'error' || type === 'warn' ? type : '');
     el.textContent = message;
@@ -529,15 +514,21 @@ function toast(message, type = 'info', ms = 3200) {
 }
 
 function openModal(innerHtml) {
-    document.getElementById('modalBox').innerHTML = innerHtml;
-    document.getElementById('modalOverlay').classList.add('open');
-}
-function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-    document.getElementById('modalBox').innerHTML = '';
+    const box = document.getElementById('modalBox');
+    const overlay = document.getElementById('modalOverlay');
+    if (box && overlay) {
+        box.innerHTML = innerHtml;
+        overlay.classList.add('open');
+    }
 }
 
-/** Confirm-style modal: calls onYes() if the user confirms. Non-blocking. */
+function closeModal() {
+    const overlay = document.getElementById('modalOverlay');
+    const box = document.getElementById('modalBox');
+    if (overlay) overlay.classList.remove('open');
+    if (box) box.innerHTML = '';
+}
+
 function confirmModal(message, onYes) {
     openModal(`
         <h3>⚠️ ${escapeHtml(message)}</h3>
@@ -546,10 +537,11 @@ function confirmModal(message, onYes) {
             <button class="btn" style="background:#95a5a6;" onclick="closeModal()">Cancel</button>
         </div>
     `);
-    document.getElementById('modalYesBtn').onclick = () => { closeModal(); onYes(); };
+    const btn = document.getElementById('modalYesBtn');
+    if (btn) btn.onclick = () => { closeModal(); onYes(); };
 }
 
-/* ---------- app state ---------- */
+/* ---------- State Variables ---------- */
 
 let currentUser = null;
 let cloudUsers = [];
@@ -562,7 +554,7 @@ let invoiceDiscountPercent = 0;
 
 let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 
-let products = [];        // each: { id, n, p, q, barcode, expiry }
+let products = [];
 let selectedProdId = null;
 let selectedStockProdId = null;
 let invoiceItems = [];
@@ -571,11 +563,11 @@ let savedFinances = [];
 let invoiceCounter = 1001;
 let activeInvoiceId = 1001;
 
-/* ---------- login / users ---------- */
+/* ---------- User & Auth Management ---------- */
 
 function togglePasswordVisibility() {
     const passInput = document.getElementById('entryPassInput');
-    passInput.type = passInput.type === 'password' ? 'text' : 'password';
+    if (passInput) passInput.type = passInput.type === 'password' ? 'text' : 'password';
 }
 
 function playBeepSound() {
@@ -594,7 +586,6 @@ async function loadLocalUsers() {
     const savedUsers = localStorage.getItem('anjum_local_users');
     if (savedUsers) {
         cloudUsers = JSON.parse(savedUsers);
-        // migrate any legacy plaintext passwords to hashes
         let changed = false;
         for (const u of cloudUsers) {
             if (u.password && !u.passwordHash) {
@@ -632,8 +623,8 @@ function renderUserDropdowns() {
 }
 
 async function validateEntryPassword() {
-    const usernameInput = document.getElementById('entryUserSelect').value.trim().toLowerCase();
-    const passwordInput = document.getElementById('entryPassInput').value.trim();
+    const usernameInput = document.getElementById('entryUserSelect')?.value.trim().toLowerCase();
+    const passwordInput = document.getElementById('entryPassInput')?.value.trim();
 
     if (!usernameInput || !passwordInput) { toast('Enter password!', 'warn'); return; }
 
@@ -663,7 +654,7 @@ function logout() {
     stopAllScanners();
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'flex';
-    document.getElementById('entryPassInput').value = '';
+    if (document.getElementById('entryPassInput')) document.getElementById('entryPassInput').value = '';
 }
 
 function applyRolePermissions() {
@@ -686,25 +677,22 @@ function applyRolePermissions() {
 }
 
 async function changeUserPasswordSystem() {
-    if (currentUser.role !== 'Admin') { toast('❌ Restricted to Admin!', 'error'); return; }
-    const targetUser = document.getElementById('userSelectPass').value;
-    const newPass = document.getElementById('newAccountPass').value.trim();
+    if (currentUser?.role !== 'Admin') { toast('❌ Restricted to Admin!', 'error'); return; }
+    const targetUser = document.getElementById('userSelectPass')?.value;
+    const newPass = document.getElementById('newAccountPass')?.value.trim();
     if (!newPass) { toast('Please enter new password!', 'warn'); return; }
 
     let uObj = cloudUsers.find(u => u.username.toLowerCase() === targetUser.toLowerCase());
     if (uObj) {
         uObj.passwordHash = await sha256Hex(newPass);
         saveLocalUsers(cloudUsers);
-        // NOTE: sending a plaintext newPassword to the backend is unavoidable if the
-        // backend itself needs to validate logins server-side; ideally the Apps Script
-        // endpoint should hash it again server-side and never store/return it in plain form.
         syncToCloud("updateUserPassword", { username: targetUser, newPasswordHash: uObj.passwordHash });
         toast(`✅ Password for [${targetUser.toUpperCase()}] updated successfully!`, 'success');
         document.getElementById('newAccountPass').value = '';
     }
 }
 
-/* ---------- rates ---------- */
+/* ---------- Exchange Rates ---------- */
 
 function loadRatesFromStorage() {
     const savedRates = localStorage.getItem('anjum_rates');
@@ -725,7 +713,7 @@ function updateRateLabels() {
 }
 
 function openRatesModal() {
-    if (currentUser.role !== 'Admin') { toast('❌ Restricted to Admin!', 'error'); return; }
+    if (currentUser?.role !== 'Admin') { toast('❌ Restricted to Admin!', 'error'); return; }
     openModal(`
         <h3>⚙️ Exchange Rates &amp; Guide Multiplier</h3>
         <div class="payment-grid">
@@ -743,11 +731,11 @@ function openRatesModal() {
 }
 
 function saveRatesFromModal() {
-    RATES.USD = parseFloat(document.getElementById('rateUSD').value) || RATES.USD;
-    RATES.EUR = parseFloat(document.getElementById('rateEUR').value) || RATES.EUR;
-    RATES.GBP = parseFloat(document.getElementById('rateGBP').value) || RATES.GBP;
-    RATES.VISA = parseFloat(document.getElementById('rateVISA').value) || RATES.VISA;
-    RATES.GUIDE_MULT = parseFloat(document.getElementById('rateGuideMult').value) || RATES.GUIDE_MULT;
+    RATES.USD = parseFloat(document.getElementById('rateUSD')?.value) || RATES.USD;
+    RATES.EUR = parseFloat(document.getElementById('rateEUR')?.value) || RATES.EUR;
+    RATES.GBP = parseFloat(document.getElementById('rateGBP')?.value) || RATES.GBP;
+    RATES.VISA = parseFloat(document.getElementById('rateVISA')?.value) || RATES.VISA;
+    RATES.GUIDE_MULT = parseFloat(document.getElementById('rateGuideMult')?.value) || RATES.GUIDE_MULT;
 
     localStorage.setItem('anjum_rates', JSON.stringify(RATES));
     updateRateLabels();
@@ -758,7 +746,7 @@ function saveRatesFromModal() {
     toast('✅ Exchange rates & Guide Multiplier updated!', 'success');
 }
 
-/* ---------- alerts bar ---------- */
+/* ---------- Alerts ---------- */
 
 function updateAlertsBar() {
     let lowStockCount = 0, expiringCount = 0;
@@ -770,11 +758,11 @@ function updateAlertsBar() {
             if (diffDays < 90) expiringCount++;
         }
     });
-    document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
-    document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
+    if (document.getElementById('lowStockCountVal')) document.getElementById('lowStockCountVal').textContent = `${lowStockCount} Low Stock Items`;
+    if (document.getElementById('expiringCountVal')) document.getElementById('expiringCountVal').textContent = `${expiringCount} Expiring Items`;
 }
 
-/* ---------- cloud sync ---------- */
+/* ---------- Cloud Sync Functions ---------- */
 
 function fetchInitialUsersOnly() {
     if (!navigator.onLine) return;
@@ -790,6 +778,7 @@ function fetchInitialUsersOnly() {
 
 function updateOnlineStatus() {
     const ind = document.getElementById('syncIndicator');
+    if (!ind) return;
     if (navigator.onLine) {
         ind.className = 'sync-status status-online';
         ind.textContent = '🟢 Online';
@@ -810,7 +799,6 @@ function fetchCloudInvoicesData(callbackAfter) {
         if (resData && resData.status === "success") {
             if (resData.users) saveLocalUsers(resData.users);
             if (resData.products && resData.products.length > 0) {
-                // ensure every product coming from the cloud has a stable id
                 products = resData.products.map(p => ({ id: p.id || uid(), ...p }));
                 saveProductsToStorage();
                 renderStockTable();
@@ -841,10 +829,6 @@ function fetchCloudInvoicesData(callbackAfter) {
     document.body.appendChild(script);
 }
 
-/** Sends an update to the backend. Tries a real fetch (so failures are detectable);
- *  only queues offline if we're actually offline or the request truly fails.
- *  NOTE: for the response to be readable, the Apps Script endpoint needs to send
- *  CORS headers — if it can't, this still degrades gracefully (data is queued). */
 function syncToCloud(actionType, data) {
     if (!navigator.onLine) {
         queueOffline(actionType, data);
@@ -852,11 +836,16 @@ function syncToCloud(actionType, data) {
     }
     fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: actionType, data: data })
-    }).catch(() => {
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("HTTP error " + res.status);
+        return res.json();
+    })
+    .catch(() => {
         queueOffline(actionType, data);
-        toast('⚠️ Sync failed — queued for later', 'warn');
+        toast('⚠️ Sync queued locally', 'warn');
     });
 }
 
@@ -874,7 +863,7 @@ function processOfflineQueue() {
     }
 }
 
-/* ---------- init / storage ---------- */
+/* ---------- System Init ---------- */
 
 function initSystem() {
     loadDataFromStorage();
@@ -910,7 +899,7 @@ function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.s
 
 function findProductById(id) { return products.find(p => p.id === id); }
 
-/* ---------- tabs / scanners ---------- */
+/* ---------- Tabs & Scanners ---------- */
 
 function showTab(tabId, evt) {
     stopAllScanners();
@@ -966,7 +955,8 @@ function stopCameraScanner(key) {
         scanners[key].stop().then(() => { activeScannerKey = null; document.getElementById(containerId).style.display = 'none'; })
             .catch(() => { document.getElementById(containerId).style.display = 'none'; });
     } else {
-        document.getElementById(containerId).style.display = 'none';
+        const el = document.getElementById(containerId);
+        if(el) el.style.display = 'none';
     }
 }
 
@@ -995,7 +985,7 @@ function onBarcodeScanned(key, decodedText) {
             prod.barcode = barcodeQuery;
             saveProductsToStorage();
             syncToCloud("updateSingleProduct", prod);
-            toast(`✅ Barcode updated for [${prod.n}] to: ${barcodeQuery}`, 'success');
+            toast(`✅ Barcode updated for [${prod.n}]`, 'success');
             selectedStockEditProductId = null;
             renderStockTable();
         }
@@ -1003,12 +993,12 @@ function onBarcodeScanned(key, decodedText) {
     stopCameraScanner(key);
 }
 
-/* ---------- barcode label printing ---------- */
+/* ---------- Barcode Label Printing ---------- */
 
 function printBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
     if (!prod) { toast("❌ Product not found!", 'error'); return; }
-    if (!prod.barcode) { toast("⚠️ This product has no barcode! Edit it to add one first.", 'warn'); return; }
+    if (!prod.barcode) { toast("⚠️ This product has no barcode!", 'warn'); return; }
 
     openModal(`
         <h3>🏷️ Print Label — ${escapeHtml(prod.n)}</h3>
@@ -1022,7 +1012,7 @@ function printBarcodeLabel(prodId) {
 
 function doPrintBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
-    const count = parseInt(document.getElementById('labelCount').value) || 1;
+    const count = parseInt(document.getElementById('labelCount')?.value) || 1;
     closeModal();
     if (!prod) return;
 
@@ -1055,7 +1045,6 @@ function doPrintBarcodeLabel(prodId) {
         `);
     }
 
-    // barcode value goes through JsBarcode as data, not HTML — inherently safe from markup injection
     win.document.write(`
         <script>
             window.onload = function() {
@@ -1071,16 +1060,8 @@ function doPrintBarcodeLabel(prodId) {
     win.document.close();
 }
 
-/* ---------- generic product search (replaces 3 near-duplicate functions) ---------- */
+/* ---------- Shared Search Logic ---------- */
 
-/**
- * Shared search helper used by the POS search box, the "recharge stock" search box,
- * and (loosely) the single-product report search.
- * @param {string} query
- * @param {HTMLElement} listEl results container
- * @param {(product:object)=>void} onPick called when a result (or exact barcode match) is chosen
- * @param {boolean} beepOnBarcodeMatch
- */
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
     const q = query.toLowerCase().trim();
     if (!q) { listEl.style.display = 'none'; return; }
@@ -1111,7 +1092,7 @@ function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) 
 
 function searchProduct() {
     genericProductSearch(
-        document.getElementById('searchInput').value,
+        document.getElementById('searchInput')?.value || '',
         document.getElementById('searchResults'),
         (p) => pickProduct(p.id)
     );
@@ -1131,7 +1112,10 @@ function pickProduct(prodId) {
     document.getElementById('guidePrice').textContent = ((p.p || 0) * guideMult).toFixed(2);
     document.getElementById('sellQty').value = 1;
 
-    ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => document.getElementById(id).value = 0);
+    ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = 0;
+    });
     document.getElementById('productCard').style.display = 'block';
     checkPriceAlert();
 }
@@ -1140,33 +1124,33 @@ function checkPriceAlert() {
     const p = findProductById(selectedProdId);
     if (!p) return;
     const guideMult = RATES.GUIDE_MULT || 3;
-    const qty = parseInt(document.getElementById('sellQty').value) || 1;
-    const u = parseFloat(document.getElementById('pUSD').value) || 0;
-    const eu = parseFloat(document.getElementById('pEUR').value) || 0;
-    const g = parseFloat(document.getElementById('pGBP').value) || 0;
-    const eg = parseFloat(document.getElementById('pEGP').value) || 0;
-    const v = parseFloat(document.getElementById('pVISA').value) || 0;
+    const qty = parseInt(document.getElementById('sellQty')?.value) || 1;
+    const u = parseFloat(document.getElementById('pUSD')?.value) || 0;
+    const eu = parseFloat(document.getElementById('pEUR')?.value) || 0;
+    const g = parseFloat(document.getElementById('pGBP')?.value) || 0;
+    const eg = parseFloat(document.getElementById('pEGP')?.value) || 0;
+    const v = parseFloat(document.getElementById('pVISA')?.value) || 0;
     const enteredTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
     const minRequiredTotal = (p.p * guideMult) * qty;
     const warnBox = document.getElementById('priceWarningBox');
 
-    document.getElementById('enteredTotalVal').textContent = enteredTotalEGP.toFixed(2);
-    document.getElementById('requiredMinVal').textContent = minRequiredTotal.toFixed(2);
-    warnBox.style.display = enteredTotalEGP < minRequiredTotal ? 'block' : 'none';
+    if (document.getElementById('enteredTotalVal')) document.getElementById('enteredTotalVal').textContent = enteredTotalEGP.toFixed(2);
+    if (document.getElementById('requiredMinVal')) document.getElementById('requiredMinVal').textContent = minRequiredTotal.toFixed(2);
+    if (warnBox) warnBox.style.display = enteredTotalEGP < minRequiredTotal ? 'block' : 'none';
 }
 
 function addToInvoice() {
     const p = findProductById(selectedProdId);
     if (!p) return;
-    const qty = parseInt(document.getElementById('sellQty').value) || 1;
+    const qty = parseInt(document.getElementById('sellQty')?.value) || 1;
     if (qty > p.q) { toast('⚠️ Quantity not available in stock! Available: ' + p.q, 'warn'); return; }
 
     playBeepSound();
-    const u = parseFloat(document.getElementById('pUSD').value) || 0;
-    const eu = parseFloat(document.getElementById('pEUR').value) || 0;
-    const g = parseFloat(document.getElementById('pGBP').value) || 0;
-    const eg = parseFloat(document.getElementById('pEGP').value) || 0;
-    const v = parseFloat(document.getElementById('pVISA').value) || 0;
+    const u = parseFloat(document.getElementById('pUSD')?.value) || 0;
+    const eu = parseFloat(document.getElementById('pEUR')?.value) || 0;
+    const g = parseFloat(document.getElementById('pGBP')?.value) || 0;
+    const eg = parseFloat(document.getElementById('pEGP')?.value) || 0;
+    const v = parseFloat(document.getElementById('pVISA')?.value) || 0;
     const itemTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
 
     p.q -= qty;
@@ -1193,20 +1177,20 @@ function addToInvoice() {
     document.getElementById('searchInput').value = '';
 }
 
-/* ---------- invoice ---------- */
+/* ---------- POS Operations ---------- */
 
 function prepareNewInvoice() {
     activeInvoiceId = invoiceCounter;
     currentNavIndex = -1;
-    document.getElementById('invNum').textContent = activeInvoiceId;
+    if (document.getElementById('invNum')) document.getElementById('invNum').textContent = activeInvoiceId;
 
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
+    if (document.getElementById('invoiceDate')) document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
 
     invoiceItems = [];
     invoiceDiscountPercent = 0;
-    document.getElementById('invoiceDiscountInput').value = 0;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
     renderInvoice();
 }
 
@@ -1215,7 +1199,7 @@ function holdCurrentInvoice() {
     heldInvoiceItems = JSON.parse(JSON.stringify(invoiceItems));
     invoiceItems = [];
     renderInvoice();
-    document.getElementById('resumeHoldBtn').style.display = 'inline-block';
+    if (document.getElementById('resumeHoldBtn')) document.getElementById('resumeHoldBtn').style.display = 'inline-block';
     toast('⏸️ Invoice put on hold', 'success');
 }
 
@@ -1223,15 +1207,15 @@ function resumeHoldInvoice() {
     if (!heldInvoiceItems) return;
     invoiceItems = JSON.parse(JSON.stringify(heldInvoiceItems));
     heldInvoiceItems = null;
-    document.getElementById('resumeHoldBtn').style.display = 'none';
+    if (document.getElementById('resumeHoldBtn')) document.getElementById('resumeHoldBtn').style.display = 'none';
     renderInvoice();
     toast('▶️ Invoice resumed', 'success');
 }
 
 function clearCurrentInvoice() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchResults').style.display = 'none';
-    document.getElementById('productCard').style.display = 'none';
+    if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+    if (document.getElementById('searchResults')) document.getElementById('searchResults').style.display = 'none';
+    if (document.getElementById('productCard')) document.getElementById('productCard').style.display = 'none';
     selectedProdId = null;
 
     if (invoiceItems.length > 0) {
@@ -1246,16 +1230,15 @@ function clearCurrentInvoice() {
 
     invoiceItems = [];
     invoiceDiscountPercent = 0;
-    document.getElementById('invoiceDiscountInput').value = 0;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
     renderInvoice();
 }
 
 function loadInvoiceIntoForm(inv) {
     if (!inv) return;
     activeInvoiceId = inv.id;
-    document.getElementById('invNum').textContent = inv.id;
-
-    if (inv.date) document.getElementById('invoiceDate').value = inv.date.replace(' ', 'T').slice(0, 16);
+    if (document.getElementById('invNum')) document.getElementById('invNum').textContent = inv.id;
+    if (inv.date && document.getElementById('invoiceDate')) document.getElementById('invoiceDate').value = inv.date.replace(' ', 'T').slice(0, 16);
 
     if (Array.isArray(inv.items)) {
         invoiceItems = JSON.parse(JSON.stringify(inv.items));
@@ -1273,7 +1256,7 @@ function loadInvoiceIntoForm(inv) {
         }];
     }
     invoiceDiscountPercent = inv.discount || 0;
-    document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
     renderInvoice();
 }
 
@@ -1318,6 +1301,7 @@ function removeInvoiceItem(index) {
 
 function renderInvoice() {
     const tbody = document.getElementById('invoiceTableBody');
+    if (!tbody) return;
     let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0, totalSellEGP = 0;
 
     if (invoiceItems.length === 0) {
@@ -1348,12 +1332,12 @@ function renderInvoice() {
     const discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
     const finalPayable = totalSellEGP - discountVal;
 
-    document.getElementById('liveUSD').textContent = '$' + sumUSD.toFixed(2);
-    document.getElementById('liveEUR').textContent = '€' + sumEUR.toFixed(2);
-    document.getElementById('liveGBP').textContent = '£' + sumGBP.toFixed(2);
-    document.getElementById('liveEGP').textContent = sumEGP.toFixed(2) + ' EGP';
-    document.getElementById('liveVISA').textContent = sumVISA.toFixed(2) + ' EGP';
-    document.getElementById('liveTotalEGP').textContent = finalPayable.toFixed(2) + ' EGP';
+    if (document.getElementById('liveUSD')) document.getElementById('liveUSD').textContent = '$' + sumUSD.toFixed(2);
+    if (document.getElementById('liveEUR')) document.getElementById('liveEUR').textContent = '€' + sumEUR.toFixed(2);
+    if (document.getElementById('liveGBP')) document.getElementById('liveGBP').textContent = '£' + sumGBP.toFixed(2);
+    if (document.getElementById('liveEGP')) document.getElementById('liveEGP').textContent = sumEGP.toFixed(2) + ' EGP';
+    if (document.getElementById('liveVISA')) document.getElementById('liveVISA').textContent = sumVISA.toFixed(2) + ' EGP';
+    if (document.getElementById('liveTotalEGP')) document.getElementById('liveTotalEGP').textContent = finalPayable.toFixed(2) + ' EGP';
 }
 
 function getItemPaidText(item) {
@@ -1371,7 +1355,7 @@ function getItemPaidText(item) {
 function saveInvoice() {
     if (invoiceItems.length === 0) { toast('Please add items to invoice first!', 'warn'); return; }
 
-    const invDateRaw = document.getElementById('invoiceDate').value;
+    const invDateRaw = document.getElementById('invoiceDate')?.value;
     const invDate = invDateRaw ? invDateRaw.replace('T', ' ') : new Date().toLocaleString();
 
     let totalSell = 0, totalComm = 0, totalProfit = 0;
@@ -1415,14 +1399,14 @@ function saveInvoice() {
     generateReport();
 }
 
-/* ---------- finance ---------- */
+/* ---------- Finance Modules ---------- */
 
 function saveFinanceEntry() {
-    const type = document.getElementById('finType').value;
-    const category = document.getElementById('finCategory').value.trim();
-    const amount = parseFloat(document.getElementById('finAmount').value) || 0;
-    const dateRaw = document.getElementById('finDate').value;
-    const notes = document.getElementById('finNotes').value.trim();
+    const type = document.getElementById('finType')?.value;
+    const category = document.getElementById('finCategory')?.value.trim();
+    const amount = parseFloat(document.getElementById('finAmount')?.value) || 0;
+    const dateRaw = document.getElementById('finDate')?.value;
+    const notes = document.getElementById('finNotes')?.value.trim();
 
     if (!category) { toast('Please enter category/description!', 'warn'); return; }
     if (amount <= 0) { toast('Please enter a valid amount!', 'warn'); return; }
@@ -1435,14 +1419,14 @@ function saveFinanceEntry() {
     syncToCloud("saveFinance", fEntry);
 
     toast(`✅ ${type} record saved successfully!`, 'success');
-    document.getElementById('finCategory').value = '';
-    document.getElementById('finAmount').value = '';
-    document.getElementById('finNotes').value = '';
+    if (document.getElementById('finCategory')) document.getElementById('finCategory').value = '';
+    if (document.getElementById('finAmount')) document.getElementById('finAmount').value = '';
+    if (document.getElementById('finNotes')) document.getElementById('finNotes').value = '';
     renderFinanceTable();
 }
 
 function deleteFinanceEntry(id) {
-    if (currentUser.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
+    if (currentUser?.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
     confirmModal("Delete this finance record permanently?", () => {
         savedFinances = savedFinances.filter(f => f.id !== id);
         saveFinancesToStorage();
@@ -1453,9 +1437,9 @@ function deleteFinanceEntry(id) {
 }
 
 function renderFinanceTable() {
-    const fromD = document.getElementById('finFromDate') ? document.getElementById('finFromDate').value : '';
-    const toD = document.getElementById('finToDate') ? document.getElementById('finToDate').value : '';
-    const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+    const fromD = document.getElementById('finFromDate')?.value || '';
+    const toD = document.getElementById('finToDate')?.value || '';
+    const includeSales = document.getElementById('includeSalesIncomeToggle')?.checked || false;
 
     const filtered = savedFinances.filter(f => {
         if (!f.date) return true;
@@ -1467,6 +1451,7 @@ function renderFinanceTable() {
 
     let totRev = 0, totExp = 0;
     const tbody = document.getElementById('financeTableBody');
+    if (!tbody) return;
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
@@ -1496,17 +1481,19 @@ function renderFinanceTable() {
         });
     }
 
-    document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
-    document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
+    if (document.getElementById('sumRevenues')) document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
+    if (document.getElementById('sumExpenses')) document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
     const net = totRev - totExp;
     const netEl = document.getElementById('netBalance');
-    netEl.textContent = net.toFixed(2) + ' EGP';
-    netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
+    if (netEl) {
+        netEl.textContent = net.toFixed(2) + ' EGP';
+        netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
+    }
 }
 
 function exportFinanceExcel() {
-    const fromD = document.getElementById('finFromDate').value;
-    const toD = document.getElementById('finToDate').value;
+    const fromD = document.getElementById('finFromDate')?.value || '';
+    const toD = document.getElementById('finToDate')?.value || '';
     const filtered = savedFinances.filter(f => {
         if (!f.date) return true;
         const fD = f.date.slice(0, 10);
@@ -1527,9 +1514,9 @@ function exportFinanceExcel() {
 }
 
 function printFinanceReportPDF() {
-    const fromD = document.getElementById('finFromDate').value;
-    const toD = document.getElementById('finToDate').value;
-    const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+    const fromD = document.getElementById('finFromDate')?.value || '';
+    const toD = document.getElementById('finToDate')?.value || '';
+    const includeSales = document.getElementById('includeSalesIncomeToggle')?.checked || false;
 
     const filtered = savedFinances.filter(f => {
         if (!f.date) return true;
@@ -1596,8 +1583,6 @@ function printFinanceReportPDF() {
     renderToTempPdf(html, 'Financial_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
 }
 
-/* ---------- shared PDF helper (removes the copy/paste html2pdf boilerplate) ---------- */
-
 function renderToTempPdf(html, filename, orientation = 'landscape') {
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
@@ -1616,14 +1601,14 @@ function renderToTempPdf(html, filename, orientation = 'landscape') {
     html2pdf().set(opt).from(tempContainer).save().then(() => document.body.removeChild(tempContainer));
 }
 
-/* ---------- add / recharge stock ---------- */
+/* ---------- Stock Operations ---------- */
 
 function addNewProductToSystem() {
-    const name = document.getElementById('newProdName').value.trim();
-    const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
-    const qty = parseInt(document.getElementById('newProdQty').value) || 0;
-    const barcode = document.getElementById('newProdBarcode').value.trim();
-    const expiry = document.getElementById('newProdExpiry').value;
+    const name = document.getElementById('newProdName')?.value.trim();
+    const price = parseFloat(document.getElementById('newProdPrice')?.value) || 0;
+    const qty = parseInt(document.getElementById('newProdQty')?.value) || 0;
+    const barcode = document.getElementById('newProdBarcode')?.value.trim();
+    const expiry = document.getElementById('newProdExpiry')?.value;
 
     if (!name) { toast('Enter product name!', 'warn'); return; }
 
@@ -1645,13 +1630,13 @@ function addNewProductToSystem() {
     updateAlertsBar();
 
     toast(`Product (${name}) saved and synced! ☁️`, 'success');
-    document.getElementById('newProdName').value = '';
-    document.getElementById('newProdBarcode').value = '';
+    if (document.getElementById('newProdName')) document.getElementById('newProdName').value = '';
+    if (document.getElementById('newProdBarcode')) document.getElementById('newProdBarcode').value = '';
 }
 
 function searchAddStockProduct() {
     genericProductSearch(
-        document.getElementById('addStockSearch').value,
+        document.getElementById('addStockSearch')?.value || '',
         document.getElementById('addStockResults'),
         (p) => pickAddStockProduct(p.id)
     );
@@ -1672,7 +1657,7 @@ function pickAddStockProduct(prodId) {
 function saveStockAddition() {
     const p = findProductById(selectedStockProdId);
     if (!p) return;
-    const addQty = parseInt(document.getElementById('newStockQty').value) || 0;
+    const addQty = parseInt(document.getElementById('newStockQty')?.value) || 0;
     p.q += addQty;
     saveProductsToStorage();
     syncToCloud("updateSingleProduct", p);
@@ -1683,8 +1668,6 @@ function saveStockAddition() {
     document.getElementById('addStockSearch').value = '';
     renderStockTable();
 }
-
-/* ---------- stock management ---------- */
 
 function isManagerUser() {
     return currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin');
@@ -1715,12 +1698,12 @@ function saveProductEdit(prodId) {
     const prod = findProductById(prodId);
     if (!prod) return;
 
-    prod.n = document.getElementById('editName').value.trim() || prod.n;
-    prod.p = parseFloat(document.getElementById('editPrice').value) || prod.p;
-    prod.q = parseInt(document.getElementById('editQty').value);
+    prod.n = document.getElementById('editName')?.value.trim() || prod.n;
+    prod.p = parseFloat(document.getElementById('editPrice')?.value) || prod.p;
+    prod.q = parseInt(document.getElementById('editQty')?.value);
     if (isNaN(prod.q)) prod.q = 0;
-    prod.barcode = document.getElementById('editBarcode').value.trim();
-    prod.expiry = document.getElementById('editExpiry').value.trim();
+    prod.barcode = document.getElementById('editBarcode')?.value.trim();
+    prod.expiry = document.getElementById('editExpiry')?.value.trim();
 
     saveProductsToStorage();
     syncToCloud("updateSingleProduct", prod);
@@ -1774,6 +1757,7 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
 
 function renderStockTable(filter = '') {
     const tbody = document.getElementById('stockTableBody');
+    if (!tbody) return;
     const f = filter.toLowerCase();
     const matched = products.filter(p => (p.n && p.n.toLowerCase().includes(f)) || (p.barcode && p.barcode.toLowerCase().includes(f)));
     const today = new Date();
@@ -1794,13 +1778,14 @@ function renderStockTable(filter = '') {
 function filterStockTable(val) { renderStockTable(val); }
 
 function filterLowStock() {
-    document.getElementById('stockFilterInput').value = '';
+    if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
     const matched = products.filter(p => p.q <= 3);
-    document.getElementById('stockTableBody').innerHTML = matched.map((p, index) => stockRowHtml(p, index, 'low-stock-row', ' ⚠️ (Low Stock)')).join('');
+    const tbody = document.getElementById('stockTableBody');
+    if (tbody) tbody.innerHTML = matched.map((p, index) => stockRowHtml(p, index, 'low-stock-row', ' ⚠️ (Low Stock)')).join('');
 }
 
 function filterNearExpiryOneMonth() {
-    document.getElementById('stockFilterInput').value = '';
+    if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
     const today = new Date();
     const matched = products.filter(p => {
         if (!p.expiry) return false;
@@ -1814,11 +1799,14 @@ function filterNearExpiryOneMonth() {
         return;
     }
 
-    document.getElementById('stockTableBody').innerHTML = matched.map((p, index) => {
-        const diffDays = (new Date(p.expiry) - today) / 86400000;
-        const isExpired = diffDays < 0;
-        return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 Expired)' : ' (⚠️ Expiring Soon)');
-    }).join('');
+    const tbody = document.getElementById('stockTableBody');
+    if (tbody) {
+        tbody.innerHTML = matched.map((p, index) => {
+            const diffDays = (new Date(p.expiry) - today) / 86400000;
+            const isExpired = diffDays < 0;
+            return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 Expired)' : ' (⚠️ Expiring Soon)');
+        }).join('');
+    }
 }
 
 function printStockTable() {
@@ -1859,7 +1847,7 @@ function printStockTable() {
     renderToTempPdf(html, 'Stock_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
 }
 
-/* ---------- reports ---------- */
+/* ---------- Sales Reports ---------- */
 
 function printSingleReceipt(invId) {
     const inv = savedInvoices.find(i => i.id === invId);
@@ -1889,15 +1877,17 @@ function printSingleReceipt(invId) {
     `;
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.innerHTML = receiptHTML;
-    document.body.classList.add('printing-receipt');
-    window.print();
-    setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.innerHTML = ''; }, 500);
+    if (printSec) {
+        printSec.innerHTML = receiptHTML;
+        document.body.classList.add('printing-receipt');
+        window.print();
+        setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.innerHTML = ''; }, 500);
+    }
 }
 
 function exportSalesReportExcel() {
-    const fromD = document.getElementById('fromDate').value;
-    const toD = document.getElementById('toDate').value;
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
 
     const filteredInvoices = savedInvoices.filter(inv => {
         if (!inv.date) return true;
@@ -1922,8 +1912,6 @@ function exportSalesReportExcel() {
     XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-/** Builds the per-invoice product tally + item html for a set of invoices.
- *  Shared by generateReport(), renderInAppReportView() and handleNetProfitAction(). */
 function buildInvoiceTally(filteredInvoices) {
     let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
     let grandTotalSell = 0, grandNetProfit = 0;
@@ -1979,15 +1967,17 @@ function filteredInvoicesByRange(fromD, toD) {
 }
 
 function generateReport() {
-    const fromD = document.getElementById('fromDate').value;
-    const toD = document.getElementById('toDate').value;
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
     const filteredInvoices = filteredInvoicesByRange(fromD, toD);
 
     const tbody = document.getElementById('savedInvoicesBody');
+    if (!tbody) return;
+
     if (filteredInvoices.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d;">No saved invoices found</td></tr>';
-        document.getElementById('reportSummaryCardsContainer').innerHTML = '';
-        document.getElementById('topProductsChartContainer').innerHTML = '';
+        if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
+        if (document.getElementById('topProductsChartContainer')) document.getElementById('topProductsChartContainer').innerHTML = '';
         return;
     }
 
@@ -2015,31 +2005,37 @@ function generateReport() {
         </tr>`;
     }).join('');
 
-    document.getElementById('reportSummaryCardsContainer').innerHTML = `
-        <div class="report-card"><div class="report-card-title">💵 Cash Payments / كاش العملات</div>
-            <div class="report-card-value" style="font-size:0.8rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
-        <div class="report-card"><div class="report-card-title">💳 Total Visa Payments / إجمالي الفيزا</div><div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div></div>
-        <div class="report-card" style="border-color:#27ae60;"><div class="report-card-title" style="color:#27ae60;">🛒 Total Net Sales / إجمالي المبيعات</div><div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div></div>
-        <div class="report-card" style="border-color:#8e44ad;"><div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit / صافي الربح</div><div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div></div>
-    `;
+    const cardsContainer = document.getElementById('reportSummaryCardsContainer');
+    if (cardsContainer) {
+        cardsContainer.innerHTML = `
+            <div class="report-card"><div class="report-card-title">💵 Cash Payments / كاش العملات</div>
+                <div class="report-card-value" style="font-size:0.8rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
+            <div class="report-card"><div class="report-card-title">💳 Total Visa Payments / إجمالي الفيزا</div><div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div></div>
+            <div class="report-card" style="border-color:#27ae60;"><div class="report-card-title" style="color:#27ae60;">🛒 Total Net Sales / إجمالي المبيعات</div><div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div></div>
+            <div class="report-card" style="border-color:#8e44ad;"><div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit / صافي الربح</div><div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div></div>
+        `;
+    }
 
+    const chartContainer = document.getElementById('topProductsChartContainer');
     const top10 = tally.sortedTop.slice(0, 10);
-    if (top10.length > 0) {
-        const maxQty = top10[0].qty || 1;
-        const chartRows = top10.map((p, idx) => `
-            <div class="chart-row">
-                <div class="chart-label">#${idx + 1} ${escapeHtml(p.name)}</div>
-                <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
-                <div class="chart-val">${p.qty} u</div>
-            </div>`).join('');
-        document.getElementById('topProductsChartContainer').innerHTML = `<h4 style="margin-bottom:10px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products / أعلى 10 منتجات مبيعاً:</h4>${chartRows}`;
-    } else {
-        document.getElementById('topProductsChartContainer').innerHTML = '';
+    if (chartContainer) {
+        if (top10.length > 0) {
+            const maxQty = top10[0].qty || 1;
+            const chartRows = top10.map((p, idx) => `
+                <div class="chart-row">
+                    <div class="chart-label">#${idx + 1} ${escapeHtml(p.name)}</div>
+                    <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
+                    <div class="chart-val">${p.qty} u</div>
+                </div>`).join('');
+            chartContainer.innerHTML = `<h4 style="margin-bottom:10px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products / أعلى 10 منتجات مبيعاً:</h4>${chartRows}`;
+        } else {
+            chartContainer.innerHTML = '';
+        }
     }
 }
 
 function loadInvoiceToEdit(invId) {
-    if (currentUser.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
+    if (currentUser?.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
     const inv = savedInvoices.find(i => i.id === invId);
     if (!inv) return;
     showTab('salesTab');
@@ -2047,7 +2043,7 @@ function loadInvoiceToEdit(invId) {
 }
 
 function cancelInvoiceSystem(invId) {
-    if (currentUser.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
+    if (currentUser?.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
     const invIdx = savedInvoices.findIndex(i => i.id === invId);
     if (invIdx === -1) return;
     const inv = savedInvoices[invIdx];
@@ -2073,10 +2069,10 @@ function cancelInvoiceSystem(invId) {
 }
 
 function handleNetProfitAction() {
-    if (currentUser.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
-    const fromD = document.getElementById('fromDate').value;
-    const toD = document.getElementById('toDate').value;
-    const deductExp = document.getElementById('deductExpensesToggle') ? document.getElementById('deductExpensesToggle').checked : false;
+    if (currentUser?.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
+    const deductExp = document.getElementById('deductExpensesToggle')?.checked || false;
 
     const filteredInvoices = filteredInvoicesByRange(fromD, toD);
     const tally = buildInvoiceTally(filteredInvoices);
@@ -2096,41 +2092,50 @@ function handleNetProfitAction() {
         netProfit -= totalExpensesInPeriod;
     }
 
-    document.getElementById('repTotalUSD').textContent = '$' + tally.sumUSD.toFixed(2);
-    document.getElementById('repTotalEUR').textContent = '€' + tally.sumEUR.toFixed(2);
-    document.getElementById('repTotalGBP').textContent = '£' + tally.sumGBP.toFixed(2);
-    document.getElementById('repTotalEGP').textContent = tally.sumEGP.toFixed(2) + ' EGP';
-    document.getElementById('repTotalVISA').textContent = tally.sumVISA.toFixed(2) + ' EGP';
-    document.getElementById('repTotalSell').textContent = tally.grandTotalSell.toFixed(2) + ' EGP';
+    if (document.getElementById('repTotalUSD')) document.getElementById('repTotalUSD').textContent = '$' + tally.sumUSD.toFixed(2);
+    if (document.getElementById('repTotalEUR')) document.getElementById('repTotalEUR').textContent = '€' + tally.sumEUR.toFixed(2);
+    if (document.getElementById('repTotalGBP')) document.getElementById('repTotalGBP').textContent = '£' + tally.sumGBP.toFixed(2);
+    if (document.getElementById('repTotalEGP')) document.getElementById('repTotalEGP').textContent = tally.sumEGP.toFixed(2) + ' EGP';
+    if (document.getElementById('repTotalVISA')) document.getElementById('repTotalVISA').textContent = tally.sumVISA.toFixed(2) + ' EGP';
+    if (document.getElementById('repTotalSell')) document.getElementById('repTotalSell').textContent = tally.grandTotalSell.toFixed(2) + ' EGP';
 
     let totalComm = 0;
     filteredInvoices.forEach(inv => totalComm += inv.totalComm || 0);
-    document.getElementById('repTotalComm').textContent = totalComm.toFixed(2) + ' EGP';
-    document.getElementById('repNetProfit').textContent = netProfit.toFixed(2) + ' EGP';
+    if (document.getElementById('repTotalComm')) document.getElementById('repTotalComm').textContent = totalComm.toFixed(2) + ' EGP';
+    if (document.getElementById('repNetProfit')) document.getElementById('repNetProfit').textContent = netProfit.toFixed(2) + ' EGP';
 
     const top5 = tally.sortedTop.slice(0, 5);
-    document.getElementById('topProductsList').innerHTML = top5.length > 0
-        ? top5.map((p, idx) => `<b>#${idx + 1} ${escapeHtml(p.name)}</b> (${p.qty} units)`).join(' | ')
-        : 'No data available';
+    if (document.getElementById('topProductsList')) {
+        document.getElementById('topProductsList').innerHTML = top5.length > 0
+            ? top5.map((p, idx) => `<b>#${idx + 1} ${escapeHtml(p.name)}</b> (${p.qty} units)`).join(' | ')
+            : 'No data available';
+    }
 
-    document.getElementById('profitBox').style.display = 'block';
+    if (document.getElementById('profitBox')) document.getElementById('profitBox').style.display = 'block';
 }
 
-/* ---------- single-product sales history ---------- */
+/* ---------- Single Product History ---------- */
 
 function clearSingleProductReportSearch() {
-    document.getElementById('singleProdSearchInput').value = '';
-    document.getElementById('singleProductReportResults').style.display = 'none';
-    document.getElementById('singleProdReportDisplay').style.display = 'none';
-    document.getElementById('singleProdReportDisplay').innerHTML = '';
+    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = '';
+    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
+    const display = document.getElementById('singleProdReportDisplay');
+    if (display) {
+        display.style.display = 'none';
+        display.innerHTML = '';
+    }
 }
 
 function searchSingleProductReport() {
-    const query = document.getElementById('singleProdSearchInput').value.trim();
+    const query = document.getElementById('singleProdSearchInput')?.value.trim() || '';
     const list = document.getElementById('singleProductReportResults');
     const display = document.getElementById('singleProdReportDisplay');
 
-    if (!query) { list.style.display = 'none'; display.style.display = 'none'; return; }
+    if (!query) { 
+        if(list) list.style.display = 'none'; 
+        if(display) display.style.display = 'none'; 
+        return; 
+    }
 
     const q = query.toLowerCase();
     const matchedProds = products.filter(p => p.n && p.n.toLowerCase().includes(q));
@@ -2140,17 +2145,17 @@ function searchSingleProductReport() {
         list.querySelectorAll('.result-item').forEach(el => el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
         list.style.display = 'block';
     } else {
-        list.style.display = 'none';
+        if(list) list.style.display = 'none';
         generateSingleProductDetailsReport(query);
     }
 }
 
 function generateSingleProductDetailsReport(productName) {
-    document.getElementById('singleProdSearchInput').value = productName;
-    document.getElementById('singleProductReportResults').style.display = 'none';
+    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = productName;
+    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
     const display = document.getElementById('singleProdReportDisplay');
-    const fromD = document.getElementById('fromDate').value;
-    const toD = document.getElementById('toDate').value;
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
 
     let totalQtySold = 0, totalRevenue = 0;
     const salesHistory = [];
@@ -2176,6 +2181,8 @@ function generateSingleProductDetailsReport(productName) {
             totalRevenue += inv.totalEGP || 0;
         }
     });
+
+    if (!display) return;
 
     if (salesHistory.length === 0) {
         display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; padding:10px;">⚠️ No sales history found for product [${escapeHtml(productName)}] in the selected period!</div>`;
@@ -2207,11 +2214,11 @@ function generateSingleProductDetailsReport(productName) {
     window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-/* ---------- full in-app report view + PDF ---------- */
+/* ---------- In-App Full PDF View ---------- */
 
 function renderInAppReportView() {
-    const fromD = document.getElementById('fromDate').value;
-    const toD = document.getElementById('toDate').value;
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
     const filteredInvoices = filteredInvoicesByRange(fromD, toD);
     const tally = buildInvoiceTally(filteredInvoices);
     const top10 = tally.sortedTop.slice(0, 10);
@@ -2284,14 +2291,18 @@ function renderInAppReportView() {
         <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
     `;
 
-    document.getElementById('pdfExportableArea').innerHTML = html;
-    document.getElementById('inAppReportContainer').style.display = 'block';
-    window.scrollTo({ top: document.getElementById('inAppReportContainer').offsetTop - 20, behavior: 'smooth' });
+    const container = document.getElementById('pdfExportableArea');
+    if (container) container.innerHTML = html;
+    const parentContainer = document.getElementById('inAppReportContainer');
+    if (parentContainer) {
+        parentContainer.style.display = 'block';
+        window.scrollTo({ top: parentContainer.offsetTop - 20, behavior: 'smooth' });
+    }
 }
 
 function hideInAppReportView() {
-    document.getElementById('inAppReportContainer').style.display = 'none';
-    document.getElementById('pdfExportableArea').innerHTML = '';
+    if (document.getElementById('inAppReportContainer')) document.getElementById('inAppReportContainer').style.display = 'none';
+    if (document.getElementById('pdfExportableArea')) document.getElementById('pdfExportableArea').innerHTML = '';
 }
 
 function downloadInAppReportPDF() {
@@ -2307,7 +2318,7 @@ function downloadInAppReportPDF() {
     html2pdf().set(opt).from(element).save();
 }
 
-/* ---------- boot ---------- */
+/* ---------- Application Entry Point ---------- */
 
 window.addEventListener('DOMContentLoaded', async () => {
     await loadLocalUsers();
@@ -2321,7 +2332,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('keydown', (e) => {
         if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput').focus(); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
         else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
         else if (e.key === 'Escape') closeModal();
