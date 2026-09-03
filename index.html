@@ -3,75 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anjum Green Pharmacy 🌿 - نظام إدارة الصيدلية 2026</title>
+    <title>Anjum Green Pharmacy 2026</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-        html, body { width: 100%; overflow-x: hidden; background-color: #f0f4f8; padding: 4px; color: #1e293b; direction: rtl; }
-        
-        .app-container { width: 100%; max-width: 100%; margin: 0 auto; background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 4px 15px rgba(30, 60, 114, 0.08); position: relative; min-height: 98vh; padding-bottom: 30px; overflow-x: hidden; border: 1px solid #cbd5e1; }
-        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.1rem; }
-        
-        .animated-leaf {
-            display: inline-block;
-            font-size: 1.4rem;
-            vertical-align: middle;
-            margin: 0 2px;
-            animation: leafSway 2.5s ease-in-out infinite alternate;
-            transform-origin: bottom center;
-        }
+        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
+        .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
+        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
+        .animated-leaf { display: inline-block; animation: leafSway 2.5s ease-in-out infinite alternate; transform-origin: bottom center; }
         @keyframes leafSway { 0% { transform: rotate(-12deg) scale(1); } 50% { transform: rotate(15deg) scale(1.15); } 100% { transform: rotate(-5deg) scale(1); } }
 
-        .sync-status { text-align: center; font-size: 0.8rem; font-weight: bold; margin-bottom: 6px; padding: 4px; border-radius: 6px; }
-        .status-online { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-        .status-offline { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
 
-        .alerts-bar { background: #fff8e7; border: 1px solid #ffe8b3; color: #b78103; padding: 6px 8px; border-radius: 6px; margin-bottom: 8px; font-size: 0.78rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+        .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.82rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
 
-        .nav-tabs { display: flex; gap: 4px; margin-bottom: 10px; border-bottom: 2px solid #3498db; padding-bottom: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.8rem; flex-shrink: 0; }
-        .tab-btn.active { background: #1e3c72; color: #fff; border-color: #1e3c72; }
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; }
+        .tab-btn.active { background: #1e3c72; color: #fff; }
 
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
-        .section-title { font-weight: bold; margin-bottom: 8px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 4px; font-size: 0.95rem; }
-        
-        .search-box { width: 100%; padding: 8px; font-size: 13px; border: 2px solid #3498db; border-radius: 6px; outline: none; margin-bottom: 6px; box-sizing: border-box; background: #fff; }
-        .large-search-box { width: 100%; padding: 10px; font-size: 0.95rem; font-weight: bold; border: 2px solid #1e3c72; border-radius: 6px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
+        .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 0.95rem; text-align: right; line-height: 1.4; }
 
-        .results-list { max-height: 180px; overflow-y: auto; border: 2px solid #3498db; border-radius: 6px; margin-bottom: 8px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .result-item { padding: 6px 8px; cursor: pointer; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 0.8rem; }
+        .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
+        .large-search-box { width: 100%; padding: 12px 14px; font-size: 1rem; font-weight: bold; border: 2px solid #1e3c72; border-radius: 8px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
 
-        .card { background: #f8fafc; border: 1px solid #94a3b8; padding: 10px; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; width: 100%; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.8rem; flex-wrap: wrap; gap: 4px; }
+        .results-list { max-height: 250px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .result-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.9rem; }
+
+        .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; width: 100%; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
         .info-row span { font-weight: bold; }
-        
-        .payment-grid, .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-top: 6px; width: 100%; box-sizing: border-box; }
-        .pay-box, .field-box { display: flex; flex-direction: column; width: 100%; }
-        .pay-box label, .field-box label { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; color: #1e3c72; }
-        .pay-box input, .pay-box select, .field-box input, .field-box select { width: 100%; padding: 8px; border: 1px solid #94a3b8; border-radius: 6px; text-align: center; font-size: 0.85rem; box-sizing: border-box; background: #fff; }
 
-        .btn { background: #27ae60; color: white; border: none; padding: 8px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; font-size: 0.85rem; }
-        .btn-blue { background: #3498db; }
-        .btn-red { background: #e74c3c; }
-        .btn-purple { background: #8e44ad; }
-        .btn-orange { background: #e67e22; }
+        .payment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box; }
+        .pay-box { display: flex; flex-direction: column; width: 100%; }
+        .pay-box label { font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; }
+        .pay-box input, .pay-box select { width: 100%; padding: 8px 4px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 0.95rem; box-sizing: border-box; }
 
-        .nav-controls { display: flex; gap: 4px; justify-content: center; margin-top: 8px; }
-        .nav-controls .btn { width: auto; font-size: 0.75rem; padding: 4px 8px; margin-top: 0; }
+        @media (max-width: 550px) { .payment-grid { grid-template-columns: 1fr; } .pay-box { grid-column: span 1 !important; } }
+
+        .warning-box { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+        .btn { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn:hover { background: #219653; }
+        .btn-blue { background: #3498db; } .btn-blue:hover { background: #2980b9; }
+        .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
+
+        .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .nav-controls .btn { width: auto; font-size: 0.8rem; padding: 6px 12px; margin-top: 0; }
 
         .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 8px; border-radius: 8px; border: 2px solid #3498db; }
-        table { width: 100%; border-collapse: collapse; background: #fff; table-layout: auto; direction: rtl; }
-        th, td { padding: 8px 6px; border: 1px solid #93c5fd; text-align: center; font-size: 0.85rem; word-break: break-word; vertical-align: middle; color: #1e293b !important; font-weight: bold; line-height: 1.4; }
-        th { background: #fcf8e3; color: #1e3c72 !important; white-space: nowrap; font-size: 0.85rem; border-bottom: 2px solid #3498db; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
+        table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
+        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.85rem; }
 
         .items-column-cell { text-align: right !important; font-size: 0.8rem !important; line-height: 1.4 !important; min-width: 250px !important; white-space: normal !important; word-break: break-word !important; }
 
@@ -80,36 +74,56 @@
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
 
         .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
-        .login-card { background: white; padding: 20px; border-radius: 12px; text-align: center; width: 92%; max-width: 360px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
 
-        .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 8px; padding: 6px; background: #eef7fe; border-radius: 6px; font-weight: bold; font-size: 0.8rem; }
-        .discount-bar input { width: 70px; padding: 4px; text-align: center; border-radius: 4px; border: 1px solid #3498db; font-weight: bold; }
+        .pass-container { position: relative; width: 100%; margin-bottom: 12px; }
+        .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
 
-        .totals-box { background: #fcf8e3; color: #1e3c72; padding: 10px; border-radius: 8px; margin-top: 10px; border: 2px solid #3498db; position: relative; }
+        .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 10px; background: #ffffff; border: 1px solid #1e3c72; border-radius: 8px; font-weight: bold; font-size: 0.85rem; color: #1e3c72; }
+        .discount-bar input { width: 75px; padding: 6px; text-align: center; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; }
+
+        .totals-box { background: #1e3c72; color: #fff; padding: 12px; padding-top: 35px; border-radius: 8px; margin-top: 15px; position: relative; }
         .close-summary-btn { position: absolute; top: 6px; left: 8px; width: auto; padding: 3px 10px; font-size: 0.72rem; z-index: 10; }
 
-        .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; font-size: 0.8rem; text-align: center; }
-        .total-item { background: #ffffff; padding: 6px 4px; border-radius: 6px; border: 1px solid #bfdbfe; color: #1e3c72; font-weight: bold; }
-        .total-item span { display: block; font-weight: bold; font-size: 0.95rem; margin-top: 2px; }
+        .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
+        .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
+        .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
 
-        .report-summary-cards { display: flex; width: 100%; gap: 6px; margin-top: 8px; justify-content: space-between; }
-        .report-card { flex: 1; background: #ffffff; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 4px; text-align: center; }
-        .report-card-title { font-size: 0.72rem; color: #333; font-weight: bold; margin-bottom: 2px; }
+        /* --- POS Improved Styling --- */
+        .pos-header-card { background: #ffffff; border: 1.5px solid #1e3c72; padding: 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .pos-header-card div { font-size: 0.9rem; font-weight: bold; color: #1e3c72; display: flex; align-items: center; gap: 6px; }
+        .pos-header-card input { padding: 6px; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; font-size: 0.85rem; }
+
+        .report-summary-cards { display: flex; width: 100%; gap: 8px; margin-top: 10px; justify-content: space-between; }
+        .report-card { flex: 1; background: #ffffff; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px 4px; text-align: center; }
+        .report-card-title { font-size: 0.75rem; color: #333; font-weight: bold; margin-bottom: 2px; }
         .report-card-value { font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
 
-        .top-products-chart { margin-top: 10px; background: #ffffff; border: 1px solid #1e3c72; padding: 8px; border-radius: 8px; }
+        .top-products-chart { margin-top: 12px; background: #ffffff; border: 1px solid #1e3c72; padding: 10px; border-radius: 8px; }
         .chart-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.72rem; direction: rtl; }
-        .chart-label { width: 160px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #1e3c72; }
+        .chart-label { width: 180px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #1e3c72; }
         .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 12px; border-radius: 4px; overflow: hidden; position: relative; }
         .chart-bar { height: 100%; background: #1e3c72 !important; border-radius: 4px; float: right; }
         .chart-val { width: 35px; text-align: left; font-weight: bold; color: #1e3c72; }
 
-        .footer-signature { text-align: center; margin-top: 15px; padding-top: 8px; border-top: 1px solid #cbd5e1; font-size: 0.75rem; color: #64748b; font-weight: bold; }
+        .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
+        .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
+        .date-inputs-row input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; outline: none; }
 
-        .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 8px; position: relative; text-align: center; }
-        .camera-div { width: 100%; max-width: 350px; margin: 0 auto; min-height: 180px; }
+        .live-invoice-summary { background: #ffffff; color: #1e3c72; border: 2px solid #1e3c72; border-radius: 10px; padding: 12px; margin-top: 14px; }
+        .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; text-align: center; font-size: 0.8rem; font-weight: bold; }
+        .live-summary-item { background: #f8f9fa; border: 1px solid #cbd5e1; padding: 8px 4px; border-radius: 6px; }
+        .live-summary-item span { display: block; color: #27ae60; font-weight: bold; font-size: 0.95rem; margin-top: 3px; }
 
-        .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #1e3c72; color: #fff; border: 2px solid #fff; border-radius: 50px; padding: 8px 14px; font-weight: bold; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 99999; }
+        .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
+        .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
+
+        .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #1e3c72; color: #fff; border: 2px solid #fff; border-radius: 50px; padding: 10px 18px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 99999; display: flex; align-items: center; gap: 4px; }
+        .btn-scroll-top:hover { background: #2c3e50; }
 
         #toastStack { position: fixed; top: 12px; right: 12px; z-index: 99999999; display: flex; flex-direction: column; gap: 8px; max-width: 90vw; }
         .toast { background: #1e3c72; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); animation: toastIn 0.25s ease-out; max-width: 320px; }
@@ -121,12 +135,20 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
+        .modal-box h3 { color: #1e3c72; margin-bottom: 12px; font-size: 1.05rem; text-align: center; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+        .modal-actions .btn { flex: 1; margin: 0; }
 
+        /* --- PDF Export Mode --- */
         .pdf-export-mode { width: 750px !important; margin: 0 auto !important; padding: 0 !important; background: #ffffff !important; }
-        .pdf-export-mode table { min-width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; }
-        .pdf-export-mode th, .pdf-export-mode td { padding: 3px 1px !important; font-size: 7.5px !important; line-height: 1.2 !important; border: 1px solid #bbb !important; }
+        .pdf-export-mode table { min-width: 100% !important; font-size: 8px !important; table-layout: fixed !important; }
+        .pdf-export-mode th, .pdf-export-mode td { padding: 4px 2px !important; font-size: 8px !important; line-height: 1.3 !important; border: 1px solid #bbb !important; }
+        .pdf-export-mode tr { page-break-inside: avoid !important; }
         .pdf-export-mode th { background-color: #1e3c72 !important; color: #ffffff !important; }
+        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 8px !important; width: 35% !important; }
         .pdf-export-mode .no-pdf { display: none !important; }
+        .pdf-export-mode .section-title { font-size: 0.85rem !important; margin-top: 10px !important; margin-bottom: 5px !important; }
+        .pdf-export-mode .report-card { background: #ffffff !important; border: 1px solid #1e3c72 !important; }
         
         #receiptPrintSection { display: none; }
         @media print {
@@ -146,32 +168,25 @@
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
-        <h2 style="color:#1e3c72; margin-bottom:10px; font-size:1.1rem;">
+        <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.2rem;">
             🔐 <span class="animated-leaf">🌿</span> Anjum Green Pharmacy
         </h2>
-        <p style="font-size:0.78rem; color:#555; margin-bottom:12px;">تسجيل الدخول للنظام</p>
-        <div style="margin-bottom:8px; text-align:right;">
-            <label style="font-size:0.78rem; font-weight:bold; color:#1e3c72;">اسم المستخدم:</label>
-            <select id="entryUserSelect" class="search-box" style="text-align:center; margin-top:4px;">
-                <option value="">⏳ Loading Users...</option>
-            </select>
+        <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:10px; font-weight:bold;">
+            <option value="">⏳ Loading Users...</option>
+        </select>
+        <div class="pass-container">
+            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; padding-left:35px;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+            <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
-        <div style="margin-bottom:12px; text-align:right;">
-            <label style="font-size:0.78rem; font-weight:bold; color:#1e3c72;">كلمة المرور:</label>
-            <div class="pass-container">
-                <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-top:4px;" placeholder="Password..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
-                <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
-            </div>
-        </div>
-        <button class="btn btn-blue" style="margin-top:0;" onclick="validateEntryPassword()">تسجيل الدخول 🚀</button>
-        <div class="footer-signature" style="margin-top:12px;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
+        <button class="btn btn-blue" style="width: 100%;" onclick="validateEntryPassword()">Login System 🚀</button>
+        <div class="footer-signature" style="margin-top:15px; font-size:0.65rem;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
     </div>
 </div>
 
 <div class="app-container" id="mainContainer" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:4px; margin-bottom:6px;">
-        <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.78rem;">👤 المستخدم: -</span>
-        <button class="btn btn-red" style="width:auto; margin:0; padding:3px 6px; font-size:0.7rem;" onclick="logout()">تسجيل الخروج 🚪</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:6px; margin-bottom:8px;">
+        <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.85rem;">👤 User: -</span>
+        <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="logout()">Logout 🚪</button>
     </div>
 
     <h1><span class="animated-leaf">🌿</span> Anjum Green Pharmacy - Management System 2026</h1>
@@ -179,66 +194,66 @@
 
     <div id="alertsContainer" class="alerts-bar">
         <div>🔔 Status Summary: <span id="lowStockCountVal" style="color:#c0392b;">0 Low Stock Items</span> | <span id="expiringCountVal" style="color:#e67e22;">0 Expiring Items</span></div>
-        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:2px 6px; font-size:0.7rem;" onclick="showTab('stockTab'); filterLowStock();">View Items 📦</button>
+        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:3px 8px; font-size:0.72rem;" onclick="showTab('stockTab'); filterLowStock();">View Items 📦</button>
     </div>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', event)">🛒 المبيعات والفواتير</button>
-        <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 تفاصيل المخزون</button>
-        <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', event)">🔒 ➕ إضافة أصناف ومخزون</button>
-        <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', event)">🔒 💵 المصروفات والإيرادات</button>
-        <button class="tab-btn admin-only" id="btnReportsTab" onclick="showTab('reportsTab', event)">🔒 📊 التقارير</button>
-        <button class="tab-btn admin-only" id="btnUsersTab" onclick="showTab('usersTab', event)">🔒 🔑 الحسابات والأمان</button>
+        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', event)">🛒 POS &amp; Invoices</button>
+        <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', event)">🔒 📦 Stock Details</button>
+        <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', event)">🔒 ➕ Add Inventory</button>
+        <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', event)">🔒 💵 Expenses &amp; Revenues</button>
+        <button class="tab-btn admin-only" id="btnReportsTab" onclick="showTab('reportsTab', event)">🔒 📊 Reports &amp; Backup</button>
+        <button class="tab-btn admin-only" id="btnUsersTab" onclick="showTab('usersTab', event)">🔒 🔑 Account Security</button>
     </div>
 
     <!-- 1. POS Tab -->
     <div id="salesTab" class="tab-content active">
         <div class="section-title">🛒 Create / Edit Sales Invoice</div>
 
-        <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
-            <button class="btn btn-blue" style="width: auto; margin: 0; font-size:0.75rem;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
-            <button class="btn btn-orange" style="width: auto; margin: 0; font-size:0.75rem;" onclick="prepareNewInvoice()">New Invoice ➕</button>
-            <button class="btn btn-purple" style="width: auto; margin: 0; font-size:0.75rem;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
-            <button class="btn btn-purple" id="resumeHoldBtn" style="width: auto; margin: 0; font-size:0.75rem; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
-            <button class="btn btn-red" style="width: auto; margin: 0; font-size:0.75rem;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <button class="btn btn-blue" style="flex:1; padding:10px; font-size:0.85rem;" onclick="fetchCloudInvoicesData()">Sync Data 🔄</button>
+            <button class="btn btn-orange" style="flex:1; padding:10px; font-size:0.85rem;" onclick="prepareNewInvoice()">New Invoice ➕</button>
+            <button class="btn btn-purple" style="flex:1; padding:10px; font-size:0.85rem;" onclick="holdCurrentInvoice()">Hold ⏸️</button>
+            <button class="btn btn-purple" id="resumeHoldBtn" style="flex:1; padding:10px; font-size:0.85rem; display:none;" onclick="resumeHoldInvoice()">Resume ⏯️</button>
+            <button class="btn btn-red" style="flex:1; padding:10px; font-size:0.85rem;" onclick="clearCurrentInvoice()">Clear (F8) 🧹</button>
         </div>
 
-        <div class="info-row" style="background: #eef7fe; padding: 8px; border-radius: 6px; align-items: center; border: 1px solid #bfdbfe;">
-            <div>Invoice Date: <input type="datetime-local" id="invoiceDate" style="padding: 2px; border-radius: 4px; border: 1px solid #ccc; font-size:0.75rem;"></div>
-            <div>Invoice ID: <span id="invNum" style="color: #1e3c72; font-size: 1.1rem; font-weight: bold;">1001</span></div>
+        <div class="pos-header-card">
+            <div>📅 Invoice Date: <input type="datetime-local" id="invoiceDate"></div>
+            <div>📄 Invoice ID: <span id="invNum" style="color: #27ae60; font-size: 1.3rem; font-weight: bold;">1001</span></div>
         </div>
 
-        <div class="nav-controls">
+        <div class="nav-controls" style="margin-bottom: 12px;">
             <button class="btn btn-blue" onclick="navigateInvoice('first')">First ⏮️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('prev')">Previous ◀️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('next')">Next ▶️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('last')">Last ⏭️</button>
         </div>
 
-        <div style="display:flex; gap:4px; margin-top:8px;">
-            <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="Search Product Name or Scan Barcode... (F4)" oninput="searchProduct()">
-            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 8px; font-size:0.75rem;" onclick="toggleCameraScanner('sales')">📷 Camera Barcode (F2)</button>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+            <input type="text" id="searchInput" class="search-box" style="margin-bottom:0; font-weight:bold;" placeholder="Search Product Name or Scan Barcode... (F4)" oninput="searchProduct()">
+            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 14px; font-size:0.85rem;" onclick="toggleCameraScanner('sales')">📷 Camera Barcode (F2)</button>
         </div>
 
-        <div id="salesScannerContainer" class="scanner-box">
+        <div id="salesScannerContainer" class="scanner-box" style="margin-top:10px;">
             <div id="salesCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('sales')">Close Camera ❌</button>
+            <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('sales')">Close Camera ❌</button>
         </div>
 
         <div id="searchResults" class="results-list"></div>
 
-        <div id="productCard" class="card" style="display:none; margin-top: 6px;">
-            <h3 id="prodName" style="color: #1e3c72; margin-bottom: 6px; font-size: 0.95rem;"></h3>
-            <div class="info-row">
+        <div id="productCard" class="card" style="display:none; margin-top: 10px; border: 2px solid #3498db; background: #ffffff;">
+            <h3 id="prodName" style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;"></h3>
+            <div class="info-row" style="background:#eef7fe; padding:8px; border-radius:6px; margin-bottom:10px;">
                 <div>Available Stock: <span id="stockQty" style="color:#27ae60;">0</span> units</div>
                 <div>Commercial Unit Price: <span id="commPrice" style="color:#2c3e50;">0</span> EGP</div>
                 <div>Guide Min Price: <span id="guidePrice" style="color:#e67e22;">0</span> EGP</div>
             </div>
             <div class="info-row" style="align-items: center;">
-                <label>Sold Quantity:</label>
-                <input type="number" id="sellQty" value="1" min="1" style="width: 80px; padding: 4px; text-align: center; border-radius: 4px; border: 1px solid #ccc;" oninput="checkPriceAlert()">
+                <label style="font-weight:bold; color:#1e3c72;">Sold Quantity:</label>
+                <input type="number" id="sellQty" value="1" min="1" style="width: 90px; padding: 6px; text-align: center; border-radius: 6px; border: 1.5px solid #3498db; font-weight:bold;" oninput="checkPriceAlert()">
             </div>
-            <p style="font-size: 0.75rem; font-weight: bold; margin-top: 6px; border-top: 1px dashed #ccc; padding-top: 4px;">Enter Manual Payments:</p>
+            <p style="font-size: 0.85rem; font-weight: bold; margin-top: 10px; color:#1e3c72; border-top: 1px dashed #ccc; padding-top: 8px;">Enter Manual Payments:</p>
             <div class="payment-grid">
                 <div class="pay-box"><label id="lblUSD">USD ($ × 50)</label><input type="number" id="pUSD" value="0" oninput="checkPriceAlert()"></div>
                 <div class="pay-box"><label id="lblEUR">EUR (€ × 60)</label><input type="number" id="pEUR" value="0" oninput="checkPriceAlert()"></div>
@@ -247,10 +262,10 @@
                 <div class="pay-box" style="grid-column: span 2;"><label id="lblVISA">VISA (EGP)</label><input type="number" id="pVISA" value="0" oninput="checkPriceAlert()"></div>
             </div>
             <div id="priceWarningBox" class="warning-box">⚠️ Warning: Total entered amount (<span id="enteredTotalVal">0</span> EGP) is below minimum threshold (<span id="requiredMinVal">0</span> EGP)!</div>
-            <button class="btn" style="width: 100%; margin-top: 8px;" onclick="addToInvoice()">Deduct Stock &amp; Add to Invoice 🛒</button>
+            <button class="btn" style="width: 100%; margin-top: 12px; font-size:1rem; padding:10px;" onclick="addToInvoice()">Deduct Stock &amp; Add to Invoice 🛒</button>
         </div>
 
-        <div class="section-title" style="margin-top: 15px;">📄 Current Invoice Items</div>
+        <div class="section-title" style="margin-top: 20px;">📄 Current Invoice Items</div>
         <div class="table-responsive"><table>
             <thead><tr><th style="width:35px;">#</th><th>Product Name</th><th>Qty</th><th>C-Total</th><th>Pay Breakdown</th><th>Sell Total</th><th>Seller</th><th style="width:60px;">Action</th></tr></thead>
             <tbody id="invoiceTableBody"><tr><td colspan="8" style="color: #7f8c8d;">No items added yet</td></tr></tbody>
@@ -262,18 +277,18 @@
         </div>
 
         <div class="live-invoice-summary">
-            <h4 style="text-align:center; font-size:0.85rem; margin-bottom:6px; color:#f1c40f;">💵 Invoice Total Breakdown:</h4>
+            <h4 style="text-align:center; font-size:0.9rem; margin-bottom:8px; color:#1e3c72; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">💵 Invoice Total Breakdown</h4>
             <div class="live-summary-grid">
                 <div class="live-summary-item">USD ($)<span id="liveUSD">$0</span></div>
                 <div class="live-summary-item">EUR (€)<span id="liveEUR">€0</span></div>
                 <div class="live-summary-item">GBP (£)<span id="liveGBP">£0</span></div>
                 <div class="live-summary-item">EGP<span id="liveEGP">0 EGP</span></div>
                 <div class="live-summary-item">VISA<span id="liveVISA">0 EGP</span></div>
-                <div class="live-summary-item" style="background:rgba(46,204,113,0.3); border:1px solid #27ae60;">Total (EGP)<span id="liveTotalEGP" style="color:#fff; font-size:0.95rem;">0.00 EGP</span></div>
+                <div class="live-summary-item" style="background:#eafaf1; border:1.5px solid #27ae60;">Total (EGP)<span id="liveTotalEGP" style="color:#27ae60; font-size:1.05rem;">0.00 EGP</span></div>
             </div>
         </div>
 
-        <button class="btn btn-blue" style="margin-top: 10px; font-size: 1rem; padding: 10px; width:100%;" onclick="saveInvoice()">Save &amp; Sync Invoice (Ctrl+S) 💾</button>
+        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1.1rem; padding: 12px; width:100%;" onclick="saveInvoice()">Save &amp; Sync Invoice (Ctrl+S) 💾</button>
     </div>
 
     <!-- 2. Stock Tab -->
@@ -281,16 +296,16 @@
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 Inventory Details</span>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
-                <button class="btn btn-orange" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (&lt; 1 Mo) ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="printStockTable()">PDF 📄</button>
+                <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
+                <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (&lt; 1 Mo) ⚠️</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">PDF 📄</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
 
-        <div id="stockScannerContainer" class="scanner-box" style="margin-top:6px;">
+        <div id="stockScannerContainer" class="scanner-box" style="margin-top:10px;">
             <div id="stockCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
+            <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
         </div>
 
         <div id="stockPrintArea">
@@ -322,29 +337,29 @@
                 </div>
                 <div class="pay-box" style="grid-column: span 2;"><label>Expiry Date:</label><input type="date" id="newProdExpiry"></div>
             </div>
-            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:8px;">
+            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="addNewCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
+                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
             </div>
-            <button class="btn btn-purple" style="margin-top: 10px; width: 100%;" onclick="addNewProductToSystem()">Save &amp; Sync Product 📦</button>
+            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="addNewProductToSystem()">Save &amp; Sync Product 📦</button>
         </div>
 
-        <div class="section-title" style="margin-top:15px;">➕ Recharge Existing Stock</div>
+        <div class="section-title" style="margin-top:20px;">➕ Recharge Existing Stock</div>
         <div class="card">
             <div style="display:flex; gap:6px;">
                 <input type="text" id="addStockSearch" class="search-box" style="margin-bottom:0;" placeholder="Search product name or scan barcode..." oninput="searchAddStockProduct()">
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('recharge')">📷 Scan Barcode</button>
             </div>
-            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:8px;">
+            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="rechargeCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
+                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
             </div>
             <div id="addStockResults" class="results-list"></div>
-            <div id="addStockCard" style="display: none; margin-top: 8px;">
-                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 6px;"></h4>
+            <div id="addStockCard" style="display: none; margin-top: 10px;">
+                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 10px;"></h4>
                 <div class="info-row"><div>Current Stock: <span id="currentStockVal" style="color:#27ae60;">0</span> units</div></div>
-                <div class="pay-box" style="margin-top: 6px;"><label>Quantity to Add:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 6px; border-radius: 6px; border: 1px solid #ccc; text-align: center;"></div>
-                <button class="btn" style="margin-top: 10px; width: 100%;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
+                <div class="pay-box" style="margin-top: 10px;"><label>Quantity to Add:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;"></div>
+                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
             </div>
         </div>
     </div>
@@ -360,10 +375,10 @@
                 <div class="pay-box"><label>Date &amp; Time:</label><input type="datetime-local" id="finDate"></div>
                 <div class="pay-box" style="grid-column: span 2;"><label>Notes / Details:</label><input type="text" id="finNotes" placeholder="Additional notes..."></div>
             </div>
-            <button class="btn btn-purple" style="margin-top: 10px; width: 100%;" onclick="saveFinanceEntry()">Save Entry 💾</button>
+            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="saveFinanceEntry()">Save Entry 💾</button>
         </div>
 
-        <div class="date-filter card" style="margin-top: 10px;">
+        <div class="date-filter card" style="margin-top: 15px;">
             <div class="date-inputs-row">
                 <div>From: <input type="date" id="finFromDate"></div>
                 <div>To: <input type="date" id="finToDate"></div>
@@ -400,12 +415,6 @@
                 </div>
             </div>
 
-            <div class="section-title">📌 تجميع المصروفات حسب البند / الفئة:</div>
-            <div class="table-responsive"><table>
-                <thead><tr><th>البند / الفئة</th><th>النوع</th><th>إجمالي المبلغ (EGP)</th></tr></thead>
-                <tbody id="financeAggregatedBody"><tr><td colspan="3" style="color:#7f8c8d;">لا توجد بيانات مجمعة</td></tr></tbody>
-            </table></div>
-
             <div class="section-title">📝 سجل الحركات المالية التفصيلية:</div>
             <div class="table-responsive"><table>
                 <thead><tr><th style="width:25px;">#</th><th>التاريخ والوقت</th><th>النوع</th><th>الوصف / البيان</th><th>المبلغ (EGP)</th><th>ملاحظات</th><th class="no-pdf" style="width:50px;">إجراء</th></tr></thead>
@@ -428,23 +437,23 @@
             </div>
         </div>
 
-        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:10px;">
-            <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History:</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
-                <button class="btn btn-red" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
-                <button class="btn btn-blue" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
+        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
+            <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History:</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:240px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
+                <button class="btn btn-red" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
+                <button class="btn btn-blue" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
             </div>
             <div id="singleProductReportResults" class="results-list" style="margin-top:6px;"></div>
-            <div id="singleProdReportDisplay" style="display:none; margin-top:8px; background:#fff; padding:10px; border-radius:8px; border:2px solid #3498db;"></div>
+            <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px; border:2px solid #3498db;"></div>
         </div>
 
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:10px;">
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
             <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
-            <h3 style="text-align:center; margin-bottom:8px;">💵 Comprehensive Sales Report</h3>
-            <div style="text-align:center; margin-bottom:8px; background:rgba(255,255,255,0.15); padding:4px; border-radius:6px;">
-                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:14px; height:14px; cursor:pointer;">
-                <label for="deductExpensesToggle" style="font-size:0.75rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
+            <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
+            <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
+                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer;">
+                <label for="deductExpensesToggle" style="font-size:0.8rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
             </div>
             <div class="totals-grid">
                 <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
@@ -454,11 +463,11 @@
                 <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1rem;">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
             </div>
-            <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:6px;">
-                <h4 style="text-align:center; color:#f1c40f; margin-bottom:4px;">⭐ Top Selling Products:</h4>
-                <div id="topProductsList" style="font-size:0.75rem; text-align:center; line-height:1.4;"></div>
+            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
+                <h4 style="text-align:center; color:#f1c40f; margin-bottom:6px;">⭐ Top Selling Products:</h4>
+                <div id="topProductsList" style="font-size:0.8rem; text-align:center; line-height:1.5;"></div>
             </div>
         </div>
 
@@ -482,11 +491,11 @@
     <div id="usersTab" class="tab-content admin-only">
         <div class="section-title">🔑 Manage Accounts & Passwords</div>
         
-        <div class="card" style="max-width:400px; margin:0 auto 10px auto; background:#fdfefe;">
-            <h4 style="color:#1e3c72; text-align:center; margin-bottom:8px;">➕ Add New User</h4>
-            <div class="pay-box" style="margin-bottom:6px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
-            <div class="pay-box" style="margin-bottom:6px;"><label>Password:</label><input type="password" id="addUserPass" placeholder="Enter password..."></div>
-            <div class="pay-box" style="margin-bottom:10px;"><label>Role:</label>
+        <div class="card" style="max-width:450px; margin:0 auto 15px auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">➕ Add New User</h4>
+            <div class="pay-box" style="margin-bottom:8px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
+            <div class="pay-box" style="margin-bottom:8px;"><label>Password:</label><input type="password" id="addUserPass" placeholder="Enter password..."></div>
+            <div class="pay-box" style="margin-bottom:12px;"><label>Role:</label>
                 <select id="addUserRole">
                     <option value="Cashier">Cashier</option>
                     <option value="User">User</option>
@@ -496,10 +505,10 @@
             <button class="btn btn-blue" style="width:100%;" onclick="createNewUserSystem()">Create User 🚀</button>
         </div>
 
-        <div class="card" style="max-width:400px; margin:0 auto; background:#fdfefe;">
-            <h4 style="color:#1e3c72; text-align:center; margin-bottom:8px;">✏️ Change Existing Password</h4>
-            <div class="pay-box" style="margin-bottom:10px;"><label>Select User:</label><select id="userSelectPass"></select></div>
-            <div class="pay-box" style="margin-bottom:10px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
+        <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">✏️ Change Existing Password</h4>
+            <div class="pay-box" style="margin-bottom:12px;"><label>Select User:</label><select id="userSelectPass"></select></div>
+            <div class="pay-box" style="margin-bottom:12px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
             <button class="btn btn-purple" style="width:100%;" onclick="changeUserPasswordSystem()">Update Password 💾</button>
         </div>
     </div>
@@ -1576,7 +1585,7 @@ function renderFinanceTable() {
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
-        if (aggBody) aggBody.innerHTML = '<tr><td colspan="3" style="color:#7f8c8d;">لا توجد بيانات مجمعة</td></tr>';
+        if (aggBody) aggBody.innerHTML = '<tr><td colspan="3" style="color:#7f8c8d;">No Aggregated Data</td></tr>';
     } else {
         tbody.innerHTML = filtered.map((f, idx) => {
             if (f.type === 'Revenue') totRev += f.amount; else totExp += f.amount;
@@ -1604,7 +1613,7 @@ function renderFinanceTable() {
                 aggRows.push(`
                     <tr style="background:${type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
                         <td style="font-weight:bold; text-align:right;">${escapeHtml(cat)}</td>
-                        <td style="font-weight:bold; color:${type === 'Revenue' ? '#27ae60' : '#c0392b'};">${type === 'Revenue' ? 'إيراد (+)' : 'مصروف (-)'}</td>
+                        <td style="font-weight:bold; color:${type === 'Revenue' ? '#27ae60' : '#c0392b'};">${type === 'Revenue' ? 'Revenue (+)' : 'Expense (-)'}</td>
                         <td style="font-weight:bold;">${totalAmount.toFixed(2)} EGP</td>
                     </tr>
                 `);
@@ -1629,7 +1638,7 @@ function renderFinanceTable() {
     const netEl = document.getElementById('netBalance');
     if (netEl) {
         netEl.textContent = net.toFixed(2) + ' EGP';
-        netEl.style.color = net >= 0 ? '#fff' : '#ff6b6b';
+        netEl.style.color = net >= 0 ? '#27ae60' : '#c0392b';
     }
 }
 
@@ -1881,7 +1890,7 @@ function filterNearExpiryOneMonth() {
         tbody.innerHTML = matched.map((p, index) => {
             const diffDays = (new Date(p.expiry) - today) / 86400000;
             const isExpired = diffDays < 0;
-            return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 Expired)' : ' (⚠️ Expiring Soon)');
+            return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 Expiring Soon)' : ' (⚠️ Expiring Soon)');
         }).join('');
     }
 }
