@@ -463,8 +463,26 @@
 
     <!-- 6. Account Security Tab -->
     <div id="usersTab" class="tab-content admin-only">
-        <div class="section-title">🔑 Change Account Passwords</div>
+        <div class="section-title">🔑 Manage Accounts & Passwords</div>
+        
+        <!-- إضافة مستخدم جديد -->
+        <div class="card" style="max-width:450px; margin:0 auto 15px auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">➕ Add New User</h4>
+            <div class="pay-box" style="margin-bottom:8px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
+            <div class="pay-box" style="margin-bottom:8px;"><label>Password:</label><input type="password" id="addUserPass" placeholder="Enter password..."></div>
+            <div class="pay-box" style="margin-bottom:12px;"><label>Role:</label>
+                <select id="addUserRole">
+                    <option value="Cashier">Cashier</option>
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <button class="btn btn-blue" style="width:100%;" onclick="createNewUserSystem()">Create User 🚀</button>
+        </div>
+
+        <!-- تغيير كلمة السر لمستخدم حقيقي -->
         <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">✏️ Change Existing Password</h4>
             <div class="pay-box" style="margin-bottom:12px;"><label>Select User:</label><select id="userSelectPass"></select></div>
             <div class="pay-box" style="margin-bottom:12px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
             <button class="btn btn-purple" style="width:100%;" onclick="changeUserPasswordSystem()">Update Password 💾</button>
@@ -598,8 +616,8 @@ async function loadLocalUsers() {
     } else {
         cloudUsers = [
             { username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' },
-            { username: 'cs2', passwordHash: await sha256Hex('456'), role: 'User' },
-            { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' }
+            { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' },
+            { username: 'cs2', passwordHash: await sha256Hex('456'), role: 'User' }
         ];
         localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
     }
@@ -674,6 +692,31 @@ function applyRolePermissions() {
     } else {
         adminElements.forEach(el => el.style.display = '');
     }
+}
+
+async function createNewUserSystem() {
+    if (currentUser?.role !== 'Admin') { toast("❌ Restricted to Admin!", 'error'); return; }
+    
+    const uName = document.getElementById('addUserName')?.value.trim().toLowerCase();
+    const uPass = document.getElementById('addUserPass')?.value.trim();
+    const uRole = document.getElementById('addUserRole')?.value || 'Cashier';
+
+    if (!uName || !uPass) { toast("Please enter both username and password!", 'warn'); return; }
+
+    const exists = cloudUsers.find(u => u.username.toLowerCase() === uName);
+    if (exists) { toast(`⚠️ User [${uName.toUpperCase()}] already exists!`, 'error'); return; }
+
+    const passHash = await sha256Hex(uPass);
+    const newUser = { username: uName, passwordHash: passHash, role: uRole, lastLogin: '-', isOnline: 'Offline' };
+
+    cloudUsers.push(newUser);
+    saveLocalUsers(cloudUsers);
+
+    syncToCloud("createUser", { username: uName, passwordHash: passHash, role: uRole });
+
+    toast(`✅ User [${uName.toUpperCase()}] created successfully!`, 'success');
+    document.getElementById('addUserName').value = '';
+    document.getElementById('addUserPass').value = '';
 }
 
 async function changeUserPasswordSystem() {
