@@ -63,11 +63,11 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
-        th { background: #3498db; color: white; white-space: nowrap; }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; vertical-align: middle; }
+        th { background: #3498db; color: white; white-space: nowrap; font-size: 0.8rem; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.85rem !important; line-height: 1.6 !important; min-width: 280px !important; white-space: normal !important; word-break: break-word !important; }
+        .items-column-cell { text-align: right !important; font-size: 0.78rem !important; line-height: 1.4 !important; min-width: 220px !important; white-space: normal !important; word-break: break-word !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -90,17 +90,17 @@
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
 
-        .report-summary-cards { display: table; width: 100%; table-layout: fixed; margin-top: 12px; border-spacing: 6px; }
-        .report-card { display: table-cell; background: #f8f9fa; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; text-align: center; vertical-align: middle; }
-        .report-card-title { font-size: 0.75rem; color: #555; font-weight: bold; margin-bottom: 4px; }
-        .report-card-value { font-size: 0.95rem; font-weight: bold; color: #1e3c72; }
+        .report-summary-cards { display: flex; width: 100%; gap: 6px; margin-top: 10px; justify-content: space-between; }
+        .report-card { flex: 1; background: #f8f9fa; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 4px; text-align: center; }
+        .report-card-title { font-size: 0.7rem; color: #555; font-weight: bold; margin-bottom: 2px; }
+        .report-card-value { font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
 
-        .top-products-chart { margin-top: 15px; background: #fafafa; border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
-        .chart-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.75rem; direction: rtl; }
-        .chart-label { width: 180px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #1e3c72; }
-        .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 14px; border-radius: 6px; overflow: hidden; position: relative; }
-        .chart-bar { height: 100%; background: #1e3c72 !important; border-radius: 6px; float: right; }
-        .chart-val { width: 45px; text-align: left; font-weight: bold; color: #1e3c72; }
+        .top-products-chart { margin-top: 12px; background: #fafafa; border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+        .chart-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.72rem; direction: rtl; }
+        .chart-label { width: 150px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #1e3c72; }
+        .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 12px; border-radius: 4px; overflow: hidden; position: relative; }
+        .chart-bar { height: 100%; background: #1e3c72 !important; border-radius: 4px; float: right; }
+        .chart-val { width: 35px; text-align: left; font-weight: bold; color: #1e3c72; }
 
         .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
         .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -134,11 +134,15 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
 
-        /* --- PDF Export Styles --- */
-        .pdf-export-mode table { min-width: 100% !important; font-size: 9.5px !important; }
-        .pdf-export-mode th, .pdf-export-mode td { padding: 4px 3px !important; }
+        /* --- Strict PDF Export Rules --- */
+        .pdf-export-mode { width: 780px !important; margin: 0 auto !important; padding: 5px !important; }
+        .pdf-export-mode table { min-width: 100% !important; font-size: 8px !important; table-layout: fixed !important; }
+        .pdf-export-mode th, .pdf-export-mode td { padding: 3px 2px !important; font-size: 8px !important; }
+        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 8px !important; }
         .pdf-export-mode .no-pdf { display: none !important; }
-        .pdf-export-mode .report-summary-cards { margin-top: 8px !important; }
+        .pdf-export-mode .report-summary-cards { margin-top: 6px !important; }
+        .pdf-export-mode .report-card-title { font-size: 0.65rem !important; }
+        .pdf-export-mode .report-card-value { font-size: 0.75rem !important; }
         
         #receiptPrintSection { display: none; }
         @media print {
@@ -303,7 +307,7 @@
 
         <div id="stockPrintArea">
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:35px;">#</th><th>Product Name</th><th>Stock</th><th>C-Price</th><th id="thStockGuideHead">G-Min (×3)</th><th>Barcode</th><th>Expiry</th><th class="no-pdf" style="width:210px;">Actions</th></tr></thead>
+                <thead><tr><th style="width:30px;">#</th><th>Product Name</th><th>Stock</th><th>C-Price</th><th id="thStockGuideHead">G-Min (×3)</th><th>Barcode</th><th>Expiry</th><th class="no-pdf" style="width:200px;">Actions</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table></div>
         </div>
@@ -384,8 +388,8 @@
         </div>
 
         <div id="financePrintArea">
-            <div class="totals-box" style="background:#1e3c72; margin-bottom:15px;">
-                <h3 style="text-align:center; margin-bottom:10px;">📊 Financial Summary (EGP)</h3>
+            <div class="totals-box" style="background:#1e3c72; margin-bottom:12px;">
+                <h3 style="text-align:center; margin-bottom:8px;">📊 Financial Summary (EGP)</h3>
                 <div class="totals-grid">
                     <div class="total-item" style="background:rgba(46,204,113,0.2);">Total Revenues <span id="sumRevenues">0.00 EGP</span></div>
                     <div class="total-item" style="background:rgba(231,76,60,0.2);">Total Expenses <span id="sumExpenses">0.00 EGP</span></div>
@@ -394,15 +398,15 @@
             </div>
 
             <!-- Aggregated Expenses Breakdown Table -->
-            <div class="section-title" style="margin-top:15px; font-size:0.9rem;">📌 تجميع المصروفات حسب البند / الفئة:</div>
+            <div class="section-title" style="margin-top:10px; font-size:0.85rem;">📌 Aggregated Expenses By Category:</div>
             <div class="table-responsive"><table>
-                <thead><tr><th>البند / الفئة</th><th>النوع</th><th>إجمالي المبلغ (EGP)</th></tr></thead>
-                <tbody id="financeAggregatedBody"><tr><td colspan="3" style="color:#7f8c8d;">لا توجد بيانات مجمعة</td></tr></tbody>
+                <thead><tr><th>Category</th><th>Type</th><th>Total Amount (EGP)</th></tr></thead>
+                <tbody id="financeAggregatedBody"><tr><td colspan="3" style="color:#7f8c8d;">No Aggregated Data</td></tr></tbody>
             </table></div>
 
-            <div class="section-title" style="margin-top:15px; font-size:0.9rem;">📝 سجل الحركات المالية التفصيلية:</div>
+            <div class="section-title" style="margin-top:12px; font-size:0.85rem;">📝 Detailed Finance Records:</div>
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:35px;">#</th><th>Date</th><th>Type</th><th>Description</th><th>Amount (EGP)</th><th>Notes</th><th class="no-pdf" style="width:60px;">Action</th></tr></thead>
+                <thead><tr><th style="width:30px;">#</th><th>Date &amp; Time</th><th>Type</th><th>Description</th><th>Amount (EGP)</th><th>Notes</th><th class="no-pdf" style="width:50px;">Action</th></tr></thead>
                 <tbody id="financeTableBody"><tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr></tbody>
             </table></div>
         </div>
@@ -423,7 +427,7 @@
         </div>
 
         <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
-            <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
+            <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History:</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                 <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:240px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
                 <button class="btn btn-red" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
@@ -457,13 +461,13 @@
         </div>
 
         <div id="reportsPrintArea">
-            <div style="text-align:center; margin-bottom:10px;">
+            <div style="text-align:center; margin-bottom:8px;">
                 <h2 style="color:#1e3c72; margin:0; font-size:18px;">Anjum Green Pharmacy</h2>
-                <h3 style="color:#333; margin:2px 0; font-size:14px;">Comprehensive Sales Financial Report</h3>
+                <h3 style="color:#333; margin:2px 0; font-size:13px;">Comprehensive Sales Financial Report</h3>
             </div>
             
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:30px;">#</th><th style="width:65px;">Inv ID</th><th style="width:110px;">Date &amp; Time</th><th style="min-width:260px;">Items Details</th><th>Pay Breakdown</th><th>C-Total</th><th style="width:55px;">Disc %</th><th>Sales Total</th><th>Net Profit</th><th class="no-pdf" style="width:140px;">Actions</th></tr></thead>
+                <thead><tr><th style="width:25px;">#</th><th style="width:55px;">Inv ID</th><th style="width:100px;">Date &amp; Time</th><th style="min-width:220px;">Items Details</th><th style="width:110px;">Pay Breakdown</th><th style="width:70px;">C-Total</th><th style="width:45px;">Disc %</th><th style="width:80px;">Sales Total</th><th style="width:75px;">Net Profit</th><th class="no-pdf" style="width:120px;">Actions</th></tr></thead>
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
             </table></div>
 
@@ -571,7 +575,6 @@ function confirmModal(message, onYes) {
 function formatDateDisplay(dateStr) {
     if (!dateStr) return '-';
     let clean = dateStr.toString().replace('T', ' ').replace('.000Z', '');
-    // Fix formatting issue if HH:MM concatenates with YYYY-MM-DD
     if (clean.length > 10 && !clean.includes(' ')) {
         let timePart = clean.slice(0, 5);
         let datePart = clean.slice(5);
@@ -590,7 +593,7 @@ function exportElementToPDF(elementId, fileName = 'Report.pdf') {
     element.classList.add('pdf-export-mode');
 
     const opt = {
-        margin: [8, 6, 8, 6],
+        margin: [6, 4, 6, 4],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
@@ -1571,7 +1574,7 @@ function renderFinanceTable() {
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
-        if (aggBody) aggBody.innerHTML = '<tr><td colspan="3" style="color:#7f8c8d;">لا توجد بيانات مجمعة</td></tr>';
+        if (aggBody) aggBody.innerHTML = '<tr><td colspan="3" style="color:#7f8c8d;">No Aggregated Data</td></tr>';
     } else {
         tbody.innerHTML = filtered.map((f, idx) => {
             if (f.type === 'Revenue') totRev += f.amount; else totExp += f.amount;
@@ -1599,7 +1602,7 @@ function renderFinanceTable() {
                 aggRows.push(`
                     <tr style="background:${type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
                         <td style="font-weight:bold; text-align:right;">${escapeHtml(cat)}</td>
-                        <td style="font-weight:bold; color:${type === 'Revenue' ? '#27ae60' : '#c0392b'};">${type === 'Revenue' ? 'إيراد (+)' : 'مصروف (-)'}</td>
+                        <td style="font-weight:bold; color:${type === 'Revenue' ? '#27ae60' : '#c0392b'};">${type === 'Revenue' ? 'Revenue (+)' : 'Expense (-)'}</td>
                         <td style="font-weight:bold;">${totalAmount.toFixed(2)} EGP</td>
                     </tr>
                 `);
@@ -2044,11 +2047,11 @@ function generateReport() {
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
         cardsContainer.innerHTML = `
-            <div class="report-card"><div class="report-card-title">💵 الكاش والعملات</div>
-                <div class="report-card-value" style="font-size:0.8rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
-            <div class="report-card"><div class="report-card-title">💳 إجمالي الفيزا</div><div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div></div>
-            <div class="report-card" style="border-color:#27ae60;"><div class="report-card-title" style="color:#27ae60;">🛒 إجمالي المبيعات الكلي</div><div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div></div>
-            <div class="report-card" style="border-color:#8e44ad;"><div class="report-card-title" style="color:#8e44ad;">💰 صافي الأرباح</div><div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div></div>
+            <div class="report-card"><div class="report-card-title">💵 Cash &amp; FX Total</div>
+                <div class="report-card-value" style="font-size:0.75rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
+            <div class="report-card"><div class="report-card-title">💳 Total Visa</div><div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div></div>
+            <div class="report-card" style="border-color:#27ae60;"><div class="report-card-title" style="color:#27ae60;">🛒 Gross Sales Total</div><div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div></div>
+            <div class="report-card" style="border-color:#8e44ad;"><div class="report-card-title" style="color:#8e44ad;">💰 Net Profit Total</div><div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div></div>
         `;
     }
 
@@ -2063,7 +2066,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:10px; color:#1e3c72; text-align:center;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products:</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
