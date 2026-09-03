@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -67,7 +66,7 @@
         th, td { padding: 6px 3px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; vertical-align: middle; }
         th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.8rem; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.82rem !important; line-height: 1.4 !important; min-width: 320px !important; white-space: normal !important; word-break: break-word !important; }
+        .items-column-cell { text-align: right !important; font-size: 0.82rem !important; line-height: 1.4 !important; min-width: 280px !important; white-space: normal !important; word-break: break-word !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -122,38 +121,31 @@
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
 
         .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #1e3c72; color: #fff; border: 2px solid #fff; border-radius: 50px; padding: 10px 18px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 99999; display: flex; align-items: center; gap: 4px; }
-        .btn-scroll-top:hover { background: #2c3e50; }
 
         #toastStack { position: fixed; top: 12px; right: 12px; z-index: 99999999; display: flex; flex-direction: column; gap: 8px; max-width: 90vw; }
         .toast { background: #1e3c72; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); animation: toastIn 0.25s ease-out; max-width: 320px; }
         .toast.success { background: #219653; }
         .toast.error { background: #c0392b; }
         .toast.warn { background: #d68910; }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
-        .modal-box h3 { color: #1e3c72; margin-bottom: 12px; font-size: 1.05rem; text-align: center; }
-        .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
-        .modal-actions .btn { flex: 1; margin: 0; }
 
-        /* --- PDF Export Mode Adjustments --- */
-        .pdf-export-mode { width: 750px !important; margin: 0 auto !important; padding: 0 !important; background: #ffffff !important; }
-        .pdf-export-mode table { min-width: 100% !important; font-size: 7px !important; table-layout: fixed !important; }
-        .pdf-export-mode th, .pdf-export-mode td { padding: 4px 2px !important; font-size: 7px !important; line-height: 1.3 !important; border: 1px solid #bbb !important; }
-        .pdf-export-mode tr { page-break-inside: avoid !important; }
-        .pdf-export-mode th { background-color: #1e3c72 !important; color: #ffffff !important; }
-        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 7.5px !important; width: 42% !important; }
-        .pdf-export-mode .no-pdf { display: none !important; }
-        .pdf-export-mode .section-title { font-size: 0.85rem !important; margin-top: 10px !important; margin-bottom: 5px !important; }
-        .pdf-export-mode .report-card { background: #ffffff !important; border: 1px solid #1e3c72 !important; }
-        
+        /* --- Native Clean Print & PDF System --- */
         #receiptPrintSection { display: none; }
         @media print {
-            body.printing-receipt * { visibility: hidden; }
-            body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible; }
-            body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 80mm; }
+            body * { visibility: hidden !important; }
+            .print-target-area, .print-target-area * { visibility: visible !important; }
+            .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
+            .no-pdf { display: none !important; }
+            table { width: 100% !important; font-size: 8px !important; table-layout: fixed !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #777 !important; padding: 4px 2px !important; word-wrap: break-word !important; }
+            th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; }
+            tr { page-break-inside: avoid !important; }
+            
+            body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
+            body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
         }
     </style>
 </head>
@@ -297,7 +289,7 @@
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
                 <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
                 <button class="btn btn-orange" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (&lt; 1 Mo) ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="printStockTable()">PDF 📄</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="printStockTable()">PDF / Print 📄</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
@@ -388,7 +380,7 @@
                 <label for="includeSalesIncomeToggle" style="font-size:0.85rem; font-weight:bold; color:#1e3c72; cursor:pointer;">💡 Include Total Sales Profit (EGP) in Financial Summary</label>
             </div>
             <div style="display:flex; gap:6px; margin-top:10px; width:100%;">
-                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">PDF 📄</button>
+                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">PDF / Print 📄</button>
                 <button class="btn btn-orange" style="flex:1;" onclick="exportFinanceExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -431,7 +423,7 @@
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
                 <button class="btn btn-purple" onclick="openRatesModal()">Set FX &amp; Multiplier ⚙️</button>
-                <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF 📄</button>
+                <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF / Print 📄</button>
                 <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -593,45 +585,17 @@ function formatDateDisplay(dateStr) {
     return clean;
 }
 
-/* ---------- Master PDF Export Method ---------- */
+/* ---------- Master Print / PDF Export Method ---------- */
 
 function exportElementToPDF(elementId, fileName = 'Report.pdf') {
     const element = document.getElementById(elementId);
     if (!element) return toast("❌ تعذر إيجاد عنصر التقرير!", "error");
 
-    toast("⏳ جاري إنشاء وتحميل ملف الـ PDF...", "info", 3000);
-    element.classList.add('pdf-export-mode');
-
-    const opt = {
-        margin: [6, 4, 6, 4],
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(element).toPdf().get('jspdf').then(function (pdf) {
-        element.classList.remove('pdf-export-mode');
-        try {
-            const blob = pdf.output('blob');
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-            toast("✅ تم تصدير الملف بنجاح!", "success");
-        } catch (e) {
-            pdf.save(fileName);
-            toast("✅ تم حفظ الملف بنجاح!", "success");
-        }
-    }).catch(err => {
-        element.classList.remove('pdf-export-mode');
-        console.error("PDF Export Fail:", err);
-        toast("❌ فشل تصدير الملف، يرجى إعادة المحاولة", "error");
-    });
+    element.classList.add('print-target-area');
+    window.print();
+    setTimeout(() => {
+        element.classList.remove('print-target-area');
+    }, 1000);
 }
 
 function exportSalesReportPDF() {
@@ -2067,7 +2031,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Selling Products</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">Top 10 Selling Products</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
@@ -2257,94 +2221,11 @@ function generateSingleProductDetailsReport(productName) {
 /* ---------- In-App Full View ---------- */
 
 function renderInAppReportView() {
-    const fromD = document.getElementById('fromDate')?.value || '';
-    const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tally = buildInvoiceTally(filteredInvoices);
-    const top10 = tally.sortedTop.slice(0, 10);
-    const maxQty = top10.length > 0 ? top10[0].qty : 1;
-
-    const chartHtml = top10.map((p, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px; direction:rtl;">
-            <div style="width:180px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#1e3c72;">#${idx + 1} ${escapeHtml(p.name)}</div>
-            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden; position:relative;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%; float:right;"></div></div>
-            <div style="width:40px; text-align:left; font-weight:bold; color:#1e3c72;">${p.qty} u</div>
-        </div>`).join('');
-
-    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
-        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">#${inv.id}</td>
-            <td style="border:1px solid #ddd; padding:5px; white-space:nowrap; direction:ltr;">${escapeHtml(formatDateDisplay(inv.date))}</td>
-            <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold; line-height:1.4; word-break:break-word;">${itemsListHtml}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-size:9.5px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
-            <td style="border:1px solid #ddd; padding:5px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-        </tr>`).join('');
-
-    const html = `
-        <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; font-family:sans-serif; direction:rtl;">
-            <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy</h2>
-            <h3 style="margin: 4px 0;">Comprehensive Sales Financial Report</h3>
-            <p style="font-size:11px; color:#666;">Period: <b>${escapeHtml(fromD || 'Start')}</b> To: <b>${escapeHtml(toD || 'Today')}</b> | Date: ${new Date().toLocaleString()}</p>
-        </div>
-        <div class="table-responsive">
-        <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
-            <thead><tr style="background-color:#1e3c72; color:#ffffff;">
-                <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
-                <th style="width:65px; padding:6px; border:1px solid #1e3c72;">Inv ID</th>
-                <th style="width:100px; padding:6px; border:1px solid #1e3c72;">Date &amp; Time</th>
-                <th style="padding:6px; min-width:230px; border:1px solid #1e3c72;">Items Details</th>
-                <th style="width:115px; padding:6px; border:1px solid #1e3c72;">Pay Breakdown</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">C-Total</th>
-                <th style="width:50px; padding:6px; border:1px solid #1e3c72;">Disc %</th>
-                <th style="width:85px; padding:6px; border:1px solid #1e3c72;">Sales Total</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">Net Profit</th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-        </div>
-        
-        <div class="report-summary-cards">
-            <div class="report-card">
-                <div class="report-card-title">💵 Cash &amp; FX Total</div>
-                <div class="report-card-value" style="font-size:0.8rem;">$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)}<br>£:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
-            </div>
-            <div class="report-card">
-                <div class="report-card-title">💳 Total Visa</div>
-                <div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#27ae60;">
-                <div class="report-card-title" style="color:#27ae60;">🛒 Total Gross Sales</div>
-                <div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#8e44ad;">
-                <div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit</div>
-                <div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div>
-            </div>
-        </div>
-
-        ${top10.length > 0 ? `
-        <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; font-family:sans-serif;">
-            <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 Top 10 Best Selling Products:</h4>${chartHtml}
-        </div>` : ''}
-        <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-    `;
-
-    const container = document.getElementById('pdfExportableArea');
-    if (container) container.innerHTML = html;
-    const parentContainer = document.getElementById('inAppReportContainer');
-    if (parentContainer) {
-        parentContainer.style.display = 'block';
-        window.scrollTo({ top: parentContainer.offsetTop - 20, behavior: 'smooth' });
-    }
+    exportSalesReportPDF();
 }
 
 function hideInAppReportView() {
     if (document.getElementById('inAppReportContainer')) document.getElementById('inAppReportContainer').style.display = 'none';
-    if (document.getElementById('pdfExportableArea')) document.getElementById('pdfExportableArea').innerHTML = '';
 }
 
 function downloadInAppReportPDF() {
