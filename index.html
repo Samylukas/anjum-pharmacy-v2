@@ -64,10 +64,10 @@
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
-        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.85rem; }
+        th, td { padding: 6px 3px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; vertical-align: middle; }
+        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.8rem; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.8rem !important; line-height: 1.4 !important; min-width: 250px !important; white-space: normal !important; word-break: break-word !important; }
+        .items-column-cell { text-align: right !important; font-size: 0.82rem !important; line-height: 1.4 !important; min-width: 320px !important; white-space: normal !important; word-break: break-word !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -90,7 +90,6 @@
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
 
-        /* --- POS Improved Styling --- */
         .pos-header-card { background: #ffffff; border: 1.5px solid #1e3c72; padding: 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .pos-header-card div { font-size: 0.9rem; font-weight: bold; color: #1e3c72; display: flex; align-items: center; gap: 6px; }
         .pos-header-card input { padding: 6px; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; font-size: 0.85rem; }
@@ -139,13 +138,13 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
 
-        /* --- PDF Export Mode --- */
+        /* --- PDF Export Mode Adjustments --- */
         .pdf-export-mode { width: 750px !important; margin: 0 auto !important; padding: 0 !important; background: #ffffff !important; }
-        .pdf-export-mode table { min-width: 100% !important; font-size: 8px !important; table-layout: fixed !important; }
-        .pdf-export-mode th, .pdf-export-mode td { padding: 4px 2px !important; font-size: 8px !important; line-height: 1.3 !important; border: 1px solid #bbb !important; }
+        .pdf-export-mode table { min-width: 100% !important; font-size: 7px !important; table-layout: fixed !important; }
+        .pdf-export-mode th, .pdf-export-mode td { padding: 3px 1px !important; font-size: 7px !important; line-height: 1.2 !important; border: 1px solid #bbb !important; }
         .pdf-export-mode tr { page-break-inside: avoid !important; }
         .pdf-export-mode th { background-color: #1e3c72 !important; color: #ffffff !important; }
-        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 8px !important; width: 35% !important; }
+        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 7.5px !important; width: 42% !important; }
         .pdf-export-mode .no-pdf { display: none !important; }
         .pdf-export-mode .section-title { font-size: 0.85rem !important; margin-top: 10px !important; margin-bottom: 5px !important; }
         .pdf-export-mode .report-card { background: #ffffff !important; border: 1px solid #1e3c72 !important; }
@@ -296,16 +295,16 @@
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 Inventory Details</span>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-red" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
-                <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (&lt; 1 Mo) ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 10px; font-size:0.8rem;" onclick="printStockTable()">PDF 📄</button>
+                <button class="btn btn-red" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterLowStock()">Low Stock ⚠️</button>
+                <button class="btn btn-orange" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="filterNearExpiryOneMonth()">Near Expiry (&lt; 1 Mo) ⚠️</button>
+                <button class="btn btn-purple" style="width:auto; margin:0; padding:4px 8px; font-size:0.75rem;" onclick="printStockTable()">PDF 📄</button>
             </div>
         </div>
         <input type="text" id="stockFilterInput" class="search-box" placeholder="Filter inventory by name or barcode..." oninput="filterStockTable(this.value)">
 
-        <div id="stockScannerContainer" class="scanner-box" style="margin-top:10px;">
+        <div id="stockScannerContainer" class="scanner-box" style="margin-top:6px;">
             <div id="stockCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
+            <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
         </div>
 
         <div id="stockPrintArea">
@@ -337,29 +336,29 @@
                 </div>
                 <div class="pay-box" style="grid-column: span 2;"><label>Expiry Date:</label><input type="date" id="newProdExpiry"></div>
             </div>
-            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:10px;">
+            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:8px;">
                 <div id="addNewCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
+                <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('addNew')">Close Camera ❌</button>
             </div>
-            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="addNewProductToSystem()">Save &amp; Sync Product 📦</button>
+            <button class="btn btn-purple" style="margin-top: 10px; width: 100%;" onclick="addNewProductToSystem()">Save &amp; Sync Product 📦</button>
         </div>
 
-        <div class="section-title" style="margin-top:20px;">➕ Recharge Existing Stock</div>
+        <div class="section-title" style="margin-top:15px;">➕ Recharge Existing Stock</div>
         <div class="card">
             <div style="display:flex; gap:6px;">
                 <input type="text" id="addStockSearch" class="search-box" style="margin-bottom:0;" placeholder="Search product name or scan barcode..." oninput="searchAddStockProduct()">
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 12px;" onclick="toggleCameraScanner('recharge')">📷 Scan Barcode</button>
             </div>
-            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:10px;">
+            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:8px;">
                 <div id="rechargeCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
+                <button class="btn btn-red" style="margin:4px auto; width:90%; padding:4px;" onclick="stopCameraScanner('recharge')">Close Camera ❌</button>
             </div>
             <div id="addStockResults" class="results-list"></div>
-            <div id="addStockCard" style="display: none; margin-top: 10px;">
-                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 10px;"></h4>
+            <div id="addStockCard" style="display: none; margin-top: 8px;">
+                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 6px;"></h4>
                 <div class="info-row"><div>Current Stock: <span id="currentStockVal" style="color:#27ae60;">0</span> units</div></div>
-                <div class="pay-box" style="margin-top: 10px;"><label>Quantity to Add:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1px solid #ccc; text-align: center;"></div>
-                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
+                <div class="pay-box" style="margin-top: 6px;"><label>Quantity to Add:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 6px; border-radius: 6px; border: 1px solid #ccc; text-align: center;"></div>
+                <button class="btn" style="margin-top: 10px; width: 100%;" onclick="saveStockAddition()">Confirm Recharge 📥</button>
             </div>
         </div>
     </div>
@@ -375,10 +374,10 @@
                 <div class="pay-box"><label>Date &amp; Time:</label><input type="datetime-local" id="finDate"></div>
                 <div class="pay-box" style="grid-column: span 2;"><label>Notes / Details:</label><input type="text" id="finNotes" placeholder="Additional notes..."></div>
             </div>
-            <button class="btn btn-purple" style="margin-top: 12px; width: 100%;" onclick="saveFinanceEntry()">Save Entry 💾</button>
+            <button class="btn btn-purple" style="margin-top: 10px; width: 100%;" onclick="saveFinanceEntry()">Save Entry 💾</button>
         </div>
 
-        <div class="date-filter card" style="margin-top: 15px;">
+        <div class="date-filter card" style="margin-top: 10px;">
             <div class="date-inputs-row">
                 <div>From: <input type="date" id="finFromDate"></div>
                 <div>To: <input type="date" id="finToDate"></div>
@@ -437,23 +436,23 @@
             </div>
         </div>
 
-        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
-            <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History:</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:240px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
-                <button class="btn btn-red" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
-                <button class="btn btn-blue" style="width:auto; padding:10px 16px; font-size:0.9rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
+        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:10px;">
+            <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History:</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
+                <button class="btn btn-red" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
+                <button class="btn btn-blue" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
             </div>
             <div id="singleProductReportResults" class="results-list" style="margin-top:6px;"></div>
-            <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px; border:2px solid #3498db;"></div>
+            <div id="singleProdReportDisplay" style="display:none; margin-top:8px; background:#fff; padding:10px; border-radius:8px; border:2px solid #3498db;"></div>
         </div>
 
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:15px;">
+        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:10px;">
             <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
-            <h3 style="text-align:center; margin-bottom:10px;">💵 Comprehensive Sales Report</h3>
-            <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
-                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer;">
-                <label for="deductExpensesToggle" style="font-size:0.8rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
+            <h3 style="text-align:center; margin-bottom:8px;">💵 Comprehensive Sales Report</h3>
+            <div style="text-align:center; margin-bottom:8px; background:rgba(255,255,255,0.15); padding:4px; border-radius:6px;">
+                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:14px; height:14px; cursor:pointer;">
+                <label for="deductExpensesToggle" style="font-size:0.75rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
             </div>
             <div class="totals-grid">
                 <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
@@ -463,11 +462,11 @@
                 <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
                 <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1rem;">0.00 EGP</span></div>
             </div>
-            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
-                <h4 style="text-align:center; color:#f1c40f; margin-bottom:6px;">⭐ Top Selling Products:</h4>
-                <div id="topProductsList" style="font-size:0.8rem; text-align:center; line-height:1.5;"></div>
+            <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:6px;">
+                <h4 style="text-align:center; color:#f1c40f; margin-bottom:4px;">⭐ Top Selling Products:</h4>
+                <div id="topProductsList" style="font-size:0.75rem; text-align:center; line-height:1.4;"></div>
             </div>
         </div>
 
@@ -491,11 +490,11 @@
     <div id="usersTab" class="tab-content admin-only">
         <div class="section-title">🔑 Manage Accounts & Passwords</div>
         
-        <div class="card" style="max-width:450px; margin:0 auto 15px auto; background:#fdfefe;">
-            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">➕ Add New User</h4>
-            <div class="pay-box" style="margin-bottom:8px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
-            <div class="pay-box" style="margin-bottom:8px;"><label>Password:</label><input type="password" id="addUserPass" placeholder="Enter password..."></div>
-            <div class="pay-box" style="margin-bottom:12px;"><label>Role:</label>
+        <div class="card" style="max-width:400px; margin:0 auto 10px auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:8px;">➕ Add New User</h4>
+            <div class="pay-box" style="margin-bottom:6px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
+            <div class="pay-box" style="margin-bottom:6px;"><label>Password:</label><input type="password" id="addUserPass" placeholder="Enter password..."></div>
+            <div class="pay-box" style="margin-bottom:10px;"><label>Role:</label>
                 <select id="addUserRole">
                     <option value="Cashier">Cashier</option>
                     <option value="User">User</option>
@@ -505,10 +504,10 @@
             <button class="btn btn-blue" style="width:100%;" onclick="createNewUserSystem()">Create User 🚀</button>
         </div>
 
-        <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
-            <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">✏️ Change Existing Password</h4>
-            <div class="pay-box" style="margin-bottom:12px;"><label>Select User:</label><select id="userSelectPass"></select></div>
-            <div class="pay-box" style="margin-bottom:12px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
+        <div class="card" style="max-width:400px; margin:0 auto; background:#fdfefe;">
+            <h4 style="color:#1e3c72; text-align:center; margin-bottom:8px;">✏️ Change Existing Password</h4>
+            <div class="pay-box" style="margin-bottom:10px;"><label>Select User:</label><select id="userSelectPass"></select></div>
+            <div class="pay-box" style="margin-bottom:10px;"><label>New Password:</label><input type="password" id="newAccountPass" placeholder="Enter new password..."></div>
             <button class="btn btn-purple" style="width:100%;" onclick="changeUserPasswordSystem()">Update Password 💾</button>
         </div>
     </div>
@@ -611,9 +610,23 @@ function exportElementToPDF(elementId, fileName = 'Report.pdf') {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
+    html2pdf().set(opt).from(element).toPdf().get('jspdf').then(function (pdf) {
         element.classList.remove('pdf-export-mode');
-        toast("✅ تم تصدير الملف بنجاح!", "success");
+        try {
+            const blob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            toast("✅ تم تصدير الملف بنجاح!", "success");
+        } catch (e) {
+            pdf.save(fileName);
+            toast("✅ تم حفظ الملف بنجاح!", "success");
+        }
     }).catch(err => {
         element.classList.remove('pdf-export-mode');
         console.error("PDF Export Fail:", err);
@@ -1578,21 +1591,13 @@ function renderFinanceTable() {
 
     let totRev = 0, totExp = 0;
     const tbody = document.getElementById('financeTableBody');
-    const aggBody = document.getElementById('financeAggregatedBody');
     if (!tbody) return;
-
-    let aggMap = new Map();
 
     if (filtered.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr>';
-        if (aggBody) aggBody.innerHTML = '<tr><td colspan="3" style="color:#7f8c8d;">No Aggregated Data</td></tr>';
     } else {
         tbody.innerHTML = filtered.map((f, idx) => {
             if (f.type === 'Revenue') totRev += f.amount; else totExp += f.amount;
-
-            let key = `${f.category.trim()}|||${f.type}`;
-            let currentAgg = aggMap.get(key) || 0;
-            aggMap.set(key, currentAgg + f.amount);
 
             return `
             <tr style="background:${f.type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
@@ -1605,21 +1610,6 @@ function renderFinanceTable() {
                 <td class="no-pdf"><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
             </tr>`;
         }).join('');
-
-        if (aggBody) {
-            let aggRows = [];
-            aggMap.forEach((totalAmount, key) => {
-                let [cat, type] = key.split('|||');
-                aggRows.push(`
-                    <tr style="background:${type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
-                        <td style="font-weight:bold; text-align:right;">${escapeHtml(cat)}</td>
-                        <td style="font-weight:bold; color:${type === 'Revenue' ? '#27ae60' : '#c0392b'};">${type === 'Revenue' ? 'Revenue (+)' : 'Expense (-)'}</td>
-                        <td style="font-weight:bold;">${totalAmount.toFixed(2)} EGP</td>
-                    </tr>
-                `);
-            });
-            aggBody.innerHTML = aggRows.join('');
-        }
     }
 
     if (includeSales) {
@@ -2077,7 +2067,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products:</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">Top 10 Selling Products</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
@@ -2262,103 +2252,6 @@ function generateSingleProductDetailsReport(productName) {
         </table></div>`;
     display.style.display = 'block';
     window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
-}
-
-/* ---------- In-App Full View ---------- */
-
-function renderInAppReportView() {
-    const fromD = document.getElementById('fromDate')?.value || '';
-    const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tally = buildInvoiceTally(filteredInvoices);
-    const top10 = tally.sortedTop.slice(0, 10);
-    const maxQty = top10.length > 0 ? top10[0].qty : 1;
-
-    const chartHtml = top10.map((p, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px; direction:rtl;">
-            <div style="width:180px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#1e3c72;">#${idx + 1} ${escapeHtml(p.name)}</div>
-            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden; position:relative;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%; float:right;"></div></div>
-            <div style="width:40px; text-align:left; font-weight:bold; color:#1e3c72;">${p.qty} u</div>
-        </div>`).join('');
-
-    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
-        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">#${inv.id}</td>
-            <td style="border:1px solid #ddd; padding:5px; white-space:nowrap; direction:ltr;">${escapeHtml(formatDateDisplay(inv.date))}</td>
-            <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold; line-height:1.4; word-break:break-word;">${itemsListHtml}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-size:9.5px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
-            <td style="border:1px solid #ddd; padding:5px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-        </tr>`).join('');
-
-    const html = `
-        <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; font-family:sans-serif; direction:rtl;">
-            <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy</h2>
-            <h3 style="margin: 4px 0;">Comprehensive Sales Financial Report</h3>
-            <p style="font-size:11px; color:#666;">Period: <b>${escapeHtml(fromD || 'Start')}</b> To: <b>${escapeHtml(toD || 'Today')}</b> | Date: ${new Date().toLocaleString()}</p>
-        </div>
-        <div class="table-responsive">
-        <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
-            <thead><tr style="background-color:#1e3c72; color:#ffffff;">
-                <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
-                <th style="width:65px; padding:6px; border:1px solid #1e3c72;">Inv ID</th>
-                <th style="width:100px; padding:6px; border:1px solid #1e3c72;">Date &amp; Time</th>
-                <th style="padding:6px; min-width:230px; border:1px solid #1e3c72;">Items Details</th>
-                <th style="width:115px; padding:6px; border:1px solid #1e3c72;">Pay Breakdown</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">C-Total</th>
-                <th style="width:50px; padding:6px; border:1px solid #1e3c72;">Disc %</th>
-                <th style="width:85px; padding:6px; border:1px solid #1e3c72;">Sales Total</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">Net Profit</th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-        </div>
-        
-        <div class="report-summary-cards">
-            <div class="report-card">
-                <div class="report-card-title">💵 Cash &amp; FX Total</div>
-                <div class="report-card-value" style="font-size:0.8rem;">$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)}<br>£:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
-            </div>
-            <div class="report-card">
-                <div class="report-card-title">💳 Total Visa</div>
-                <div class="report-card-value">${tally.sumVISA.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#27ae60;">
-                <div class="report-card-title" style="color:#27ae60;">🛒 Total Gross Sales</div>
-                <div class="report-card-value" style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div>
-            </div>
-            <div class="report-card" style="border-color:#8e44ad;">
-                <div class="report-card-title" style="color:#8e44ad;">💰 Total Net Profit</div>
-                <div class="report-card-value" style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div>
-            </div>
-        </div>
-
-        ${top10.length > 0 ? `
-        <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; font-family:sans-serif;">
-            <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 Top 10 Best Selling Products:</h4>${chartHtml}
-        </div>` : ''}
-        <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-    `;
-
-    const container = document.getElementById('pdfExportableArea');
-    if (container) container.innerHTML = html;
-    const parentContainer = document.getElementById('inAppReportContainer');
-    if (parentContainer) {
-        parentContainer.style.display = 'block';
-        window.scrollTo({ top: parentContainer.offsetTop - 20, behavior: 'smooth' });
-    }
-}
-
-function hideInAppReportView() {
-    if (document.getElementById('inAppReportContainer')) document.getElementById('inAppReportContainer').style.display = 'none';
-    if (document.getElementById('pdfExportableArea')) document.getElementById('pdfExportableArea').innerHTML = '';
-}
-
-function downloadInAppReportPDF() {
-    exportSalesReportPDF();
 }
 
 /* ---------- Application Entry Point ---------- */
