@@ -30,7 +30,7 @@
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
-        .section-title { font-weight: bold; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 1rem; text-align: right; }
+        .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 0.95rem; text-align: right; clear: both; block-size: auto; }
 
         .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
         .large-search-box { width: 100%; padding: 12px 14px; font-size: 1rem; font-weight: bold; border: 2px solid #1e3c72; border-radius: 8px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
@@ -63,11 +63,11 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; }
+        table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: auto; }
         th, td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; font-size: 0.8rem; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.78rem !important; line-height: 1.4 !important; min-width: 220px !important; white-space: normal !important; word-break: break-word !important; }
+        .items-column-cell { text-align: right !important; font-size: 0.78rem !important; line-height: 1.4 !important; min-width: 200px !important; white-space: normal !important; word-break: break-word !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -134,15 +134,13 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
 
-        /* --- Strict PDF Export Rules --- */
-        .pdf-export-mode { width: 780px !important; margin: 0 auto !important; padding: 5px !important; }
-        .pdf-export-mode table { min-width: 100% !important; font-size: 8px !important; table-layout: fixed !important; }
-        .pdf-export-mode th, .pdf-export-mode td { padding: 3px 2px !important; font-size: 8px !important; }
-        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 8px !important; }
+        /* --- Perfect PDF Export Dimensions --- */
+        .pdf-export-mode { width: 750px !important; margin: 0 auto !important; padding: 0 !important; }
+        .pdf-export-mode table { min-width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; }
+        .pdf-export-mode th, .pdf-export-mode td { padding: 3px 1px !important; font-size: 7.5px !important; line-height: 1.2 !important; }
+        .pdf-export-mode .items-column-cell { min-width: auto !important; font-size: 7.5px !important; }
         .pdf-export-mode .no-pdf { display: none !important; }
-        .pdf-export-mode .report-summary-cards { margin-top: 6px !important; }
-        .pdf-export-mode .report-card-title { font-size: 0.65rem !important; }
-        .pdf-export-mode .report-card-value { font-size: 0.75rem !important; }
+        .pdf-export-mode .section-title { font-size: 0.8rem !important; margin-top: 8px !important; margin-bottom: 4px !important; }
         
         #receiptPrintSection { display: none; }
         @media print {
@@ -397,14 +395,13 @@
                 </div>
             </div>
 
-            <!-- Aggregated Expenses Breakdown Table -->
-            <div class="section-title" style="margin-top:10px; font-size:0.85rem;">📌 Aggregated Expenses By Category:</div>
+            <div class="section-title" style="margin-top:10px;">📌 Aggregated Expenses By Category:</div>
             <div class="table-responsive"><table>
                 <thead><tr><th>Category</th><th>Type</th><th>Total Amount (EGP)</th></tr></thead>
                 <tbody id="financeAggregatedBody"><tr><td colspan="3" style="color:#7f8c8d;">No Aggregated Data</td></tr></tbody>
             </table></div>
 
-            <div class="section-title" style="margin-top:12px; font-size:0.85rem;">📝 Detailed Finance Records:</div>
+            <div class="section-title" style="margin-top:12px;">📝 Detailed Finance Records:</div>
             <div class="table-responsive"><table>
                 <thead><tr><th style="width:30px;">#</th><th>Date &amp; Time</th><th>Type</th><th>Description</th><th>Amount (EGP)</th><th>Notes</th><th class="no-pdf" style="width:50px;">Action</th></tr></thead>
                 <tbody id="financeTableBody"><tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr></tbody>
@@ -467,7 +464,7 @@
             </div>
             
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:25px;">#</th><th style="width:55px;">Inv ID</th><th style="width:100px;">Date &amp; Time</th><th style="min-width:220px;">Items Details</th><th style="width:110px;">Pay Breakdown</th><th style="width:70px;">C-Total</th><th style="width:45px;">Disc %</th><th style="width:80px;">Sales Total</th><th style="width:75px;">Net Profit</th><th class="no-pdf" style="width:120px;">Actions</th></tr></thead>
+                <thead><tr><th style="width:25px;">#</th><th style="width:55px;">Inv ID</th><th style="width:100px;">Date &amp; Time</th><th style="min-width:220px;">Items Details</th><th>Pay Breakdown</th><th>C-Total</th><th style="width:45px;">Disc %</th><th>Sales Total</th><th>Net Profit</th><th class="no-pdf" style="width:120px;">Actions</th></tr></thead>
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
             </table></div>
 
