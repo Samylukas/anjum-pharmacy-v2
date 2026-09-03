@@ -8,8 +8,6 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبة html2pdf المحدثة لتوليد ملفات PDF بشكل ممتاز -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -171,6 +169,13 @@
             gap: 4px;
         }
         .btn-scroll-top:hover { background: #2c3e50; }
+
+        @media print {
+            body * { visibility: hidden !important; }
+            #printableNativeSection, #printableNativeSection * { visibility: visible !important; }
+            #printableNativeSection { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
+            .no-print-el { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -516,6 +521,7 @@
             </div>
         </div>
 
+        <!-- أداة التقرير التفصيلي المكبر لمنتج محدد مع زر مسح البحث Clear -->
         <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
             <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -582,7 +588,7 @@
         <div id="inAppReportContainer" style="display:none; margin-top:20px; background:#fff; padding:15px; border-radius:8px; border:2px solid #1e3c72;">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
                 <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">Download PDF 📄</button>
+                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">PDF 📄</button>
             </div>
             
             <div id="pdfExportableArea">
@@ -590,7 +596,7 @@
 
             <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #1e3c72; padding-top:10px; margin-top:15px; flex-wrap:wrap; gap:8px;">
                 <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">Download PDF 📄</button>
+                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">PDF 📄</button>
             </div>
         </div>
     </div>
@@ -612,11 +618,12 @@
         </div>
     </div>
 
-    <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
+    <button class="btn-scroll-top no-print-el" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
 
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
 </div>
 
+<div id="printableNativeSection"></div>
 <div id="receiptPrintSection"></div>
 
 <script>
@@ -648,24 +655,6 @@
             osc.stop(ctx.currentTime + 0.12);
         } catch(e) {}
     }
-
-    // دعم زر التراجع في الهواتف ذكياً دون الخروج من التطبيق
-    window.addEventListener('popstate', function (event) {
-        const repContainer = document.getElementById('inAppReportContainer');
-        const profBox = document.getElementById('profitBox');
-        const singleRepDisplay = document.getElementById('singleProdReportDisplay');
-        
-        if (repContainer && repContainer.style.display === 'block') {
-            repContainer.style.display = 'none';
-            document.getElementById('pdfExportableArea').innerHTML = '';
-        }
-        if (profBox && profBox.style.display === 'block') {
-            profBox.style.display = 'none';
-        }
-        if (singleRepDisplay && singleRepDisplay.style.display === 'block') {
-            singleRepDisplay.style.display = 'none';
-        }
-    });
 
     window.addEventListener('DOMContentLoaded', () => {
         const userEl = document.getElementById('entryUserSelect');
@@ -821,7 +810,6 @@
 
         display.innerHTML = html;
         display.style.display = 'block';
-        window.history.pushState({ view: 'singleProdReport' }, '');
         window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
     }
 
@@ -983,7 +971,6 @@
 
         document.getElementById('pdfExportableArea').innerHTML = html;
         document.getElementById('inAppReportContainer').style.display = 'block';
-        window.history.pushState({ view: 'reportModal' }, '');
         window.scrollTo({ top: document.getElementById('inAppReportContainer').offsetTop - 20, behavior: 'smooth' });
     }
 
@@ -992,85 +979,175 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // دالة تصدير وطباعة الـ PDF المعالجة كلياً لمنع الصفحات الفارغة بالمتصفح والـ APK
+    // تصدير وتنزيل طباعة الـ PDF المباشرة بدون أطُر خارجية أو نوافذ منبثقة محظورة
     function downloadInAppReportPDF() {
-        const srcElement = document.getElementById('pdfExportableArea');
-        if (!srcElement || !srcElement.innerHTML.trim()) return alert("⚠️ No report content to export!");
+        const reportContent = document.getElementById('pdfExportableArea').innerHTML;
+        if (!reportContent) return;
 
-        // اختبار البيئة: متصفح حقيقي أم WebView/APK
-        const isStandaloneBrowser = !window.matchMedia('(display-mode: standalone)').matches && 
-                                    !navigator.userAgent.includes('wv') && 
-                                    !window.cordova;
+        executeDirectNativePrint(reportContent);
+    }
 
-        // خيار المتصفح: طباعة مباشرة سريعة بجودة عالية جداً
-        if (isStandaloneBrowser) {
-            const printWin = window.open('', '_blank');
-            if (printWin) {
-                printWin.document.write(`
-                    <!DOCTYPE html>
-                    <html lang="ar" dir="rtl">
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Anjum Sales Report PDF</title>
-                        <style>
-                            @page { size: A4 landscape; margin: 8mm; }
-                            body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 10px; direction: rtl; text-align: center; background: #fff; color: #333; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 10px; }
-                            th, td { border: 1px solid #1e3c72; padding: 5px; text-align: center; vertical-align: middle; }
-                            th { background-color: #1e3c72 !important; color: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-size: 11px; }
-                            tr { page-break-inside: avoid !important; }
-                        </style>
-                    </head>
-                    <body>
-                        ${srcElement.innerHTML}
-                        <script>
-                            window.onload = function() {
-                                setTimeout(function(){
-                                    window.focus();
-                                    window.print();
-                                    window.close();
-                                }, 400);
-                            };
-                        <\/script>
-                    </body>
-                    </html>
-                `);
-                printWin.document.close();
-                return;
-            }
+    function printStockTable() {
+        const tbody = document.getElementById('stockTableBody').innerHTML;
+        const guideMult = RATES.GUIDE_MULT || 3;
+        
+        let html = `
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
+                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Stock Inventory Details Report</h3>
+                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Issued Date: ${new Date().toLocaleString()}</p>
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
+                <thead>
+                    <tr style="background:#1e3c72; color:#fff;">
+                        <th>#</th>
+                        <th style="width:35%;">Product Name</th>
+                        <th>Stock Qty</th>
+                        <th>Commercial Price</th>
+                        <th>Guide Min</th>
+                        <th>Barcode</th>
+                        <th>Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        products.forEach((p, idx) => {
+            html += `
+                <tr>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.q} units</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.p.toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${(p.p * guideMult).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.expiry || '-'}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+        `;
+
+        executeDirectNativePrint(html);
+    }
+
+    function printFinanceReportPDF() {
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let totRev = 0, totExp = 0;
+        let salesProfit = 0;
+
+        filtered.forEach(f => {
+            if (f.type === 'Revenue') totRev += f.amount;
+            else totExp += f.amount;
+        });
+
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                salesProfit += (parseFloat(inv.netProfit) || 0);
+            });
+            totRev += salesProfit;
         }
 
-        // خيار الـ APK والتنزيل المباشر: إنتاج حاوية مؤقتة خارج الشاشة لتفادي القص والإطار الفارغ
-        const tempDiv = document.createElement('div');
-        tempDiv.style.position = 'absolute';
-        tempDiv.style.left = '-9999px';
-        tempDiv.style.top = '-9999px';
-        tempDiv.style.width = '1100px';
-        tempDiv.style.background = '#ffffff';
-        tempDiv.style.direction = 'rtl';
-        tempDiv.innerHTML = srcElement.innerHTML;
-        document.body.appendChild(tempDiv);
+        const net = totRev - totExp;
 
-        const opt = {
-            margin:       [5, 5, 5, 5],
-            filename:     `Anjum_Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                scrollX: 0, 
-                scrollY: 0,
-                windowWidth: 1200
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
+        let html = `
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
+                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Expenses & Revenues Financial Report</h3>
+                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}</p>
+            </div>
 
-        html2pdf().set(opt).from(tempDiv).save().then(() => {
-            if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
-        }).catch(err => {
-            if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
-            alert("❌ PDF Generation failed: " + err);
-        });
+            <div style="background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px;">
+                <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
+                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
+                    <thead>
+                        <tr style="background:#1e3c72; color:#fff;">
+                            <th style="padding:5px;">Total Revenues</th>
+                            ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
+                            <th style="padding:5px;">Total Expenses</th>
+                            <th style="padding:5px;">Net Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
+                            ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
+                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px;">
+                <thead>
+                    <tr style="background:#1e3c72; color:#fff;">
+                        <th style="width:30px; padding:6px;">#</th>
+                        <th style="width:120px; padding:6px;">Date</th>
+                        <th style="width:70px; padding:6px;">Type</th>
+                        <th style="padding:6px;">Category / Description</th>
+                        <th style="width:90px; padding:6px;">Amount (EGP)</th>
+                        <th style="padding:6px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        if (filtered.length === 0) {
+            html += `<tr><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`;
+        } else {
+            filtered.forEach((f, idx) => {
+                const isRev = f.type === 'Revenue';
+                html += `
+                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                        <td style="border:1px solid #ccc; padding:5px; white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
+                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
+                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        html += `
+                </tbody>
+            </table>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+        `;
+
+        executeDirectNativePrint(html);
+    }
+
+    // دالة الطباعة وتصدير PDF المباشرة الداخلية المعزولة للتطبيق
+    function executeDirectNativePrint(contentHtml) {
+        const sec = document.getElementById('printableNativeSection');
+        sec.innerHTML = contentHtml;
+
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { sec.innerHTML = ''; }, 1000);
+        }, 150);
     }
 
     function fetchInitialUsersOnly() {
@@ -1396,10 +1473,7 @@
                 usd: inv.usd||0, eur: inv.eur||0, gbp: inv.gbp||0, egp: inv.egp||0, visa: inv.visa||0
             }];
         }
-        
-        let dPercent = inv.discount || 0;
-        if (dPercent > 25) dPercent = 25;
-        invoiceDiscountPercent = dPercent;
+        invoiceDiscountPercent = inv.discount || 0;
         document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
         renderInvoice();
     }
@@ -2025,21 +2099,6 @@
         XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    function printFinanceReportPDF() {
-        renderFinanceTable();
-        const element = document.getElementById('financeTableBody').parentNode;
-        
-        const opt = {
-            margin:       [5, 5, 5, 5],
-            filename:     `Anjum_Finance_Report_${new Date().toISOString().slice(0,10)}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save();
-    }
-
     function changeUserPasswordSystem() {
         if (currentUser.role !== 'Admin') return alert("❌ Restricted to Admin!");
         const targetUser = document.getElementById('userSelectPass').value;
@@ -2339,25 +2398,17 @@
 
         const printSec = document.getElementById('receiptPrintSection');
         printSec.innerHTML = receiptHTML;
-        
-        const opt = {
-            margin:       [2, 2, 2, 2],
-            filename:     `Receipt_${inv.id}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'mm', format: [80, 150], orientation: 'portrait' }
-        };
+        document.body.classList.add('printing-receipt');
 
-        html2pdf().set(opt).from(printSec).save().then(() => {
+        window.print();
+
+        setTimeout(() => {
+            document.body.classList.remove('printing-receipt');
             printSec.innerHTML = '';
-        });
+        }, 500);
     }
 
     function printReportTable() {
-        renderInAppReportView();
-    }
-
-    function printStockTable() {
         renderInAppReportView();
     }
 
@@ -2652,7 +2703,6 @@
         document.getElementById('topProductsList').innerHTML = topHtml;
 
         document.getElementById('profitBox').style.display = 'block';
-        window.history.pushState({ view: 'profitBox' }, '');
     }
 </script>
 </body>
