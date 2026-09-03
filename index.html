@@ -1585,20 +1585,34 @@ function printFinanceReportPDF() {
 
 function renderToTempPdf(html, filename, orientation = 'landscape') {
     const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.top = '0';
+    tempContainer.style.left = '0';
+    tempContainer.style.width = '1000px';
+    tempContainer.style.zIndex = '-999999';
+    tempContainer.style.opacity = '0';
+    tempContainer.style.backgroundColor = '#ffffff';
     tempContainer.innerHTML = html;
     document.body.appendChild(tempContainer);
 
     const opt = {
         margin: 5,
-        filename,
+        filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: orientation }
     };
 
-    html2pdf().set(opt).from(tempContainer).save().then(() => document.body.removeChild(tempContainer));
+    html2pdf().set(opt).from(tempContainer).save().then(() => {
+        if (tempContainer.parentNode) {
+            tempContainer.parentNode.removeChild(tempContainer);
+        }
+    }).catch(err => {
+        console.error("PDF Generation Error:", err);
+        if (tempContainer.parentNode) {
+            tempContainer.parentNode.removeChild(tempContainer);
+        }
+    });
 }
 
 /* ---------- Stock Operations ---------- */
