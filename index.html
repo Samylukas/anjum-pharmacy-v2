@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -169,14 +170,6 @@
             gap: 4px;
         }
         .btn-scroll-top:hover { background: #2c3e50; }
-
-        /* التعديل الحاسم لمنع الأسطر والصفحات الفاضية أثناء الطباعة وإلغاء خلفية الأبليكيشن */
-        @media print {
-            body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
-            .app-container, .btn-scroll-top, .no-print-el, #loginOverlay { display: none !important; }
-            #printableNativeSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
-            #printableNativeSection * { visibility: visible !important; }
-        }
     </style>
 </head>
 <body>
@@ -618,12 +611,11 @@
         </div>
     </div>
 
-    <button class="btn-scroll-top no-print-el" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
+    <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">UP ⬆️</button>
 
     <div class="footer-signature">✨ D&P by Samy Lukas , Powered By Gemini</div>
 </div>
 
-<div id="printableNativeSection"></div>
 <div id="receiptPrintSection"></div>
 
 <script>
@@ -885,25 +877,25 @@
         }).join('');
 
         let html = `
-            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px;">
+            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; font-family:sans-serif; direction:rtl;">
                 <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
                 <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
                 <p style="font-size:11px; color:#666;">الفترة من: <b>${fromD || 'بداية السجلات'}</b> إلى: <b>${toD || 'تاريخ اليوم'}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
             </div>
 
             <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px;">
+            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
                 <thead>
                     <tr style="background-color:#1e3c72; color:#ffffff;">
-                        <th style="width:30px; padding:6px;">#</th>
-                        <th style="width:65px; padding:6px;">رقم الفاتورة</th>
-                        <th style="width:100px; padding:6px;">التاريخ</th>
-                        <th style="padding:6px; min-width:230px;">الأصناف المباعة</th>
-                        <th style="width:115px; padding:6px;">تفاصيل الدفع</th>
-                        <th style="width:80px; padding:6px;">إجمالي تجاري</th>
-                        <th style="width:50px; padding:6px;">الخصم %</th>
-                        <th style="width:85px; padding:6px;">إجمالي البيع</th>
-                        <th style="width:80px; padding:6px;">صافي الربح</th>
+                        <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
+                        <th style="width:65px; padding:6px; border:1px solid #1e3c72;">رقم الفاتورة</th>
+                        <th style="width:100px; padding:6px; border:1px solid #1e3c72;">التاريخ</th>
+                        <th style="padding:6px; min-width:230px; border:1px solid #1e3c72;">الأصناف المباعة</th>
+                        <th style="width:115px; padding:6px; border:1px solid #1e3c72;">تفاصيل الدفع</th>
+                        <th style="width:80px; padding:6px; border:1px solid #1e3c72;">إجمالي تجاري</th>
+                        <th style="width:50px; padding:6px; border:1px solid #1e3c72;">الخصم %</th>
+                        <th style="width:85px; padding:6px; border:1px solid #1e3c72;">إجمالي البيع</th>
+                        <th style="width:80px; padding:6px; border:1px solid #1e3c72;">صافي الربح</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -937,7 +929,7 @@
             </table>
             </div>
 
-            <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap;">
+            <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap; font-family:sans-serif;">
                 <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
                     <div style="font-size: 10px; color: #555; font-weight: bold;">💵 إجمالي الكاش والعملات</div>
                     <div style="font-size: 10px; font-weight: bold; color: #1e3c72; margin-top: 2px;">
@@ -960,13 +952,13 @@
             </div>
 
             ${sortedTop.length > 0 ? `
-            <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff;">
+            <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; font-family:sans-serif;">
                 <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>
                 ${chartHtml}
             </div>
             ` : ''}
 
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&P by Samy Lukas , Powered By Gemini</div>
         `;
 
         document.getElementById('pdfExportableArea').innerHTML = html;
@@ -979,35 +971,43 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
+    // 1. تحويل وتنزيل PDF تقرير المبيعات مباشرة عبر html2pdf.js المخصصة للـ APK
     function downloadInAppReportPDF() {
-        const reportContent = document.getElementById('pdfExportableArea').innerHTML;
-        if (!reportContent) return;
+        const element = document.getElementById('pdfExportableArea');
+        if (!element) return;
 
-        executeDirectNativePrint(reportContent);
+        const opt = {
+            margin:       4,
+            filename:     'Sales_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(element).save();
     }
 
+    // 2. تحويل وتنزيل PDF تفاصيل المخزون مباشرة عبر html2pdf.js
     function printStockTable() {
         const guideMult = RATES.GUIDE_MULT || 3;
-        
         let html = `
-            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
-                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
-                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Stock Inventory Details Report</h3>
-                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Issued Date: ${new Date().toLocaleString()}</p>
-            </div>
-            <table style="width:100%; border-collapse:collapse; font-size:11px; text-align:center;">
-                <thead>
-                    <tr style="background:#1e3c72; color:#fff;">
-                        <th>#</th>
-                        <th style="width:35%;">Product Name</th>
-                        <th>Stock Qty</th>
-                        <th>Commercial Price</th>
-                        <th>Guide Min</th>
-                        <th>Barcode</th>
-                        <th>Expiry</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+                <h2 style="color:#1e3c72; margin:0;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="margin:5px 0;">تقرير تفاصيل المخزون</h3>
+                <p style="font-size:11px; color:#666;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
+                    <thead>
+                        <tr style="background:#1e3c72; color:#fff;">
+                            <th style="border:1px solid #ccc; padding:5px;">#</th>
+                            <th style="border:1px solid #ccc; padding:5px; width:35%;">اسم المنتج</th>
+                            <th style="border:1px solid #ccc; padding:5px;">الكمية</th>
+                            <th style="border:1px solid #ccc; padding:5px;">السعر التجاري</th>
+                            <th style="border:1px solid #ccc; padding:5px;">الحد الاسترشادي</th>
+                            <th style="border:1px solid #ccc; padding:5px;">البارکود</th>
+                            <th style="border:1px solid #ccc; padding:5px;">تاريخ الصلاحية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
 
         products.forEach((p, idx) => {
@@ -1015,9 +1015,9 @@
                 <tr>
                     <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
                     <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${p.q} units</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${p.p.toFixed(2)} EGP</td>
-                    <td style="border:1px solid #ccc; padding:5px;">${(p.p * guideMult).toFixed(2)} EGP</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.q} قطعة</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.p.toFixed(2)} ج.م</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
                     <td style="border:1px solid #ccc; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
                     <td style="border:1px solid #ccc; padding:5px;">${p.expiry || '-'}</td>
                 </tr>
@@ -1025,14 +1025,27 @@
         });
 
         html += `
-                </tbody>
-            </table>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+                    </tbody>
+                </table>
+                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </div>
         `;
 
-        executeDirectNativePrint(html);
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+
+        const opt = {
+            margin:       5,
+            filename:     'Stock_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(tempContainer).save();
     }
 
+    // 3. تحويل وتنزيل PDF التقرير المالي مباشرة عبر html2pdf.js
     function printFinanceReportPDF() {
         const fromD = document.getElementById('finFromDate').value;
         const toD = document.getElementById('finToDate').value;
@@ -1046,8 +1059,7 @@
             return true;
         });
 
-        let totRev = 0, totExp = 0;
-        let salesProfit = 0;
+        let totRev = 0, totExp = 0, salesProfit = 0;
 
         filtered.forEach(f => {
             if (f.type === 'Revenue') totRev += f.amount;
@@ -1068,84 +1080,63 @@
         const net = totRev - totExp;
 
         let html = `
-            <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 6px; margin-bottom: 12px;">
-                <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
-                <h3 style="color: #333; margin: 4px 0 0 0; font-size: 14px;">Expenses & Revenues Financial Report</h3>
-                <p style="color: #666; font-size: 10px; margin: 4px 0 0 0;">Period From: <b>${fromD || 'Start'}</b> To: <b>${toD || 'End'}</b> | Issued Date: ${new Date().toLocaleString()}</p>
-            </div>
-
-            <div style="background: #f8f9fa; border: 1px solid #1e3c72; border-radius: 6px; padding: 10px; margin-bottom: 12px;">
-                <h4 style="text-align:center; margin:0 0 6px 0; color:#1e3c72; font-size:12px;">📊 Financial Summary (EGP)</h4>
-                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:10px;">
+            <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+                <h2 style="color:#1e3c72; margin:0;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="margin:5px 0;">التقرير المالي للحسابات والمصروفات</h3>
+                <p style="font-size:11px; color:#666;">الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b></p>
+                
+                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
                     <thead>
                         <tr style="background:#1e3c72; color:#fff;">
-                            <th style="padding:5px;">Total Revenues</th>
-                            ${includeSales ? `<th style="padding:5px;">Total Sales Profit</th>` : ''}
-                            <th style="padding:5px;">Total Expenses</th>
-                            <th style="padding:5px;">Net Balance</th>
+                            <th style="padding:5px; border:1px solid #ccc;">#</th>
+                            <th style="padding:5px; border:1px solid #ccc;">التاريخ</th>
+                            <th style="padding:5px; border:1px solid #ccc;">النوع</th>
+                            <th style="padding:5px; border:1px solid #ccc;">الوصف / البند</th>
+                            <th style="padding:5px; border:1px solid #ccc;">المبلغ (ج.م)</th>
+                            <th style="padding:5px; border:1px solid #ccc;">ملاحظات</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${totRev.toFixed(2)} EGP</td>
-                            ${includeSales ? `<td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#27ae60;">${salesProfit.toFixed(2)} EGP</td>` : ''}
-                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:#c0392b;">${totExp.toFixed(2)} EGP</td>
-                            <td style="padding:6px; border:1px solid #ddd; font-weight:bold; color:${net >= 0 ? '#1e3c72' : '#c0392b'}; font-size:11px;">${net.toFixed(2)} EGP</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px;">
-                <thead>
-                    <tr style="background:#1e3c72; color:#fff;">
-                        <th style="width:30px; padding:6px;">#</th>
-                        <th style="width:120px; padding:6px;">Date</th>
-                        <th style="width:70px; padding:6px;">Type</th>
-                        <th style="padding:6px;">Category / Description</th>
-                        <th style="width:90px; padding:6px;">Amount (EGP)</th>
-                        <th style="padding:6px;">Notes</th>
-                    </tr>
-                </thead>
-                <tbody>
         `;
 
-        if (filtered.length === 0) {
-            html += `<tr><td colspan="6" style="padding:10px; color:#777;">No financial records found for selected period</td></tr>`;
-        } else {
-            filtered.forEach((f, idx) => {
-                const isRev = f.type === 'Revenue';
-                html += `
-                    <tr style="background:${isRev ? '#f2fcf5' : '#ffffff'};">
-                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
-                        <td style="border:1px solid #ccc; padding:5px; white-space:nowrap; direction:ltr;">${f.date || '-'}</td>
-                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.type}</td>
-                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold; direction:rtl;">${f.category || '-'}</td>
-                        <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${isRev ? '#27ae60' : '#c0392b'};">${f.amount.toFixed(2)}</td>
-                        <td style="border:1px solid #ccc; padding:5px; text-align:right; font-size:9px; direction:rtl;">${f.notes || '-'}</td>
-                    </tr>
-                `;
-            });
-        }
+        filtered.forEach((f, idx) => {
+            html += `
+                <tr>
+                    <td style="border:1px solid #ccc; padding:5px;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc; padding:5px; direction:ltr;">${f.date || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right;">${f.category || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right;">${f.notes || '-'}</td>
+                </tr>
+            `;
+        });
 
         html += `
-                </tbody>
-            </table>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top:15px; border:1px solid #1e3c72; padding:8px; border-radius:5px; background:#f8f9fa;">
+                    <b>إجمالي الإيرادات: ${totRev.toFixed(2)} ج.م</b> | 
+                    <b>إجمالي المصروفات: ${totExp.toFixed(2)} ج.م</b> | 
+                    <b style="color:${net >= 0 ? '#27ae60' : '#c0392b'};">الصافي: ${net.toFixed(2)} ج.م</b>
+                </div>
+                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </div>
         `;
 
-        executeDirectNativePrint(html);
-    }
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
 
-    // دالة الطباعة المباشرة المعزولة والمجربة دون أطُر أو صفحات فارغة
-    function executeDirectNativePrint(contentHtml) {
-        const sec = document.getElementById('printableNativeSection');
-        sec.innerHTML = contentHtml;
+        const opt = {
+            margin:       5,
+            filename:     'Financial_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
 
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => { sec.innerHTML = ''; }, 1000);
-        }, 150);
+        html2pdf().set(opt).from(tempContainer).save();
     }
 
     function fetchInitialUsersOnly() {
@@ -1420,7 +1411,7 @@
         heldInvoiceItems = null;
         document.getElementById('resumeHoldBtn').style.display = 'none';
         renderInvoice();
-        alert('⏯️ Held invoice resumed!');
+        alert('GM Invoice resumed!');
     }
 
     function clearCurrentInvoice() {
@@ -2701,6 +2692,174 @@
         document.getElementById('topProductsList').innerHTML = topHtml;
 
         document.getElementById('profitBox').style.display = 'block';
+    }
+
+    // 1. تحويل وتنزيل PDF تقرير المبيعات الشامل مباشرة لداخل ذاكرة الموبايل
+    function downloadInAppReportPDF() {
+        const element = document.getElementById('pdfExportableArea');
+        if (!element) return;
+
+        const opt = {
+            margin:       4,
+            filename:     'Sales_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // 2. تحويل وتنزيل PDF تفاصيل المخزون مباشرة لداخل الموبايل
+    function printStockTable() {
+        const guideMult = RATES.GUIDE_MULT || 3;
+        let html = `
+            <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+                <h2 style="color:#1e3c72; margin:0;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="margin:5px 0;">تقرير تفاصيل المخزون</h3>
+                <p style="font-size:11px; color:#666;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+                <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
+                    <thead>
+                        <tr style="background:#1e3c72; color:#fff;">
+                            <th style="border:1px solid #ccc; padding:5px;">#</th>
+                            <th style="border:1px solid #ccc; padding:5px; width:35%;">اسم المنتج</th>
+                            <th style="border:1px solid #ccc; padding:5px;">الكمية</th>
+                            <th style="border:1px solid #ccc; padding:5px;">السعر التجاري</th>
+                            <th style="border:1px solid #ccc; padding:5px;">الحد الاسترشادي</th>
+                            <th style="border:1px solid #ccc; padding:5px;">البارکود</th>
+                            <th style="border:1px solid #ccc; padding:5px;">تاريخ الصلاحية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        products.forEach((p, idx) => {
+            html += `
+                <tr>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right; font-weight:bold;">${p.n}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.q} قطعة</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.p.toFixed(2)} ج.م</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-family:monospace;">${p.barcode || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px;">${p.expiry || '-'}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </div>
+        `;
+
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+
+        const opt = {
+            margin:       5,
+            filename:     'Stock_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(tempContainer).save();
+    }
+
+    // 3. تحويل وتنزيل PDF التقرير المالي مباشرة لداخل الموبايل
+    function printFinanceReportPDF() {
+        const fromD = document.getElementById('finFromDate').value;
+        const toD = document.getElementById('finToDate').value;
+        const includeSales = document.getElementById('includeSalesIncomeToggle') ? document.getElementById('includeSalesIncomeToggle').checked : false;
+
+        const filtered = savedFinances.filter(f => {
+            if (!f.date) return true;
+            const fD = f.date.slice(0, 10);
+            if (fromD && fD < fromD) return false;
+            if (toD && fD > toD) return false;
+            return true;
+        });
+
+        let totRev = 0, totExp = 0, salesProfit = 0;
+
+        filtered.forEach(f => {
+            if (f.type === 'Revenue') totRev += f.amount;
+            else totExp += f.amount;
+        });
+
+        if (includeSales) {
+            savedInvoices.forEach(inv => {
+                if (!inv.date) return;
+                const invD = inv.date.slice(0, 10);
+                if (fromD && invD < fromD) return;
+                if (toD && invD > toD) return;
+                salesProfit += (parseFloat(inv.netProfit) || 0);
+            });
+            totRev += salesProfit;
+        }
+
+        const net = totRev - totExp;
+
+        let html = `
+            <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+                <h2 style="color:#1e3c72; margin:0;">Anjum Green Pharmacy 🌿</h2>
+                <h3 style="margin:5px 0;">التقرير المالي للحسابات والمصروفات</h3>
+                <p style="font-size:11px; color:#666;">الفترة من: <b>${fromD || 'البداية'}</b> إلى: <b>${toD || 'النهاية'}</b></p>
+                
+                <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
+                    <thead>
+                        <tr style="background:#1e3c72; color:#fff;">
+                            <th style="padding:5px; border:1px solid #ccc;">#</th>
+                            <th style="padding:5px; border:1px solid #ccc;">التاريخ</th>
+                            <th style="padding:5px; border:1px solid #ccc;">النوع</th>
+                            <th style="padding:5px; border:1px solid #ccc;">الوصف / البند</th>
+                            <th style="padding:5px; border:1px solid #ccc;">المبلغ (ج.م)</th>
+                            <th style="padding:5px; border:1px solid #ccc;">ملاحظات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        filtered.forEach((f, idx) => {
+            html += `
+                <tr>
+                    <td style="border:1px solid #ccc; padding:5px;">${idx + 1}</td>
+                    <td style="border:1px solid #ccc; padding:5px; direction:ltr;">${f.date || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right;">${f.category || '-'}</td>
+                    <td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
+                    <td style="border:1px solid #ccc; padding:5px; text-align:right;">${f.notes || '-'}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+                
+                <div style="margin-top:15px; border:1px solid #1e3c72; padding:8px; border-radius:5px; background:#f8f9fa;">
+                    <b>إجمالي الإيرادات: ${totRev.toFixed(2)} ج.م</b> | 
+                    <b>إجمالي المصروفات: ${totExp.toFixed(2)} ج.م</b> | 
+                    <b style="color:${net >= 0 ? '#27ae60' : '#c0392b'};">الصافي: ${net.toFixed(2)} ج.م</b>
+                </div>
+                <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&P by Samy Lukas , Powered By Gemini</div>
+            </div>
+        `;
+
+        const tempContainer = document.createElement('div');
+        tempContainer.innerHTML = html;
+
+        const opt = {
+            margin:       5,
+            filename:     'Financial_Report_' + new Date().toISOString().slice(0,10) + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(tempContainer).save();
     }
 </script>
 </body>
