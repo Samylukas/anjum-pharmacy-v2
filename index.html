@@ -974,12 +974,22 @@ function onBarcodeScanned(key, decodedText) {
         if (matched) pickProduct(matched.id);
         else toast("⚠️ Product with barcode [" + barcodeQuery + "] not found!", 'warn');
     } else if (key === 'addNew') {
+        const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+        if (existingBarcode) {
+            toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل مع المنتج (${existingBarcode.n})!`, 'error');
+            return;
+        }
         document.getElementById('newProdBarcode').value = barcodeQuery;
         toast("✅ Barcode captured: " + barcodeQuery, 'success');
     } else if (key === 'recharge') {
         document.getElementById('addStockSearch').value = barcodeQuery;
         searchAddStockProduct();
     } else if (key === 'stock') {
+        const existingBarcode = products.find(p => p.id !== selectedStockEditProductId && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+        if (existingBarcode) {
+            toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل مع المنتج (${existingBarcode.n})!`, 'error');
+            return;
+        }
         const prod = findProductById(selectedStockEditProductId);
         if (prod) {
             prod.barcode = barcodeQuery;
@@ -1585,13 +1595,12 @@ function printFinanceReportPDF() {
 
 function renderToTempPdf(html, filename, orientation = 'landscape') {
     const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'fixed';
+    tempContainer.style.position = 'absolute';
     tempContainer.style.top = '0';
     tempContainer.style.left = '0';
-    tempContainer.style.width = '1000px';
-    tempContainer.style.zIndex = '-999999';
-    tempContainer.style.opacity = '0';
-    tempContainer.style.backgroundColor = '#ffffff';
+    tempContainer.style.width = '210mm';
+    tempContainer.style.background = '#ffffff';
+    tempContainer.style.zIndex = '999999';
     tempContainer.innerHTML = html;
     document.body.appendChild(tempContainer);
 
@@ -1603,16 +1612,18 @@ function renderToTempPdf(html, filename, orientation = 'landscape') {
         jsPDF: { unit: 'mm', format: 'a4', orientation: orientation }
     };
 
-    html2pdf().set(opt).from(tempContainer).save().then(() => {
-        if (tempContainer.parentNode) {
-            tempContainer.parentNode.removeChild(tempContainer);
-        }
-    }).catch(err => {
-        console.error("PDF Generation Error:", err);
-        if (tempContainer.parentNode) {
-            tempContainer.parentNode.removeChild(tempContainer);
-        }
-    });
+    setTimeout(() => {
+        html2pdf().set(opt).from(tempContainer).save().then(() => {
+            if (tempContainer.parentNode) {
+                tempContainer.parentNode.removeChild(tempContainer);
+            }
+        }).catch(err => {
+            console.error("PDF Generation Error:", err);
+            if (tempContainer.parentNode) {
+                tempContainer.parentNode.removeChild(tempContainer);
+            }
+        });
+    }, 400);
 }
 
 /* ---------- Stock Operations ---------- */
@@ -1626,18 +1637,22 @@ function addNewProductToSystem() {
 
     if (!name) { toast('Enter product name!', 'warn'); return; }
 
-    const existing = products.find(p => p.n.toLowerCase() === name.toLowerCase());
-    let productToSync;
-    if (existing) {
-        existing.p = price;
-        existing.q += qty;
-        existing.barcode = barcode || existing.barcode;
-        existing.expiry = expiry || existing.expiry;
-        productToSync = existing;
-    } else {
-        productToSync = { id: uid(), n: name, p: price, q: qty, barcode, expiry };
-        products.push(productToSync);
+    const existingName = products.find(p => p.n.toLowerCase() === name.toLowerCase());
+    if (existingName) {
+        toast(`⚠️ اسم المنتج [${name}] مسجل بالفعل في النظام!`, 'error');
+        return;
     }
+
+    if (barcode) {
+        const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcode.toLowerCase());
+        if (existingBarcode) {
+            toast(`⚠️ الباركود [${barcode}] مسجل بالفعل لمنتج آخر (${existingBarcode.n})!`, 'error');
+            return;
+        }
+    }
+
+    const productToSync = { id: uid(), n: name, p: price, q: qty, barcode, expiry };
+    products.push(productToSync);
 
     saveProductsToStorage();
     syncToCloud("updateSingleProduct", productToSync);
@@ -1712,11 +1727,30 @@ function saveProductEdit(prodId) {
     const prod = findProductById(prodId);
     if (!prod) return;
 
-    prod.n = document.getElementById('editName')?.value.trim() || prod.n;
+    const newName = document.getElementById('editName')?.value.trim();
+    const newBarcode = document.getElementById('editBarcode')?.value.trim();
+
+    if (newName && newName.toLowerCase() !== prod.n.toLowerCase()) {
+        const existingName = products.find(p => p.id !== prodId && p.n.toLowerCase() === newName.toLowerCase());
+        if (existingName) {
+            toast(`⚠️ اسم المنتج [${newName}] مكرر وموجود مسبقاً!`, 'error');
+            return;
+        }
+    }
+
+    if (newBarcode && newBarcode.toLowerCase() !== (prod.barcode || '').toLowerCase()) {
+        const existingBarcode = products.find(p => p.id !== prodId && p.barcode && p.barcode.toLowerCase() === newBarcode.toLowerCase());
+        if (existingBarcode) {
+            toast(`⚠️ الباركود [${newBarcode}] مكرر ومسجل لصنف آخر (${existingBarcode.n})!`, 'error');
+            return;
+        }
+    }
+
+    prod.n = newName || prod.n;
     prod.p = parseFloat(document.getElementById('editPrice')?.value) || prod.p;
     prod.q = parseInt(document.getElementById('editQty')?.value);
     if (isNaN(prod.q)) prod.q = 0;
-    prod.barcode = document.getElementById('editBarcode')?.value.trim();
+    prod.barcode = newBarcode;
     prod.expiry = document.getElementById('editExpiry')?.value.trim();
 
     saveProductsToStorage();
