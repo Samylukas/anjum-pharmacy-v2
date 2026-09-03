@@ -62,21 +62,21 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 5px 2px; border: 1px solid #ddd; text-align: center; font-size: 0.75rem; vertical-align: middle; }
-        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.78rem; }
+        table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: fixed; }
+        th, td { padding: 4px 2px; border: 1px solid #ddd; text-align: center; font-size: 0.72rem; vertical-align: middle; word-wrap: break-word; }
+        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.75rem; }
 
-        /* --- Column Width Optimization --- */
-        .col-seq { width: 25px !important; }
-        .col-inv { width: 45px !important; }
-        .col-date { width: 85px !important; }
-        .col-items { width: auto !important; text-align: right !important; font-size: 0.78rem !important; line-height: 1.35 !important; word-break: break-word !important; }
-        .col-pay { width: 105px !important; font-size: 0.68rem !important; }
-        .col-comm { width: 65px !important; }
-        .col-disc { width: 35px !important; }
-        .col-sell { width: 70px !important; }
-        .col-profit { width: 65px !important; }
-        .col-act { width: 110px !important; }
+        /* --- Fine-tuned Column Widths --- */
+        .col-seq { width: 22px !important; }
+        .col-inv { width: 40px !important; }
+        .col-date { width: 80px !important; font-size: 0.68rem !important; }
+        .col-items { width: 35% !important; text-align: right !important; font-size: 0.72rem !important; line-height: 1.3 !important; }
+        .col-pay { width: 100px !important; font-size: 0.65rem !important; }
+        .col-comm { width: 60px !important; font-size: 0.7rem !important; }
+        .col-disc { width: 30px !important; font-size: 0.7rem !important; }
+        .col-sell { width: 65px !important; font-size: 0.7rem !important; }
+        .col-profit { width: 60px !important; font-size: 0.7rem !important; }
+        .col-act { width: 100px !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -145,6 +145,10 @@
         /* --- Native Multi-Page Print Rules --- */
         #receiptPrintSection { display: none; }
         @media print {
+            @page {
+                size: portrait;
+                margin: 5mm;
+            }
             body * { visibility: hidden !important; }
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
@@ -157,15 +161,14 @@
             }
 
             table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
-            th, td { border: 1px solid #777 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
+            th, td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
             th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             tr { page-break-inside: avoid !important; page-break-after: auto !important; }
             
-            /* --- Force Summary Cards & Chart to Standalone Page --- */
             .print-summary-wrapper {
                 page-break-before: always !important;
                 break-before: page !important;
-                margin-top: 20px !important;
+                margin-top: 15px !important;
             }
 
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
@@ -508,7 +511,7 @@
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
             </table></div>
 
-            <!-- Page Break Wrapper to Keep Cards and Chart Together -->
+            <!-- Page Break Wrapper for Standalone Final Page -->
             <div class="print-summary-wrapper">
                 <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
                 <div id="topProductsChartContainer" class="top-products-chart"></div>
@@ -2069,7 +2072,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Selling Products</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
