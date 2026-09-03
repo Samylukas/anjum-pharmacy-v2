@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -1566,6 +1565,46 @@ function exportFinanceExcel() {
     XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
+function renderToNativePrint(titleHtml, tableBodyHtml, summaryHtml) {
+    const win = window.open('', '', 'height=800,width=1000');
+    win.document.write(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <title>Print Report</title>
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; direction: rtl; color: #333; }
+                h2 { color: #1e3c72; text-align: center; margin-bottom: 5px; }
+                h3 { text-align: center; margin-top: 0; color: #555; }
+                p { text-align: center; font-size: 12px; color: #777; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+                th, td { border: 1px solid #999; padding: 8px 5px; text-align: center; word-break: break-word; }
+                th { background-color: #1e3c72; color: white; -webkit-print-color-adjust: exact; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .summary-box { margin-top: 20px; border: 2px solid #1e3c72; padding: 10px; border-radius: 6px; font-weight: bold; background: #fdfefe; }
+                .footer-text { text-align: center; margin-top: 30px; font-size: 10px; color: #888; border-top: 1px solid #ccc; padding-top: 10px; }
+                @media print {
+                    body { padding: 0; }
+                    button { display: none !important; }
+                }
+            </style>
+        </head>
+        <body>
+            ${titleHtml}
+            ${tableBodyHtml}
+            ${summaryHtml}
+            <div class="footer-text">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
+            <script>
+                window.onload = function() {
+                    setTimeout(function() { window.print(); window.close(); }, 300);
+                };
+            <\/script>
+        </body>
+        </html>
+    `);
+    win.document.close();
+}
+
 function printFinanceReportPDF() {
     const fromD = document.getElementById('finFromDate')?.value || '';
     const toD = document.getElementById('finToDate')?.value || '';
@@ -1596,77 +1635,46 @@ function printFinanceReportPDF() {
     const net = totRev - totExp;
 
     let rowsHtml = filtered.length === 0
-        ? `<tr><td colspan="6" style="padding:10px; border:1px solid #ddd;">لا توجد سجلات مالية للفترة المحددة</td></tr>`
+        ? `<tr><td colspan="6" style="padding:10px;">لا توجد سجلات مالية للفترة المحددة</td></tr>`
         : filtered.map((f, idx) => `
             <tr style="background:${f.type === 'Revenue' ? '#f2fcf5' : '#ffffff'};">
-                <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-                <td style="border:1px solid #ddd; padding:5px; direction:ltr;">${escapeHtml(f.date || '-')}</td>
-                <td style="border:1px solid #ddd; padding:5px; font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${escapeHtml(f.type)}</td>
-                <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${escapeHtml(f.category || '-')}</td>
-                <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${f.amount.toFixed(2)}</td>
-                <td style="border:1px solid #ddd; padding:5px; text-align:right;">${escapeHtml(f.notes || '-')}</td>
+                <td>${idx + 1}</td>
+                <td style="direction:ltr;">${escapeHtml(f.date || '-')}</td>
+                <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${escapeHtml(f.type)}</td>
+                <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category || '-')}</td>
+                <td style="font-weight:bold;">${f.amount.toFixed(2)}</td>
+                <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
             </tr>`).join('');
 
-    const html = `
-        <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-            <div style="margin-bottom:10px;">
-                <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">التقرير المالي للحسابات والمصروفات</h3>
-                <p style="font-size:11px; color:#666; margin-top:4px;">الفترة من: <b>${escapeHtml(fromD || 'البداية')}</b> إلى: <b>${escapeHtml(toD || 'النهاية')}</b></p>
-            </div>
-            <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:11px; text-align:center;">
-                <thead><tr style="background:#1e3c72; color:#fff;">
-                    <th style="padding:6px; border:1px solid #1e3c72; width:30px;">#</th>
-                    <th style="padding:6px; border:1px solid #1e3c72; width:120px;">التاريخ</th>
-                    <th style="padding:6px; border:1px solid #1e3c72; width:80px;">النوع</th>
-                    <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">الوصف / البند</th>
-                    <th style="padding:6px; border:1px solid #1e3c72; width:100px;">المبلغ (ج.م)</th>
-                    <th style="padding:6px; border:1px solid #1e3c72; text-align:right;">ملاحظات</th>
-                </tr></thead>
-                <tbody>${rowsHtml}</tbody>
-            </table>
-            <div style="margin-top:15px; border:1.5px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-content:space-around;">
-                <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-                <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-                <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
-            </div>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-        </div>`;
+    const title = `
+        <h2>🌿 Anjum Green Pharmacy</h2>
+        <h3>التقرير المالي للحسابات والمصروفات</h3>
+        <p>الفترة من: <b>${escapeHtml(fromD || 'البداية')}</b> إلى: <b>${escapeHtml(toD || 'النهاية')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+    `;
 
-    renderToTempPdf(html, 'Financial_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
-}
+    const table = `
+        <table>
+            <thead><tr>
+                <th style="width:30px;">#</th>
+                <th style="width:120px;">التاريخ</th>
+                <th style="width:80px;">النوع</th>
+                <th style="text-align:right;">الوصف / البند</th>
+                <th style="width:100px;">المبلغ (ج.م)</th>
+                <th style="text-align:right;">ملاحظات</th>
+            </tr></thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
 
-function renderToTempPdf(html, filename, orientation = 'landscape') {
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.top = '0';
-    tempContainer.style.left = '0';
-    tempContainer.style.width = '210mm';
-    tempContainer.style.background = '#ffffff';
-    tempContainer.style.zIndex = '999999';
-    tempContainer.innerHTML = html;
-    document.body.appendChild(tempContainer);
+    const summary = `
+        <div class="summary-box" style="display:flex; justify-content:space-around;">
+            <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
+            <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
+            <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
+        </div>
+    `;
 
-    const opt = {
-        margin: 5,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: orientation }
-    };
-
-    setTimeout(() => {
-        html2pdf().set(opt).from(tempContainer).save().then(() => {
-            if (tempContainer.parentNode) {
-                tempContainer.parentNode.removeChild(tempContainer);
-            }
-        }).catch(err => {
-            console.error("PDF Generation Error:", err);
-            if (tempContainer.parentNode) {
-                tempContainer.parentNode.removeChild(tempContainer);
-            }
-        });
-    }, 400);
+    renderToNativePrint(title, table, summary);
 }
 
 /* ---------- Stock Operations ---------- */
@@ -1904,38 +1912,37 @@ function printStockTable() {
     const guideMult = RATES.GUIDE_MULT || 3;
     const rows = products.map((p, idx) => `
         <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-            <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold;">${escapeHtml(p.n)}</td>
-            <td style="border:1px solid #ddd; padding:5px;">${p.q} قطعة</td>
-            <td style="border:1px solid #ddd; padding:5px;">${p.p.toFixed(2)} ج.م</td>
-            <td style="border:1px solid #ddd; padding:5px;">${(p.p * guideMult).toFixed(2)} ج.م</td>
-            <td style="border:1px solid #ddd; padding:5px; font-family:monospace;">${escapeHtml(p.barcode || '-')}</td>
-            <td style="border:1px solid #ddd; padding:5px;">${escapeHtml(p.expiry || '-')}</td>
+            <td>${idx + 1}</td>
+            <td style="text-align:right; font-weight:bold;">${escapeHtml(p.n)}</td>
+            <td>${p.q} قطعة</td>
+            <td>${p.p.toFixed(2)} ج.م</td>
+            <td>${(p.p * guideMult).toFixed(2)} ج.م</td>
+            <td style="font-family:monospace;">${escapeHtml(p.barcode || '-')}</td>
+            <td>${escapeHtml(p.expiry || '-')}</td>
         </tr>`).join('');
 
-    const html = `
-        <div style="text-align:center; padding:15px; font-family:system-ui, -apple-system, sans-serif; direction:rtl; background:#fff;">
-            <div style="margin-bottom: 10px;">
-                <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                <h3 style="color:#333; margin:6px 0 0 0; font-size:16px;">تقرير تفاصيل المخزون</h3>
-                <p style="font-size:11px; color:#666; margin-top:4px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-            </div>
-            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; text-align:center;">
-                <thead><tr style="background:#1e3c72; color:#fff;">
-                    <th style="border:1px solid #1e3c72; padding:6px; width:30px;">#</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; text-align:right;">اسم المنتج</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; width:70px;">الكمية</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; width:90px;">السعر التجاري</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; width:100px;">الحد الاسترشادي</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; width:120px;">الباركود</th>
-                    <th style="border:1px solid #1e3c72; padding:6px; width:90px;">تاريخ الصلاحية</th>
-                </tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-        </div>`;
+    const title = `
+        <h2>🌿 Anjum Green Pharmacy</h2>
+        <h3>تقرير تفاصيل المخزون</h3>
+        <p>تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+    `;
 
-    renderToTempPdf(html, 'Stock_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
+    const table = `
+        <table>
+            <thead><tr>
+                <th style="width:30px;">#</th>
+                <th style="text-align:right;">اسم المنتج</th>
+                <th style="width:70px;">الكمية</th>
+                <th style="width:90px;">السعر التجاري</th>
+                <th style="width:100px;">الحد الاسترشادي</th>
+                <th style="width:120px;">الباركود</th>
+                <th style="width:90px;">تاريخ الصلاحية</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+
+    renderToNativePrint(title, table, '');
 }
 
 /* ---------- Sales Reports ---------- */
@@ -2397,16 +2404,67 @@ function hideInAppReportView() {
 }
 
 function downloadInAppReportPDF() {
-    const element = document.getElementById('pdfExportableArea');
-    if (!element) return;
-    const opt = {
-        margin: 4,
-        filename: 'Sales_Report_' + new Date().toISOString().slice(0, 10) + '.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-    html2pdf().set(opt).from(element).save();
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
+    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
+    const tally = buildInvoiceTally(filteredInvoices);
+    const top10 = tally.sortedTop.slice(0, 10);
+    const maxQty = top10.length > 0 ? top10[0].qty : 1;
+
+    const chartHtml = top10.map((p, idx) => `
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
+            <div style="width:150px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx + 1} ${escapeHtml(p.name)}</div>
+            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%;"></div></div>
+            <div style="width:40px; text-align:left; font-weight:bold;">${p.qty} u</div>
+        </div>`).join('');
+
+    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
+        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
+            <td>${idx + 1}</td>
+            <td>#${inv.id}</td>
+            <td style="direction:ltr;">${escapeHtml(inv.date || '-')}</td>
+            <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
+            <td style="font-size:10px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
+            <td>${(inv.totalComm || 0).toFixed(2)} EGP</td>
+            <td>${inv.discount || 0}%</td>
+            <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
+            <td style="color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
+        </tr>`).join('');
+
+    const title = `
+        <h2>Anjum Green Pharmacy 🌿</h2>
+        <h3>تقرير المبيعات الشامل</h3>
+        <p>الفترة من: <b>${escapeHtml(fromD || 'بداية السجلات')}</b> إلى: <b>${escapeHtml(toD || 'تاريخ اليوم')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+    `;
+
+    const table = `
+        <table>
+            <thead><tr>
+                <th style="width:30px;">#</th>
+                <th style="width:65px;">رقم الفاتورة</th>
+                <th style="width:100px;">التاريخ</th>
+                <th>الأصناف المباعة</th>
+                <th style="width:115px;">تفاصيل الدفع</th>
+                <th style="width:80px;">إجمالي تجاري</th>
+                <th style="width:50px;">الخصم %</th>
+                <th style="width:85px;">إجمالي البيع</th>
+                <th style="width:80px;">صافي الربح</th>
+            </tr></thead>
+            <tbody>${rowsHtml}</tbody>
+        </table>
+    `;
+
+    const summary = `
+        <div class="summary-box" style="display:flex; justify-content:space-around; text-align:center;">
+            <div>💵 الكاش والدفعات<br>$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)} | £:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
+            <div>💳 إجمالي الفيزا<br>${tally.sumVISA.toFixed(2)} EGP</div>
+            <div>🛒 إجمالي المبيعات<br><b style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</b></div>
+            <div>💰 صافي الربح<br><b style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</b></div>
+        </div>
+        ${top10.length > 0 ? `<div style="margin-top:15px; border:1px solid #1e3c72; padding:10px; border-radius:6px; background:#fff;"><h4>📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>${chartHtml}</div>` : ''}
+    `;
+
+    renderToNativePrint(title, table, summary);
 }
 
 /* ---------- Application Entry Point ---------- */
