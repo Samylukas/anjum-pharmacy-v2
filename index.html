@@ -132,17 +132,25 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
 
-        /* --- Native Clean Print & PDF System --- */
+        /* --- Native Multi-Page Print Rules --- */
         #receiptPrintSection { display: none; }
         @media print {
             body * { visibility: hidden !important; }
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
+            
+            /* Allow Multi-page Pagination without truncating */
+            html, body, .app-container, .table-responsive {
+                overflow: visible !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+
             table { width: 100% !important; font-size: 8px !important; table-layout: fixed !important; border-collapse: collapse !important; }
-            th, td { border: 1px solid #777 !important; padding: 4px 2px !important; word-wrap: break-word !important; }
-            th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; }
-            tr { page-break-inside: avoid !important; }
+            th, td { border: 1px solid #777 !important; padding: 4px 2px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
+            th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
             
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
             body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
@@ -2031,7 +2039,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">Top 10 Selling Products</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Selling Products</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
