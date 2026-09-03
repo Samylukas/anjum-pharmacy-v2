@@ -2,11 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anjum Green Pharmacy 2026</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -62,7 +63,7 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 850px; border-collapse: collapse; table-layout: auto; }
+        table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: auto; }
         th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
@@ -133,17 +134,17 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
 
-        /* --- Full Printable Overlay --- */
+        /* --- Print/Export Full Overlay --- */
         .print-modal-overlay { position: fixed; inset: 0; background: #fff; z-index: 99999999; display: none; flex-direction: column; padding: 12px; overflow-y: auto; }
         .print-modal-overlay.open { display: flex; }
-        .print-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
+        .print-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; position: sticky; top: 0; background: #fff; z-index: 10; }
         
         #receiptPrintSection { display: none; }
         @media print {
             body * { visibility: hidden; }
             .print-modal-overlay.open, .print-modal-overlay.open * { visibility: visible; }
             .print-modal-overlay.open { position: absolute; left: 0; top: 0; width: 100%; height: auto; padding: 0; }
-            .print-modal-header button { display: none !important; }
+            .print-modal-header { display: none !important; }
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible; }
             body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 100%; }
         }
@@ -157,14 +158,14 @@
     <div class="modal-box" id="modalBox"></div>
 </div>
 
-<!-- شاشة العرض المخصصة للتقارير والطباعة -->
+<!-- شاشة عارض التقارير الجاهز للتصدير برابط مباشر -->
 <div id="printModalOverlay" class="print-modal-overlay">
     <div class="print-modal-header">
         <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="closePrintModal()">❌ إغلاق / رجوع (Close)</button>
-        <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+        <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadDirectPDF()">📥 تحميل ملف PDF</button>
     </div>
     <div id="printModalBody"></div>
-    <div style="margin-top:15px; text-align:center;">
+    <div style="margin-top:15px; text-align:center; padding-bottom: 20px;">
         <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="closePrintModal()">❌ إغلاق / رجوع (Close)</button>
     </div>
 </div>
@@ -484,7 +485,6 @@
     <div id="usersTab" class="tab-content admin-only">
         <div class="section-title">🔑 Manage Accounts & Passwords</div>
         
-        <!-- إضافة مستخدم جديد -->
         <div class="card" style="max-width:450px; margin:0 auto 15px auto; background:#fdfefe;">
             <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">➕ Add New User</h4>
             <div class="pay-box" style="margin-bottom:8px;"><label>Username:</label><input type="text" id="addUserName" placeholder="Enter username..."></div>
@@ -499,7 +499,6 @@
             <button class="btn btn-blue" style="width:100%;" onclick="createNewUserSystem()">Create User 🚀</button>
         </div>
 
-        <!-- تغيير كلمة السر لمستخدم حقيقي -->
         <div class="card" style="max-width:450px; margin:0 auto; background:#fdfefe;">
             <h4 style="color:#1e3c72; text-align:center; margin-bottom:10px;">✏️ Change Existing Password</h4>
             <div class="pay-box" style="margin-bottom:12px;"><label>Select User:</label><select id="userSelectPass"></select></div>
@@ -578,7 +577,7 @@ function confirmModal(message, onYes) {
     if (btn) btn.onclick = () => { closeModal(); onYes(); };
 }
 
-/* ---------- Modal Print Utilities ---------- */
+/* ---------- Modal Direct PDF Generation ---------- */
 
 function openPrintModal(contentHtml) {
     const body = document.getElementById('printModalBody');
@@ -595,6 +594,28 @@ function closePrintModal() {
     const body = document.getElementById('printModalBody');
     if (overlay) overlay.classList.remove('open');
     if (body) body.innerHTML = '';
+}
+
+function downloadDirectPDF() {
+    const element = document.getElementById('printModalBody');
+    if (!element) return;
+    
+    toast("⏳ جاري تحضير ملف ה-PDF...", "info", 2000);
+    
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: 'Anjum_Pharmacy_Report_' + new Date().toISOString().slice(0, 10) + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        toast("✅ تم تحميل التقرير بنجاح!", "success");
+    }).catch(err => {
+        console.error("PDF Download Error:", err);
+        toast("❌ حدث خطأ أثناء التحميل، جرب مجدداً", "error");
+    });
 }
 
 /* ---------- State Variables ---------- */
