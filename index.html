@@ -62,11 +62,11 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
+        table { width: 100%; min-width: 850px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.85rem !important; line-height: 1.6 !important; min-width: 320px !important; white-space: normal !important; word-break: break-word !important; }
+        .items-column-cell { text-align: right !important; font-size: 0.85rem !important; line-height: 1.6 !important; min-width: 280px !important; white-space: normal !important; word-break: break-word !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -128,14 +128,22 @@
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
-        .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 420px; max-height: 88vh; overflow-y: auto; }
+        .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
         .modal-box h3 { color: #1e3c72; margin-bottom: 12px; font-size: 1.05rem; text-align: center; }
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
+
+        /* --- Full Printable Overlay --- */
+        .print-modal-overlay { position: fixed; inset: 0; background: #fff; z-index: 99999999; display: none; flex-direction: column; padding: 12px; overflow-y: auto; }
+        .print-modal-overlay.open { display: flex; }
+        .print-modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; }
         
         #receiptPrintSection { display: none; }
         @media print {
-            body.printing-receipt * { visibility: hidden; }
+            body * { visibility: hidden; }
+            .print-modal-overlay.open, .print-modal-overlay.open * { visibility: visible; }
+            .print-modal-overlay.open { position: absolute; left: 0; top: 0; width: 100%; height: auto; padding: 0; }
+            .print-modal-header button { display: none !important; }
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible; }
             body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 100%; }
         }
@@ -147,6 +155,18 @@
 
 <div id="modalOverlay" class="modal-overlay">
     <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- شاشة العرض المخصصة للتقارير والطباعة -->
+<div id="printModalOverlay" class="print-modal-overlay">
+    <div class="print-modal-header">
+        <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="closePrintModal()">❌ إغلاق / رجوع (Close)</button>
+        <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="window.print()">🖨️ طباعة / حفظ PDF</button>
+    </div>
+    <div id="printModalBody"></div>
+    <div style="margin-top:15px; text-align:center;">
+        <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="closePrintModal()">❌ إغلاق / رجوع (Close)</button>
+    </div>
 </div>
 
 <div id="loginOverlay" class="login-overlay">
@@ -556,6 +576,25 @@ function confirmModal(message, onYes) {
     `);
     const btn = document.getElementById('modalYesBtn');
     if (btn) btn.onclick = () => { closeModal(); onYes(); };
+}
+
+/* ---------- Modal Print Utilities ---------- */
+
+function openPrintModal(contentHtml) {
+    const body = document.getElementById('printModalBody');
+    const overlay = document.getElementById('printModalOverlay');
+    if (body && overlay) {
+        body.innerHTML = contentHtml;
+        overlay.classList.add('open');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function closePrintModal() {
+    const overlay = document.getElementById('printModalOverlay');
+    const body = document.getElementById('printModalBody');
+    if (overlay) overlay.classList.remove('open');
+    if (body) body.innerHTML = '';
 }
 
 /* ---------- State Variables ---------- */
@@ -1565,46 +1604,6 @@ function exportFinanceExcel() {
     XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-function renderToNativePrint(titleHtml, tableBodyHtml, summaryHtml) {
-    const win = window.open('', '', 'height=800,width=1000');
-    win.document.write(`
-        <!DOCTYPE html>
-        <html lang="ar" dir="rtl">
-        <head>
-            <title>Print Report</title>
-            <style>
-                body { font-family: system-ui, -apple-system, sans-serif; padding: 20px; direction: rtl; color: #333; }
-                h2 { color: #1e3c72; text-align: center; margin-bottom: 5px; }
-                h3 { text-align: center; margin-top: 0; color: #555; }
-                p { text-align: center; font-size: 12px; color: #777; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-                th, td { border: 1px solid #999; padding: 8px 5px; text-align: center; word-break: break-word; }
-                th { background-color: #1e3c72; color: white; -webkit-print-color-adjust: exact; }
-                tr:nth-child(even) { background-color: #f9f9f9; }
-                .summary-box { margin-top: 20px; border: 2px solid #1e3c72; padding: 10px; border-radius: 6px; font-weight: bold; background: #fdfefe; }
-                .footer-text { text-align: center; margin-top: 30px; font-size: 10px; color: #888; border-top: 1px solid #ccc; padding-top: 10px; }
-                @media print {
-                    body { padding: 0; }
-                    button { display: none !important; }
-                }
-            </style>
-        </head>
-        <body>
-            ${titleHtml}
-            ${tableBodyHtml}
-            ${summaryHtml}
-            <div class="footer-text">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-            <script>
-                window.onload = function() {
-                    setTimeout(function() { window.print(); window.close(); }, 300);
-                };
-            <\/script>
-        </body>
-        </html>
-    `);
-    win.document.close();
-}
-
 function printFinanceReportPDF() {
     const fromD = document.getElementById('finFromDate')?.value || '';
     const toD = document.getElementById('finToDate')?.value || '';
@@ -1646,35 +1645,36 @@ function printFinanceReportPDF() {
                 <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
             </tr>`).join('');
 
-    const title = `
-        <h2>🌿 Anjum Green Pharmacy</h2>
-        <h3>التقرير المالي للحسابات والمصروفات</h3>
-        <p>الفترة من: <b>${escapeHtml(fromD || 'البداية')}</b> إلى: <b>${escapeHtml(toD || 'النهاية')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-    `;
+    const htmlContent = `
+        <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+            <h2 style="color:#1e3c72; margin:0; font-size:20px;">🌿 Anjum Green Pharmacy</h2>
+            <h3 style="color:#333; margin:4px 0;">التقرير المالي للحسابات والمصروفات</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;">الفترة من: <b>${escapeHtml(fromD || 'البداية')}</b> إلى: <b>${escapeHtml(toD || 'النهاية')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+            
+            <div class="table-responsive">
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px;">
+                <thead><tr style="background:#1e3c72; color:#fff;">
+                    <th style="padding:6px; width:30px;">#</th>
+                    <th style="padding:6px; width:120px;">التاريخ</th>
+                    <th style="padding:6px; width:80px;">النوع</th>
+                    <th style="padding:6px; text-align:right;">الوصف / البند</th>
+                    <th style="padding:6px; width:100px;">المبلغ (ج.م)</th>
+                    <th style="padding:6px; text-align:right;">ملاحظات</th>
+                </tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+            </div>
 
-    const table = `
-        <table>
-            <thead><tr>
-                <th style="width:30px;">#</th>
-                <th style="width:120px;">التاريخ</th>
-                <th style="width:80px;">النوع</th>
-                <th style="text-align:right;">الوصف / البند</th>
-                <th style="width:100px;">المبلغ (ج.م)</th>
-                <th style="text-align:right;">ملاحظات</th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-    `;
-
-    const summary = `
-        <div class="summary-box" style="display:flex; justify-content:space-around;">
-            <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-            <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-            <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
+            <div style="margin-top:15px; border:2px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-content:space-around; flex-wrap:wrap; gap:8px;">
+                <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
+                <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
+                <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
+            </div>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
         </div>
     `;
 
-    renderToNativePrint(title, table, summary);
+    openPrintModal(htmlContent);
 }
 
 /* ---------- Stock Operations ---------- */
@@ -1921,28 +1921,31 @@ function printStockTable() {
             <td>${escapeHtml(p.expiry || '-')}</td>
         </tr>`).join('');
 
-    const title = `
-        <h2>🌿 Anjum Green Pharmacy</h2>
-        <h3>تقرير تفاصيل المخزون</h3>
-        <p>تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+    const htmlContent = `
+        <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
+            <h2 style="color:#1e3c72; margin:0; font-size:20px;">🌿 Anjum Green Pharmacy</h2>
+            <h3 style="color:#333; margin:4px 0;">تقرير تفاصيل المخزون</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
+            
+            <div class="table-responsive">
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:10px;">
+                <thead><tr style="background:#1e3c72; color:#fff;">
+                    <th style="width:30px;">#</th>
+                    <th style="text-align:right;">اسم المنتج</th>
+                    <th style="width:70px;">الكمية</th>
+                    <th style="width:90px;">السعر التجاري</th>
+                    <th style="width:100px;">الحد الاسترشادي</th>
+                    <th style="width:120px;">الباركود</th>
+                    <th style="width:90px;">تاريخ الصلاحية</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            </div>
+            <div style="margin-top:15px; font-size:10px; color:#7f8c8d;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
+        </div>
     `;
 
-    const table = `
-        <table>
-            <thead><tr>
-                <th style="width:30px;">#</th>
-                <th style="text-align:right;">اسم المنتج</th>
-                <th style="width:70px;">الكمية</th>
-                <th style="width:90px;">السعر التجاري</th>
-                <th style="width:100px;">الحد الاسترشادي</th>
-                <th style="width:120px;">الباركود</th>
-                <th style="width:90px;">تاريخ الصلاحية</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-        </table>
-    `;
-
-    renderToNativePrint(title, table, '');
+    openPrintModal(htmlContent);
 }
 
 /* ---------- Sales Reports ---------- */
@@ -2348,7 +2351,7 @@ function renderInAppReportView() {
             <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
             <p style="font-size:11px; color:#666;">الفترة من: <b>${escapeHtml(fromD || 'بداية السجلات')}</b> إلى: <b>${escapeHtml(toD || 'تاريخ اليوم')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="table-responsive">
         <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
             <thead><tr style="background-color:#1e3c72; color:#ffffff;">
                 <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
@@ -2404,67 +2407,10 @@ function hideInAppReportView() {
 }
 
 function downloadInAppReportPDF() {
-    const fromD = document.getElementById('fromDate')?.value || '';
-    const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tally = buildInvoiceTally(filteredInvoices);
-    const top10 = tally.sortedTop.slice(0, 10);
-    const maxQty = top10.length > 0 ? top10[0].qty : 1;
-
-    const chartHtml = top10.map((p, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
-            <div style="width:150px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx + 1} ${escapeHtml(p.name)}</div>
-            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%;"></div></div>
-            <div style="width:40px; text-align:left; font-weight:bold;">${p.qty} u</div>
-        </div>`).join('');
-
-    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
-        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td>${idx + 1}</td>
-            <td>#${inv.id}</td>
-            <td style="direction:ltr;">${escapeHtml(inv.date || '-')}</td>
-            <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
-            <td style="font-size:10px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
-            <td>${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td>${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-        </tr>`).join('');
-
-    const title = `
-        <h2>Anjum Green Pharmacy 🌿</h2>
-        <h3>تقرير المبيعات الشامل</h3>
-        <p>الفترة من: <b>${escapeHtml(fromD || 'بداية السجلات')}</b> إلى: <b>${escapeHtml(toD || 'تاريخ اليوم')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-    `;
-
-    const table = `
-        <table>
-            <thead><tr>
-                <th style="width:30px;">#</th>
-                <th style="width:65px;">رقم الفاتورة</th>
-                <th style="width:100px;">التاريخ</th>
-                <th>الأصناف المباعة</th>
-                <th style="width:115px;">تفاصيل الدفع</th>
-                <th style="width:80px;">إجمالي تجاري</th>
-                <th style="width:50px;">الخصم %</th>
-                <th style="width:85px;">إجمالي البيع</th>
-                <th style="width:80px;">صافي الربح</th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-    `;
-
-    const summary = `
-        <div class="summary-box" style="display:flex; justify-content:space-around; text-align:center;">
-            <div>💵 الكاش والدفعات<br>$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)} | £:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
-            <div>💳 إجمالي الفيزا<br>${tally.sumVISA.toFixed(2)} EGP</div>
-            <div>🛒 إجمالي المبيعات<br><b style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</b></div>
-            <div>💰 صافي الربح<br><b style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</b></div>
-        </div>
-        ${top10.length > 0 ? `<div style="margin-top:15px; border:1px solid #1e3c72; padding:10px; border-radius:6px; background:#fff;"><h4>📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>${chartHtml}</div>` : ''}
-    `;
-
-    renderToNativePrint(title, table, summary);
+    const content = document.getElementById('pdfExportableArea')?.innerHTML;
+    if (content) {
+        openPrintModal(content);
+    }
 }
 
 /* ---------- Application Entry Point ---------- */
