@@ -170,12 +170,16 @@
         }
         .btn-scroll-top:hover { background: #2c3e50; }
 
-@media print {
-    body { background: #fff !important; }
-    .app-container, .btn-scroll-top, .no-print-el { display: none !important; }
-    #printableNativeSection, #printableNativeSection * { visibility: visible !important; display: block !important; }
-    #printableNativeSection { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; }
-}
+        /* التعديل الحاسم لمنع الأسطر والصفحات الفاضية أثناء الطباعة وإلغاء خلفية الأبليكيشن */
+        @media print {
+            body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+            .app-container, .btn-scroll-top, .no-print-el, #loginOverlay { display: none !important; }
+            #printableNativeSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
+            #printableNativeSection * { visibility: visible !important; }
+        }
+    </style>
+</head>
+<body>
 
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
@@ -518,7 +522,6 @@
             </div>
         </div>
 
-        <!-- أداة التقرير التفصيلي المكبر لمنتج محدد مع زر مسح البحث Clear -->
         <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:15px;">
             <div style="font-size:0.95rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 Single Product Sales History (تقرير مبيعات منتج محدد):</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
@@ -976,7 +979,6 @@
         document.getElementById('pdfExportableArea').innerHTML = '';
     }
 
-    // تصدير وتنزيل طباعة الـ PDF المباشرة بدون أطُر خارجية أو نوافذ منبثقة محظورة
     function downloadInAppReportPDF() {
         const reportContent = document.getElementById('pdfExportableArea').innerHTML;
         if (!reportContent) return;
@@ -985,7 +987,6 @@
     }
 
     function printStockTable() {
-        const tbody = document.getElementById('stockTableBody').innerHTML;
         const guideMult = RATES.GUIDE_MULT || 3;
         
         let html = `
@@ -1136,7 +1137,7 @@
         executeDirectNativePrint(html);
     }
 
-    // دالة الطباعة وتصدير PDF المباشرة الداخلية المعزولة للتطبيق
+    // دالة الطباعة المباشرة المعزولة والمجربة دون أطُر أو صفحات فارغة
     function executeDirectNativePrint(contentHtml) {
         const sec = document.getElementById('printableNativeSection');
         sec.innerHTML = contentHtml;
