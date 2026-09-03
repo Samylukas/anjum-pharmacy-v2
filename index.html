@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anjum Green Pharmacy 2026</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -64,9 +64,8 @@
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; page-break-inside: avoid; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.82rem; vertical-align: middle; }
         th { background: #3498db; color: white; white-space: nowrap; }
-        tr { page-break-inside: avoid !important; page-break-after: auto; }
 
         .items-column-cell { text-align: right !important; font-size: 0.85rem !important; line-height: 1.6 !important; min-width: 280px !important; white-space: normal !important; word-break: break-word !important; }
 
@@ -135,11 +134,15 @@
         .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
         .modal-actions .btn { flex: 1; margin: 0; }
 
+        /* --- PDF Generation CSS Rules --- */
+        .pdf-export-mode table { min-width: 100% !important; font-size: 10px !important; }
+        .pdf-export-mode .no-pdf { display: none !important; }
+        
         #receiptPrintSection { display: none; }
         @media print {
             body.printing-receipt * { visibility: hidden; }
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible; }
-            body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+            body.printing-receipt #receiptPrintSection { display: block; position: absolute; left: 0; top: 0; width: 80mm; }
         }
     </style>
 </head>
@@ -296,9 +299,9 @@
             <button class="btn btn-red" style="margin:5px auto; width:90%; padding:6px;" onclick="stopCameraScanner('stock')">Close Camera ❌</button>
         </div>
 
-        <div id="stockPrintArea" style="max-height: 400px; overflow-y: auto;">
+        <div id="stockPrintArea">
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:35px;">#</th><th>Product Name</th><th>Stock</th><th>C-Price</th><th id="thStockGuideHead">G-Min (×3)</th><th>Barcode</th><th>Expiry</th><th style="width:210px;">Actions</th></tr></thead>
+                <thead><tr><th style="width:35px;">#</th><th>Product Name</th><th>Stock</th><th>C-Price</th><th id="thStockGuideHead">G-Min (×3)</th><th>Barcode</th><th>Expiry</th><th class="no-pdf" style="width:210px;">Actions</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table></div>
         </div>
@@ -378,19 +381,21 @@
             </div>
         </div>
 
-        <div class="totals-box" style="background:#1e3c72; margin-bottom:15px;">
-            <h3 style="text-align:center; margin-bottom:10px;">📊 Financial Summary (EGP)</h3>
-            <div class="totals-grid">
-                <div class="total-item" style="background:rgba(46,204,113,0.2);">Total Revenues <span id="sumRevenues">0.00 EGP</span></div>
-                <div class="total-item" style="background:rgba(231,76,60,0.2);">Total Expenses <span id="sumExpenses">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Balance <span id="netBalance" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+        <div id="financePrintArea">
+            <div class="totals-box" style="background:#1e3c72; margin-bottom:15px;">
+                <h3 style="text-align:center; margin-bottom:10px;">📊 Financial Summary (EGP)</h3>
+                <div class="totals-grid">
+                    <div class="total-item" style="background:rgba(46,204,113,0.2);">Total Revenues <span id="sumRevenues">0.00 EGP</span></div>
+                    <div class="total-item" style="background:rgba(231,76,60,0.2);">Total Expenses <span id="sumExpenses">0.00 EGP</span></div>
+                    <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Balance <span id="netBalance" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
+                </div>
             </div>
-        </div>
 
-        <div class="table-responsive"><table>
-            <thead><tr><th style="width:35px;">#</th><th>Date</th><th>Type</th><th>Description</th><th>Amount (EGP)</th><th>Notes</th><th style="width:60px;">Action</th></tr></thead>
-            <tbody id="financeTableBody"><tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr></tbody>
-        </table></div>
+            <div class="table-responsive"><table>
+                <thead><tr><th style="width:35px;">#</th><th>Date</th><th>Type</th><th>Description</th><th>Amount (EGP)</th><th>Notes</th><th class="no-pdf" style="width:60px;">Action</th></tr></thead>
+                <tbody id="financeTableBody"><tr><td colspan="7" style="color:#7f8c8d;">No finance records found</td></tr></tbody>
+            </table></div>
+        </div>
     </div>
 
     <!-- 5. Sales Reports Tab -->
@@ -402,7 +407,7 @@
                 <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
                 <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
                 <button class="btn btn-purple" onclick="openRatesModal()">Set FX &amp; Multiplier ⚙️</button>
-                <button class="btn btn-purple" onclick="renderInAppReportView()">PDF 📄</button>
+                <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF 📄</button>
                 <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
             </div>
         </div>
@@ -441,24 +446,14 @@
             </div>
         </div>
 
-        <div class="table-responsive" id="reportsPrintArea"><table>
-            <thead><tr><th style="width:30px;">#</th><th style="width:65px;">Inv ID</th><th style="width:110px;">Date</th><th style="min-width:260px;">Items Details</th><th>Pay Breakdown</th><th>C-Total</th><th style="width:55px;">Disc %</th><th>Sales Total</th><th>N-Profit</th><th style="width:140px;">Actions</th></tr></thead>
-            <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
-        </table></div>
+        <div id="reportsPrintArea">
+            <div class="table-responsive"><table>
+                <thead><tr><th style="width:30px;">#</th><th style="width:65px;">Inv ID</th><th style="width:110px;">Date</th><th style="min-width:260px;">Items Details</th><th>Pay Breakdown</th><th>C-Total</th><th style="width:55px;">Disc %</th><th>Sales Total</th><th>N-Profit</th><th class="no-pdf" style="width:140px;">Actions</th></tr></thead>
+                <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
+            </table></div>
 
-        <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
-        <div id="topProductsChartContainer" class="top-products-chart"></div>
-
-        <div id="inAppReportContainer" style="display:none; margin-top:20px; background:#fff; padding:15px; border-radius:8px; border:2px solid #1e3c72;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3c72; padding-bottom:10px; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
-                <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">PDF 📄</button>
-            </div>
-            <div id="pdfExportableArea"></div>
-            <div style="display:flex; justify-content:space-between; align-items:center; border-top:2px solid #1e3c72; padding-top:10px; margin-top:15px; flex-wrap:wrap; gap:8px;">
-                <button class="btn btn-red" style="font-size:0.9rem; padding:8px 16px;" onclick="hideInAppReportView()">❌ خروج من التقرير (Close)</button>
-                <button class="btn btn-purple" style="font-size:0.9rem; padding:8px 16px;" onclick="downloadInAppReportPDF()">PDF 📄</button>
-            </div>
+            <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
+            <div id="topProductsChartContainer" class="top-products-chart"></div>
         </div>
     </div>
 
@@ -558,45 +553,43 @@ function confirmModal(message, onYes) {
     if (btn) btn.onclick = () => { closeModal(); onYes(); };
 }
 
-/* ---------- Perfect Multi-page PDF Generator ---------- */
+/* ---------- Master PDF Export Method (Direct & Clean) ---------- */
 
-function generateCleanPDF(htmlContent, fileName = 'Report.pdf') {
-    toast("⏳ جاري توليد وتجهيز ملف الـ PDF...", "info", 3000);
+function exportElementToPDF(elementId, fileName = 'Report.pdf') {
+    const element = document.getElementById(elementId);
+    if (!element) return toast("❌ تعذر إيجاد عنصر التقرير!", "error");
 
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '0';
-    tempDiv.style.width = '800px'; 
-    tempDiv.style.background = '#ffffff';
-    tempDiv.style.direction = 'rtl';
-    tempDiv.innerHTML = htmlContent;
-    document.body.appendChild(tempDiv);
+    toast("⏳ جاري إنشاء وتحميل ملف الـ PDF...", "info", 3000);
+    element.classList.add('pdf-export-mode');
 
     const opt = {
-        margin: [8, 8, 8, 8],
+        margin: [8, 6, 8, 6],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
-            scrollY: 0,
-            windowWidth: 800
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    setTimeout(() => {
-        html2pdf().set(opt).from(tempDiv).save().then(() => {
-            document.body.removeChild(tempDiv);
-            toast("✅ تم تحميل ملف الـ PDF بنجاح!", "success");
-        }).catch(err => {
-            console.error("PDF Fail:", err);
-            document.body.removeChild(tempDiv);
-            toast("❌ حدث خطأ أثناء الحفظ، يرجى المحاولة مجدداً", "error");
-        });
-    }, 400);
+    html2pdf().set(opt).from(element).save().then(() => {
+        element.classList.remove('pdf-export-mode');
+        toast("✅ تم تصدير الملف بنجاح!", "success");
+    }).catch(err => {
+        element.classList.remove('pdf-export-mode');
+        console.error("PDF Export Fail:", err);
+        toast("❌ فشل تصدير الملف، يرجى إعادة المحاولة", "error");
+    });
+}
+
+function exportSalesReportPDF() {
+    exportElementToPDF('reportsPrintArea', `Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function printFinanceReportPDF() {
+    exportElementToPDF('financePrintArea', `Financial_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+function printStockTable() {
+    exportElementToPDF('stockPrintArea', `Stock_Report_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 /* ---------- State Variables ---------- */
@@ -1559,7 +1552,7 @@ function renderFinanceTable() {
                 <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category)}</td>
                 <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
                 <td style="text-align:right; font-size:0.75rem;">${escapeHtml(f.notes || '-')}</td>
-                <td><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
+                <td class="no-pdf"><button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">Delete</button></td>
             </tr>`;
         }).join('');
     }
@@ -1604,81 +1597,6 @@ function exportFinanceExcel() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Finance_Report");
     XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
-
-function printFinanceReportPDF() {
-    const fromD = document.getElementById('finFromDate')?.value || '';
-    const toD = document.getElementById('finToDate')?.value || '';
-    const includeSales = document.getElementById('includeSalesIncomeToggle')?.checked || false;
-
-    const filtered = savedFinances.filter(f => {
-        if (!f.date) return true;
-        const fD = f.date.slice(0, 10);
-        if (fromD && fD < fromD) return false;
-        if (toD && fD > toD) return false;
-        return true;
-    });
-
-    let totRev = 0, totExp = 0, salesProfit = 0;
-    filtered.forEach(f => { if (f.type === 'Revenue') totRev += f.amount; else totExp += f.amount; });
-
-    if (includeSales) {
-        savedInvoices.forEach(inv => {
-            if (!inv.date) return;
-            const invD = inv.date.slice(0, 10);
-            if (fromD && invD < fromD) return;
-            if (toD && invD > toD) return;
-            salesProfit += (parseFloat(inv.netProfit) || 0);
-        });
-        totRev += salesProfit;
-    }
-
-    const net = totRev - totExp;
-
-    let rowsHtml = filtered.length === 0
-        ? `<tr><td colspan="6" style="padding:10px;">لا توجد سجلات مالية للفترة المحددة</td></tr>`
-        : filtered.map((f, idx) => `
-            <tr style="background:${f.type === 'Revenue' ? '#f2fcf5' : '#ffffff'};">
-                <td>${idx + 1}</td>
-                <td style="direction:ltr;">${escapeHtml(f.date || '-')}</td>
-                <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${escapeHtml(f.type)}</td>
-                <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category || '-')}</td>
-                <td style="font-weight:bold;">${f.amount.toFixed(2)}</td>
-                <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
-            </tr>`).join('');
-
-    const htmlContent = `
-        <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
-            <div style="margin-bottom:12px;">
-                <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                <h3 style="color:#333; margin:4px 0; font-size:16px;">التقرير المالي للحسابات والمصروفات</h3>
-                <p style="font-size:11px; color:#666; margin-top:2px;">الفترة من: <b>${escapeHtml(fromD || 'البداية')}</b> إلى: <b>${escapeHtml(toD || 'النهاية')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-            </div>
-            
-            <div class="table-responsive">
-            <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                <thead><tr style="background:#1e3c72; color:#fff;">
-                    <th style="padding:6px; width:30px;">#</th>
-                    <th style="padding:6px; width:120px;">التاريخ</th>
-                    <th style="padding:6px; width:80px;">النوع</th>
-                    <th style="padding:6px; text-align:right;">الوصف / البند</th>
-                    <th style="padding:6px; width:100px;">المبلغ (ج.م)</th>
-                    <th style="padding:6px; text-align:right;">ملاحظات</th>
-                </tr></thead>
-                <tbody>${rowsHtml}</tbody>
-            </table>
-            </div>
-
-            <div style="margin-top:15px; border:2px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:12px; display:flex; justify-content:space-around; flex-wrap:wrap; gap:8px;">
-                <span>إجمالي الإيرادات: <b style="color:#27ae60;">${totRev.toFixed(2)} ج.م</b></span>
-                <span>إجمالي المصروفات: <b style="color:#c0392b;">${totExp.toFixed(2)} ج.م</b></span>
-                <span>الصافي: <b style="color:${net >= 0 ? '#1e3c72' : '#c0392b'};">${net.toFixed(2)} ج.م</b></span>
-            </div>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-        </div>
-    `;
-
-    generateCleanPDF(htmlContent, 'Financial_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
 }
 
 /* ---------- Stock Operations ---------- */
@@ -1849,7 +1767,7 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
         <td>${(p.p * guideMult).toFixed(2)} EGP</td>
         <td style="font-family:monospace; font-weight:bold; color:#1e3c72;">${escapeHtml(p.barcode || '-')}</td>
         <td>${escapeHtml(p.expiry || '-')}</td>
-        <td>
+        <td class="no-pdf">
             <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${p.id}')">Edit ✏️</button>
             <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="scanAndEditProductBarcode('${p.id}')">Scan 📷</button>
             <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="printBarcodeLabel('${p.id}')">Label 🏷️</button>
@@ -1912,46 +1830,6 @@ function filterNearExpiryOneMonth() {
     }
 }
 
-function printStockTable() {
-    const guideMult = RATES.GUIDE_MULT || 3;
-    const rows = products.map((p, idx) => `
-        <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td>${idx + 1}</td>
-            <td style="text-align:right; font-weight:bold;">${escapeHtml(p.n)}</td>
-            <td>${p.q} قطعة</td>
-            <td>${p.p.toFixed(2)} ج.م</td>
-            <td>${(p.p * guideMult).toFixed(2)} ج.م</td>
-            <td style="font-family:monospace;">${escapeHtml(p.barcode || '-')}</td>
-            <td>${escapeHtml(p.expiry || '-')}</td>
-        </tr>`).join('');
-
-    const htmlContent = `
-        <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
-            <h2 style="color:#1e3c72; margin:0; font-size:20px;">🌿 Anjum Green Pharmacy</h2>
-            <h3 style="color:#333; margin:4px 0;">تقرير تفاصيل المخزون</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;">تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-            
-            <div class="table-responsive">
-            <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                <thead><tr style="background:#1e3c72; color:#fff;">
-                    <th style="width:30px;">#</th>
-                    <th style="text-align:right;">اسم المنتج</th>
-                    <th style="width:70px;">الكمية</th>
-                    <th style="width:90px;">السعر التجاري</th>
-                    <th style="width:100px;">الحد الاسترشادي</th>
-                    <th style="width:120px;">الباركود</th>
-                    <th style="width:90px;">تاريخ الصلاحية</th>
-                </tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            </div>
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-        </div>
-    `;
-
-    generateCleanPDF(htmlContent, 'Stock_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
-}
-
 /* ---------- Sales Reports ---------- */
 
 function printSingleReceipt(invId) {
@@ -1966,19 +1844,21 @@ function printSingleReceipt(invId) {
     }
 
     const receiptHTML = `
-        <h3>Anjum Green Pharmacy 🌿</h3>
-        <p>Invoice ID: <b>#${inv.id}</b></p>
-        <p>Date: ${escapeHtml((inv.date || '').replace('T', ' '))}</p>
-        <hr style="border-top:1px dashed #000; margin:6px 0;">
-        <table style="width:100%; border-collapse:collapse; font-size:10px; direction:rtl;">
-            <thead><tr><th style="text-align:right;">Item</th><th style="text-align:left;">Total</th></tr></thead>
-            <tbody>${itemsHtml}</tbody>
-        </table>
-        <hr style="border-top:1px dashed #000; margin:6px 0;">
-        <h4 style="text-align:left;">Discount: ${inv.discount || 0}%</h4>
-        <h4 style="text-align:left;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
-        <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
-        <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
+        <div style="text-align:center; direction:rtl; font-family:'Courier New', monospace; padding:5px;">
+            <h3>Anjum Green Pharmacy 🌿</h3>
+            <p>Invoice ID: <b>#${inv.id}</b></p>
+            <p>Date: ${escapeHtml((inv.date || '').replace('T', ' '))}</p>
+            <hr style="border-top:1px dashed #000; margin:6px 0;">
+            <table style="width:100%; border-collapse:collapse; font-size:10px;">
+                <thead><tr><th style="text-align:right;">Item</th><th style="text-align:left;">Total</th></tr></thead>
+                <tbody>${itemsHtml}</tbody>
+            </table>
+            <hr style="border-top:1px dashed #000; margin:6px 0;">
+            <h4 style="text-align:left;">Discount: ${inv.discount || 0}%</h4>
+            <h4 style="text-align:left;">Total: ${inv.totalEGP.toFixed(2)} EGP</h4>
+            <p style="font-size:9px; margin-top:10px;">Thank you for visiting us!</p>
+            <div style="font-size:8px; color:#555; margin-top:8px;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
+        </div>
     `;
 
     const printSec = document.getElementById('receiptPrintSection');
@@ -2102,7 +1982,7 @@ function generateReport() {
             <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
             <td style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
             <td style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-            <td>
+            <td class="no-pdf">
                 <button class="btn btn-purple" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="printSingleReceipt(${inv.id})">Receipt 🧾</button>
                 <button class="btn btn-blue" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="loadInvoiceToEdit(${inv.id})">Edit ✏️</button>
                 <button class="btn btn-red" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="cancelInvoiceSystem(${inv.id})">Delete 🗑️</button>
@@ -2317,164 +2197,6 @@ function generateSingleProductDetailsReport(productName) {
         </table></div>`;
     display.style.display = 'block';
     window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
-}
-
-/* ---------- In-App Full PDF View ---------- */
-
-function renderInAppReportView() {
-    const fromD = document.getElementById('fromDate')?.value || '';
-    const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tally = buildInvoiceTally(filteredInvoices);
-    const top10 = tally.sortedTop.slice(0, 10);
-    const maxQty = top10.length > 0 ? top10[0].qty : 1;
-
-    const chartHtml = top10.map((p, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
-            <div style="width:150px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx + 1} ${escapeHtml(p.name)}</div>
-            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%;"></div></div>
-            <div style="width:40px; text-align:left; font-weight:bold;">${p.qty} u</div>
-        </div>`).join('');
-
-    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
-        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">${idx + 1}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-weight:bold;">#${inv.id}</td>
-            <td style="border:1px solid #ddd; padding:5px; white-space:nowrap; direction:ltr;">${escapeHtml(inv.date || '-')}</td>
-            <td style="border:1px solid #ddd; padding:5px; text-align:right; font-weight:bold; line-height:1.4; word-break:break-word;">${itemsListHtml}</td>
-            <td style="border:1px solid #ddd; padding:5px; font-size:9.5px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
-            <td style="border:1px solid #ddd; padding:5px;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="border:1px solid #ddd; padding:5px; color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-        </tr>`).join('');
-
-    const html = `
-        <div style="text-align:center; border-bottom: 2px solid #1e3c72; padding-bottom: 8px; margin-bottom: 12px; font-family:sans-serif; direction:rtl;">
-            <h2 style="color: #1e3c72; margin: 0; font-size: 20px;">Anjum Green Pharmacy 🌿</h2>
-            <h3 style="margin: 4px 0;">تقرير المبيعات الشامل</h3>
-            <p style="font-size:11px; color:#666;">الفترة من: <b>${escapeHtml(fromD || 'بداية السجلات')}</b> إلى: <b>${escapeHtml(toD || 'تاريخ اليوم')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-        </div>
-        <div class="table-responsive">
-        <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center; min-width:820px; font-family:sans-serif;">
-            <thead><tr style="background-color:#1e3c72; color:#ffffff;">
-                <th style="width:30px; padding:6px; border:1px solid #1e3c72;">#</th>
-                <th style="width:65px; padding:6px; border:1px solid #1e3c72;">رقم الفاتورة</th>
-                <th style="width:100px; padding:6px; border:1px solid #1e3c72;">التاريخ</th>
-                <th style="padding:6px; min-width:230px; border:1px solid #1e3c72;">الأصناف المباعة</th>
-                <th style="width:115px; padding:6px; border:1px solid #1e3c72;">تفاصيل الدفع</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">إجمالي تجاري</th>
-                <th style="width:50px; padding:6px; border:1px solid #1e3c72;">الخصم %</th>
-                <th style="width:85px; padding:6px; border:1px solid #1e3c72;">إجمالي البيع</th>
-                <th style="width:80px; padding:6px; border:1px solid #1e3c72;">صافي الربح</th>
-            </tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 15px; justify-content: space-between; flex-wrap:wrap; font-family:sans-serif;">
-            <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
-                <div style="font-size: 10px; color: #555; font-weight: bold;">💵 إجمالي الكاش والعملات</div>
-                <div style="font-size: 10px; font-weight: bold; color: #1e3c72; margin-top: 2px;">$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)}<br>£:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
-            </div>
-            <div style="border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
-                <div style="font-size: 10px; color: #555; font-weight: bold;">💳 إجمالي مدفوعات الفيزا</div>
-                <div style="font-size: 13px; font-weight: bold; color: #1e3c72; margin-top: 2px;">${tally.sumVISA.toFixed(2)} EGP</div>
-            </div>
-            <div style="border: 1.5px solid #27ae60; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
-                <div style="font-size: 10px; color: #27ae60; font-weight: bold;">🛒 إجمالي المبيعات الكلي</div>
-                <div style="font-size: 13px; font-weight: bold; color: #27ae60; margin-top: 2px;">${tally.grandTotalSell.toFixed(2)} EGP</div>
-            </div>
-            <div style="border: 1.5px solid #8e44ad; border-radius: 6px; padding: 8px; flex: 1; min-width:130px; text-align: center; background: #fdfefe;">
-                <div style="font-size: 10px; color: #8e44ad; font-weight: bold;">💰 إجمالي صافي الربح</div>
-                <div style="font-size: 13px; font-weight: bold; color: #8e44ad; margin-top: 2px;">${tally.grandNetProfit.toFixed(2)} EGP</div>
-            </div>
-        </div>
-        ${top10.length > 0 ? `
-        <div style="margin-top: 15px; border: 1px solid #1e3c72; padding: 10px; border-radius: 6px; background: #fff; font-family:sans-serif;">
-            <h4 style="margin:0 0 8px 0; color:#1e3c72; font-size:12px;">📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>${chartHtml}
-        </div>` : ''}
-        <div style="margin-top:15px; font-size:10px; color:#7f8c8d; text-align:center; border-top:1px solid #ddd; padding-top:6px; font-family:sans-serif;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-    `;
-
-    const container = document.getElementById('pdfExportableArea');
-    if (container) container.innerHTML = html;
-    const parentContainer = document.getElementById('inAppReportContainer');
-    if (parentContainer) {
-        parentContainer.style.display = 'block';
-        window.scrollTo({ top: parentContainer.offsetTop - 20, behavior: 'smooth' });
-    }
-}
-
-function hideInAppReportView() {
-    if (document.getElementById('inAppReportContainer')) document.getElementById('inAppReportContainer').style.display = 'none';
-    if (document.getElementById('pdfExportableArea')) document.getElementById('pdfExportableArea').innerHTML = '';
-}
-
-function downloadInAppReportPDF() {
-    const fromD = document.getElementById('fromDate')?.value || '';
-    const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tally = buildInvoiceTally(filteredInvoices);
-    const top10 = tally.sortedTop.slice(0, 10);
-    const maxQty = top10.length > 0 ? top10[0].qty : 1;
-
-    const chartHtml = top10.map((p, idx) => `
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:10px;">
-            <div style="width:150px; text-align:right; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">#${idx + 1} ${escapeHtml(p.name)}</div>
-            <div style="flex:1; background:#eee; height:12px; border-radius:6px; overflow:hidden;"><div style="width:${Math.round((p.qty / maxQty) * 100)}%; background:#1e3c72; height:100%;"></div></div>
-            <div style="width:40px; text-align:left; font-weight:bold;">${p.qty} u</div>
-        </div>`).join('');
-
-    const rowsHtml = tally.perInvoice.map(({ inv, itemsListHtml }, idx) => `
-        <tr style="background-color:${idx % 2 === 0 ? '#ffffff' : '#f8f9fa'};">
-            <td>${idx + 1}</td>
-            <td>#${inv.id}</td>
-            <td style="direction:ltr;">${escapeHtml(inv.date || '-')}</td>
-            <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
-            <td style="font-size:10px;">$:${inv.usd || 0} | €:${inv.eur || 0} | £:${inv.gbp || 0}<br>EGP:${inv.egp || 0} | VISA:${inv.visa || 0}</td>
-            <td>${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td>${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-        </tr>`).join('');
-
-    const htmlContent = `
-        <div style="text-align:center; padding:10px; font-family:sans-serif; direction:rtl;">
-            <div style="margin-bottom:12px;">
-                <h2 style="color:#1e3c72; margin:0; font-size:22px; font-weight:bold;">🌿 Anjum Green Pharmacy</h2>
-                <h3 style="color:#333; margin:4px 0; font-size:16px;">تقرير المبيعات الشامل</h3>
-                <p style="font-size:11px; color:#666; margin-bottom:15px;">الفترة من: <b>${escapeHtml(fromD || 'بداية السجلات')}</b> إلى: <b>${escapeHtml(toD || 'تاريخ اليوم')}</b> | تاريخ الإصدار: ${new Date().toLocaleString()}</p>
-            </div>
-
-            <div class="table-responsive">
-            <table style="width:100%; border-collapse:collapse; font-size:10.5px; text-align:center;">
-                <thead><tr style="background:#1e3c72; color:#fff;">
-                    <th style="width:30px;">#</th>
-                    <th style="width:65px;">رقم الفاتورة</th>
-                    <th style="width:100px;">التاريخ</th>
-                    <th>الأصناف المباعة</th>
-                    <th style="width:115px;">تفاصيل الدفع</th>
-                    <th style="width:80px;">إجمالي تجاري</th>
-                    <th style="width:50px;">الخصم %</th>
-                    <th style="width:85px;">إجمالي البيع</th>
-                    <th style="width:80px;">صافي الربح</th>
-                </tr></thead>
-                <tbody>${rowsHtml}</tbody>
-            </table>
-            </div>
-
-            <div style="margin-top:15px; border:2px solid #1e3c72; padding:10px; border-radius:6px; background:#f8f9fa; font-size:11px; display:flex; justify-content:space-around; flex-wrap:wrap; gap:8px;">
-                <div>💵 الكاش والعملات<br>$:${tally.sumUSD.toFixed(2)} | €:${tally.sumEUR.toFixed(2)} | £:${tally.sumGBP.toFixed(2)} | EGP:${tally.sumEGP.toFixed(2)}</div>
-                <div>💳 إجمالي الفيزا<br>${tally.sumVISA.toFixed(2)} EGP</div>
-                <div>🛒 إجمالي المبيعات<br><b style="color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</b></div>
-                <div>💰 صافي الربح<br><b style="color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</b></div>
-            </div>
-            ${top10.length > 0 ? `<div style="margin-top:15px; border:1px solid #1e3c72; padding:10px; border-radius:6px; background:#fff;"><h4>📊 أعلى 10 منتجات مبيعاً بالفترة:</h4>${chartHtml}</div>` : ''}
-            <div style="margin-top:15px; font-size:10px; color:#7f8c8d;">✨ D&amp;P by Samy Lukas , Powered By Gemini</div>
-        </div>
-    `;
-
-    generateCleanPDF(htmlContent, 'Sales_Report_' + new Date().toISOString().slice(0, 10) + '.pdf');
 }
 
 /* ---------- Application Entry Point ---------- */
