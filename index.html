@@ -63,10 +63,20 @@
 
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 6px 3px; border: 1px solid #ddd; text-align: center; font-size: 0.78rem; vertical-align: middle; }
-        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.8rem; }
+        th, td { padding: 5px 2px; border: 1px solid #ddd; text-align: center; font-size: 0.75rem; vertical-align: middle; }
+        th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.78rem; }
 
-        .items-column-cell { text-align: right !important; font-size: 0.82rem !important; line-height: 1.4 !important; min-width: 280px !important; white-space: normal !important; word-break: break-word !important; }
+        /* --- Column Width Optimization --- */
+        .col-seq { width: 25px !important; }
+        .col-inv { width: 45px !important; }
+        .col-date { width: 85px !important; }
+        .col-items { width: auto !important; text-align: right !important; font-size: 0.78rem !important; line-height: 1.35 !important; word-break: break-word !important; }
+        .col-pay { width: 105px !important; font-size: 0.68rem !important; }
+        .col-comm { width: 65px !important; }
+        .col-disc { width: 35px !important; }
+        .col-sell { width: 70px !important; }
+        .col-profit { width: 65px !important; }
+        .col-act { width: 110px !important; }
 
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
@@ -140,18 +150,24 @@
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
             
-            /* Allow Multi-page Pagination without truncating */
             html, body, .app-container, .table-responsive {
                 overflow: visible !important;
                 height: auto !important;
                 max-height: none !important;
             }
 
-            table { width: 100% !important; font-size: 8px !important; table-layout: fixed !important; border-collapse: collapse !important; }
-            th, td { border: 1px solid #777 !important; padding: 4px 2px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
+            table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #777 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
             th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             tr { page-break-inside: avoid !important; page-break-after: auto !important; }
             
+            /* --- Force Summary Cards & Chart to Standalone Page --- */
+            .print-summary-wrapper {
+                page-break-before: always !important;
+                break-before: page !important;
+                margin-top: 20px !important;
+            }
+
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
             body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
         }
@@ -477,12 +493,26 @@
             </div>
             
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:25px;">#</th><th style="width:50px;">Inv ID</th><th style="width:100px;">Date &amp; Time</th><th style="min-width:250px;">Items Details</th><th>Pay Breakdown</th><th>C-Total</th><th style="width:45px;">Disc %</th><th>Sales Total</th><th>Net Profit</th><th class="no-pdf" style="width:120px;">Actions</th></tr></thead>
+                <thead><tr>
+                    <th class="col-seq">#</th>
+                    <th class="col-inv">Inv ID</th>
+                    <th class="col-date">Date &amp; Time</th>
+                    <th class="col-items">Items Details</th>
+                    <th class="col-pay">Pay Breakdown</th>
+                    <th class="col-comm">C-Total</th>
+                    <th class="col-disc">Disc %</th>
+                    <th class="col-sell">Sales Total</th>
+                    <th class="col-profit">Net Profit</th>
+                    <th class="col-act no-pdf">Actions</th>
+                </tr></thead>
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
             </table></div>
 
-            <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
-            <div id="topProductsChartContainer" class="top-products-chart"></div>
+            <!-- Page Break Wrapper to Keep Cards and Chart Together -->
+            <div class="print-summary-wrapper">
+                <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
+                <div id="topProductsChartContainer" class="top-products-chart"></div>
+            </div>
         </div>
     </div>
 
@@ -2000,16 +2030,16 @@ function generateReport() {
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
-            <td><span class="seq-num">${index + 1}</span></td>
-            <td style="font-weight:bold;">#${inv.id}</td>
-            <td style="white-space:nowrap; direction:ltr;">${escapeHtml(cleanDateStr)}</td>
-            <td class="items-column-cell">${itemsListHtml}</td>
-            <td style="font-size:0.72rem; color:#2c3e50;">${payBreakdown}</td>
-            <td style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
-            <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
-            <td style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
-            <td class="no-pdf">
+            <td class="col-seq"><span class="seq-num">${index + 1}</span></td>
+            <td class="col-inv" style="font-weight:bold;">#${inv.id}</td>
+            <td class="col-date" style="white-space:nowrap; direction:ltr;">${escapeHtml(cleanDateStr)}</td>
+            <td class="col-items">${itemsListHtml}</td>
+            <td class="col-pay">${payBreakdown}</td>
+            <td class="col-comm" style="color:#2c3e50; white-space:nowrap;">${(inv.totalComm || 0).toFixed(2)} EGP</td>
+            <td class="col-disc" style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
+            <td class="col-sell" style="color:#27ae60; font-weight:bold; white-space:nowrap;">${(inv.totalEGP || 0).toFixed(2)} EGP</td>
+            <td class="col-profit" style="color:#8e44ad; font-weight:bold; white-space:nowrap;">${(inv.netProfit || 0).toFixed(2)} EGP</td>
+            <td class="col-act no-pdf">
                 <button class="btn btn-purple" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="printSingleReceipt(${inv.id})">Receipt 🧾</button>
                 <button class="btn btn-blue" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="loadInvoiceToEdit(${inv.id})">Edit ✏️</button>
                 <button class="btn btn-red" style="padding:3px 6px; font-size:0.72rem; margin:2px 0;" onclick="cancelInvoiceSystem(${inv.id})">Delete 🗑️</button>
@@ -2039,7 +2069,7 @@ function generateReport() {
                     <div class="chart-bar-wrapper"><div class="chart-bar" style="width: ${Math.round((p.qty / maxQty) * 100)}%;"></div></div>
                     <div class="chart-val">${p.qty} u</div>
                 </div>`).join('');
-            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Selling Products</h4>${chartRows}`;
+            chartContainer.innerHTML = `<h4 style="margin-bottom:8px; color:#1e3c72; text-align:center;">📊 Top 10 Best Selling Products</h4>${chartRows}`;
         } else {
             chartContainer.innerHTML = '';
         }
