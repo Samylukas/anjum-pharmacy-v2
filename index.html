@@ -17,7 +17,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations (النسخة الاحترافية المعدلة) ✨ --- */
+        /* --- ✨ Splash Screen Animations ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -46,18 +46,9 @@
         .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        @keyframes flyFromTop { 
-            0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 
-            100% { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-        @keyframes flyFromBottom { 
-            0% { opacity: 0; transform: translateY(40px) scale(0.3); } 
-            100% { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-        @keyframes flyFromRight { 
-            0% { opacity: 0; transform: translateX(40px) scale(0.3); } 
-            100% { opacity: 1; transform: translateX(0) scale(1); } 
-        }
+        @keyframes flyFromTop { 0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromBottom { 0% { opacity: 0; transform: translateY(40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromRight { 0% { opacity: 0; transform: translateX(40px) scale(0.3); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
 
         .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; }
         .d-4 { animation-delay: 1.2s; } .d-5 { animation-delay: 1.4s; } .d-6 { animation-delay: 1.6s; }
@@ -67,142 +58,109 @@
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
-
         .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.82rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
-
         .nav-tabs { display: flex; gap: 6px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; }
         .tab-btn.active { background: #1e3c72; color: #fff; }
-
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
-
         .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #3498db; padding-bottom: 5px; font-size: 0.95rem; text-align: right; line-height: 1.4; }
-
         .search-box { width: 100%; padding: 10px; font-size: 14px; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; }
         .large-search-box { width: 100%; padding: 12px 14px; font-size: 1rem; font-weight: bold; border: 2px solid #1e3c72; border-radius: 8px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
-
         .results-list { max-height: 250px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .result-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.9rem; }
-
         .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; width: 100%; }
         .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
         .info-row span { font-weight: bold; }
-
         .payment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box; }
         .pay-box { display: flex; flex-direction: column; width: 100%; }
         .pay-box label { font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; }
         .pay-box input, .pay-box select { width: 100%; padding: 8px 4px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 0.95rem; box-sizing: border-box; }
-
         @media (max-width: 550px) { .payment-grid { grid-template-columns: 1fr; } .pay-box { grid-column: span 1 !important; } }
-
         .warning-box { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
-
         .btn { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
         .btn:hover { background: #219653; }
         .btn-blue { background: #3498db; } .btn-blue:hover { background: #2980b9; }
         .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
-
         .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
         .nav-controls .btn { width: auto; font-size: 0.8rem; padding: 6px 12px; margin-top: 0; }
-
         .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
-
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; table-layout: fixed; }
         th, td { padding: 4px 2px; border: 1px solid #ddd; text-align: center; font-size: 0.72rem; vertical-align: middle; word-wrap: break-word; }
         th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.75rem; }
-
-        .col-seq { width: 22px !important; }
-        .col-inv { width: 40px !important; }
-        .col-date { width: 80px !important; font-size: 0.68rem !important; }
+        .col-seq { width: 22px !important; } .col-inv { width: 40px !important; } .col-date { width: 80px !important; font-size: 0.68rem !important; }
         .col-items { width: 35% !important; text-align: right !important; font-size: 0.72rem !important; line-height: 1.3 !important; }
-        .col-pay { width: 100px !important; font-size: 0.65rem !important; }
-        .col-comm { width: 60px !important; font-size: 0.7rem !important; }
-        .col-disc { width: 30px !important; font-size: 0.7rem !important; }
-        .col-sell { width: 65px !important; font-size: 0.7rem !important; }
-        .col-profit { width: 60px !important; font-size: 0.7rem !important; }
-        .col-act { width: 100px !important; }
-
+        .col-pay { width: 100px !important; font-size: 0.65rem !important; } .col-comm { width: 60px !important; font-size: 0.7rem !important; }
+        .col-disc { width: 30px !important; font-size: 0.7rem !important; } .col-sell { width: 65px !important; font-size: 0.7rem !important; }
+        .col-profit { width: 60px !important; font-size: 0.7rem !important; } .col-act { width: 100px !important; }
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
-
         .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
         .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
-
         .pass-container { position: relative; width: 100%; margin-bottom: 12px; }
         .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
-
         .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 10px; background: #ffffff; border: 1px solid #1e3c72; border-radius: 8px; font-weight: bold; font-size: 0.85rem; color: #1e3c72; }
         .discount-bar input { width: 75px; padding: 6px; text-align: center; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; }
-
         .totals-box { background: #1e3c72; color: #fff; padding: 12px; padding-top: 35px; border-radius: 8px; margin-top: 15px; position: relative; }
         .close-summary-btn { position: absolute; top: 6px; left: 8px; width: auto; padding: 3px 10px; font-size: 0.72rem; z-index: 10; }
-
         .totals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 6px; font-size: 0.75rem; text-align: center; }
         .total-item { background: rgba(255,255,255,0.1); padding: 6px 4px; border-radius: 6px; }
         .total-item span { display: block; font-weight: bold; font-size: 0.85rem; color: #f1c40f; margin-top: 2px; }
-
         .pos-header-card { background: #ffffff; border: 1.5px solid #1e3c72; padding: 12px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .pos-header-card div { font-size: 0.9rem; font-weight: bold; color: #1e3c72; display: flex; align-items: center; gap: 6px; }
         .pos-header-card input { padding: 6px; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; font-size: 0.85rem; }
-
         .report-summary-cards { display: flex; width: 100%; gap: 8px; margin-top: 10px; justify-content: space-between; }
         .report-card { flex: 1; background: #ffffff; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 8px 4px; text-align: center; }
         .report-card-title { font-size: 0.75rem; color: #333; font-weight: bold; margin-bottom: 2px; }
         .report-card-value { font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
-
         .top-products-chart { margin-top: 12px; background: #ffffff; border: 1px solid #1e3c72; padding: 10px; border-radius: 8px; }
         .chart-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 0.72rem; direction: rtl; }
         .chart-label { width: 180px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; color: #1e3c72; }
         .chart-bar-wrapper { flex: 1; background: #e0e0e0; height: 12px; border-radius: 4px; overflow: hidden; position: relative; }
         .chart-bar { height: 100%; background: #1e3c72 !important; border-radius: 4px; float: right; }
         .chart-val { width: 35px; text-align: left; font-weight: bold; color: #1e3c72; }
-
         .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
         .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
         .date-inputs-row input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; outline: none; }
-
         .live-invoice-summary { background: #ffffff; color: #1e3c72; border: 2px solid #1e3c72; border-radius: 10px; padding: 12px; margin-top: 14px; }
         .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; text-align: center; font-size: 0.8rem; font-weight: bold; }
         .live-summary-item { background: #f8f9fa; border: 1px solid #cbd5e1; padding: 8px 4px; border-radius: 6px; }
         .live-summary-item span { display: block; color: #27ae60; font-weight: bold; font-size: 0.95rem; margin-top: 3px; }
-
         .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
-
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
-
         .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #1e3c72; color: #fff; border: 2px solid #fff; border-radius: 50px; padding: 10px 18px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 99999; display: flex; align-items: center; gap: 4px; }
-
         #toastStack { position: fixed; top: 12px; right: 12px; z-index: 99999999; display: flex; flex-direction: column; gap: 8px; max-width: 90vw; }
         .toast { background: #1e3c72; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); animation: toastIn 0.25s ease-out; max-width: 320px; }
-        .toast.success { background: #219653; }
-        .toast.error { background: #c0392b; }
-        .toast.warn { background: #d68910; }
-
+        .toast.success { background: #219653; } .toast.error { background: #c0392b; } .toast.warn { background: #d68910; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
 
-        /* --- 🖨️ CSS الطباعة المخصص والنهائي --- */
+        /* --- 🖨️ CSS الطباعة المخصص --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* إخفاء كل محتوى الصفحة والإبقاء على قسم الطباعة فقط لمنع استهلاك الورق */
+        /* هذا الكود تم ضبطه بدقة لمنع ظهور أي صفحة فارغة إضافية */
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
-            body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-            body.printing-receipt #receiptPrintSection { display: block !important; position: relative !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-            
-            .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-after: always !important; page-break-inside: avoid !important; }
+            html, body.printing-receipt { 
+                margin: 0 !important; padding: 0 !important; background: #fff !important; 
+                width: 100% !important; height: 100% !important; overflow: hidden !important; 
+            }
+            body.printing-receipt #receiptPrintSection { 
+                display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; 
+                margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; 
+            }
+            .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
             
-            /* إعدادات الفاتورة الكبيرة للتقارير */
+            /* إعدادات الفاتورة الكبيرة */
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
@@ -1275,14 +1233,14 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // تم إضافة margin-bottom: 1mm للاسم، و margin-top: 1mm للسعر
+        // تم إضافة margin-top: -1.5mm لرفع المحتوى، وتقليل ارتفاع الباركود ليناسب المسافة
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1.5mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
                     <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm; shape-rendering: crispEdges;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1mm;">${finalPriceStr}</div>` : ''}
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1px;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1292,12 +1250,13 @@ function executeAdvancedPrint(prodId) {
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
+    // تم إرجاع الـ width إلى 1.2 و الـ height إلى 35 لضمان قراءة الريدر
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
-            width: 1.6,       
-            height: 30,       
-            fontSize: 11,     
+            width: 1.2,       
+            height: 35,       
+            fontSize: 12,     
             margin: 0, 
             displayValue: true,
             background: "#ffffff",
