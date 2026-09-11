@@ -146,7 +146,6 @@
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* إخفاء كل محتوى الصفحة والإبقاء على قسم الطباعة فقط لمنع استهلاك الورق */
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { 
@@ -160,7 +159,6 @@
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
             
-            /* إعدادات الفاتورة الكبيرة */
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
@@ -177,27 +175,20 @@
 <!-- ✨ Splash Screen الاحترافية ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
-        <!-- توسيع الـ viewBox لمنع قص الورقة العلوية -->
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
-            <!-- الغصن الأساسي -->
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
-            
-            <!-- تصميم الورقة الموحد -->
             <defs>
                 <path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" />
             </defs>
 
-            <!-- 3 أوراق تنزل من فوق -->
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
             <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
             <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
 
-            <!-- 3 أوراق تصعد من تحت -->
             <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
             <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
             <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
 
-            <!-- 🌿 ورقة واحدة في قمة الغصن (التيب) متجهة للأعلى بشكل صحيح 🌿 -->
             <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
     </div>
@@ -539,7 +530,6 @@
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">No saved invoices</td></tr></tbody>
             </table></div>
 
-            <!-- Page Break Wrapper for Standalone Final Page -->
             <div class="print-summary-wrapper">
                 <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
                 <div id="topProductsChartContainer" class="top-products-chart"></div>
@@ -1231,29 +1221,30 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        JsBarcode("#bcode-" + i, prod.barcode, {
-            format: "CODE128", 
-            width: 0.9,       // تقليل السُمك لأقل درجة لمنع تداخل الحرق الحراري
-            height: 28,       // تقليل الارتفاع عشان الباركود يتنفس
-            fontSize: 11,     
-            margin: 0, 
-            displayValue: true,
-            background: "#ffffff",
-            lineColor: "#000000"
-        });
+        // الاعتماد على SVG حاد ورسومات فيكتور واضحة مع إتاحة سُمك رفع مستقر للطباعة الحرارية
+        labelsHtml += `
+            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 32px;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
+                </div>
+            </div>
+        `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
-    // تم تثبيت السُمك على 1 لضمان عدم التداخل أبداً
+    // تم تثبيت السُمك على 1 لضمان تباعد الخطوط وعدم تداخلها حتى مع أطول باركود
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
-            width: 1,         // أرفع خط ممكن عشان الباركود الطويل ميقفلش على بعضه
+            width: 1,         
             height: 32,       
-            fontSize: 13,     // كبرت رقم الباركود شوية عشان يبقى مقروء
+            fontSize: 13,     
             margin: 0, 
             displayValue: true,
             background: "#ffffff",
@@ -1299,6 +1290,7 @@ function executeAdvancedPrint(prodId) {
         }, 300);
     }
 }
+
 /* ---------- Shared Search Logic ---------- */
 
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
@@ -2356,7 +2348,6 @@ function generateSingleProductDetailsReport(productName) {
 /* ---------- Application Entry Point ---------- */
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // إخفاء الـ Splash Screen بعد انتهاء الأنيميشن بالكامل
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) {
