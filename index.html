@@ -17,7 +17,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations (النسخة الاحترافية) ✨ --- */
+        /* --- ✨ Splash Screen Animations (النسخة الاحترافية المعدلة) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -39,12 +39,12 @@
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
-        /* أنيميشن الأوراق */
+        /* تصميم الورقة الموحد */
         .anim-leaf { opacity: 0; transform-origin: center; }
         
         .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .swoop-right { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         @keyframes flyFromTop { 
             0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 
@@ -60,8 +60,8 @@
         }
 
         .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; }
-        .d-4 { animation-delay: 1.8s; } .d-5 { animation-delay: 2.0s; } .d-6 { animation-delay: 2.2s; }
-        .d-7 { animation-delay: 2.4s; }
+        .d-4 { animation-delay: 1.2s; } .d-5 { animation-delay: 1.4s; } .d-6 { animation-delay: 1.6s; }
+        .d-7 { animation-delay: 2.0s; }
 
         /* --- Base UI Styles --- */
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
@@ -129,7 +129,7 @@
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
 
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 999999; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
         .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
 
@@ -189,9 +189,9 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
 
-        /* --- Dynamic Barcode Styles & Print Media --- */
+        /* --- 🖨️ CSS الطباعة المخصص والنهائي --- */
         #receiptPrintSection { display: none; }
-        .barcode-print-container { display: flex; flex-wrap: wrap; justify-content: flex-start; width: 100%; }
+        .barcode-print-container { display: flex; flex-wrap: wrap; gap: 2mm; justify-content: flex-start; width: 100%; }
         
         .custom-label-card {
             border: 1px dashed #ccc; padding: 1px; text-align: center; box-sizing: border-box; 
@@ -199,25 +199,24 @@
             page-break-inside: avoid; background: #fff; overflow: hidden;
         }
 
+        /* الكود ده بيمسح كل حاجة في الخلفية وبيسيب بس الباركود أو الفاتورة عشان الطابعة متسحبش ورق فاضي */
         @media print {
-            @page { size: portrait; margin: 5mm; }
-            body * { visibility: hidden !important; }
+            body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
+            body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+            body.printing-receipt #receiptPrintSection { display: block !important; position: relative !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+            
+            .custom-label-card { border: none !important; margin: 0 !important; }
+            .barcode-print-container { gap: 0 !important; }
+            
+            /* إعدادات الفاتورة الكبيرة */
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
-            
-            html, body, .app-container, .table-responsive { overflow: visible !important; height: auto !important; max-height: none !important; }
-
             table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
             th, td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
             th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             tr { page-break-inside: avoid !important; page-break-after: auto !important; }
-            
             .print-summary-wrapper { page-break-before: always !important; break-before: page !important; margin-top: 15px !important; }
-
-            body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
-            body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: auto !important; }
-            .custom-label-card { border: none !important; }
         }
     </style>
 </head>
@@ -236,17 +235,17 @@
             </defs>
 
             <!-- 3 أوراق تنزل من فوق -->
-            <g transform="translate(35, 55) rotate(20)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
-            <g transform="translate(60, 38) rotate(45)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
-            <g transform="translate(80, 25) rotate(60)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
+            <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
+            <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
+            <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
 
             <!-- 3 أوراق تصعد من تحت -->
-            <g transform="translate(25, 73) rotate(130)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
-            <g transform="translate(50, 48) rotate(150)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
-            <g transform="translate(72, 33) rotate(160)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
+            <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
+            <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+            <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
 
-            <!-- 1 ورقة من اليمين لتكملة الشكل -->
-            <g transform="translate(90, 20) rotate(90)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-right d-7"/></g>
+            <!-- 🌿 ورقة واحدة في قمة الغصن (التيب) متجهة للأعلى بشكل صحيح 🌿 -->
+            <g transform="translate(90, 20) rotate(60)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
     </div>
     <div class="splash-title">
@@ -1228,13 +1227,16 @@ function promptPrintBarcodeLabel(prodId) {
         <div class="payment-grid" style="margin-bottom:15px;">
             <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1"></div>
             <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="8" min="4" max="14"></div>
-            <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="38.1" step="0.1"></div>
-            <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.1"></div>
+            <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="35.56" step="0.01"></div>
+            <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01"></div>
         </div>
 
-        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:5px;"> طباعة اسم المنتج</label>
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:5px;"> طباعة السعر</label>
+            <label style="font-weight:bold; font-size:0.8rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:8px;">
+                <input type="checkbox" id="lblRotatePrint" style="margin-left:5px;"> 🔄 عكس أبعاد الورقة (لو الطباعة بتطلع مقصوصة أو بالطول)
+            </label>
         </div>
 
         <div class="pay-box" style="margin-bottom:15px;">
@@ -1258,10 +1260,11 @@ function executeAdvancedPrint(prodId) {
 
     const count = parseInt(document.getElementById('lblCount')?.value) || 1;
     const fontSz = parseInt(document.getElementById('lblFont')?.value) || 8;
-    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
+    const wMM = parseFloat(document.getElementById('lblW')?.value) || 35.56;
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
     const showName = document.getElementById('lblShowName')?.checked;
     const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const isRotated = document.getElementById('lblRotatePrint')?.checked;
     const targetApp = document.getElementById('lblTargetApp')?.value;
 
     closeModal();
@@ -1326,10 +1329,15 @@ function executeAdvancedPrint(prodId) {
             }, 'image/png');
         });
     } else {
-        // --- 🛠️ إجبار المتصفح على مقاس الورقة الحقيقي للطباعة المباشرة ---
+        // --- 🛠️ إجبار المتصفح على مقاس الورقة الحقيقي ومنع استهلاك الورق ---
         const pageStyle = document.createElement('style');
         pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { @page { size: ${wMM}mm ${hMM}mm; margin: 0 !important; } body { margin: 0 !important; } }`;
+        
+        // لو المستخدم اختار عكس الأبعاد عشان يحل مشكلة الطباعة بالطول
+        let printW = isRotated ? hMM : wMM;
+        let printH = isRotated ? wMM : hMM;
+        
+        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
         document.head.appendChild(pageStyle);
 
         document.body.classList.add('printing-receipt');
