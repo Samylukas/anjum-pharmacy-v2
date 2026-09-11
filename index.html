@@ -17,7 +17,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations (النسخة الاحترافية النهائية) ✨ --- */
+        /* --- ✨ Splash Screen Animations (النسخة الاحترافية المعدلة) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -1221,7 +1221,7 @@ function promptPrintBarcodeLabel(prodId) {
         
         <div class="payment-grid" style="margin-bottom:15px;">
             <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1"></div>
-            <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="8" min="4" max="14"></div>
+            <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="6" min="4" max="14"></div>
             <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="35.56" step="0.01"></div>
             <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01"></div>
         </div>
@@ -1237,8 +1237,8 @@ function promptPrintBarcodeLabel(prodId) {
         <div class="pay-box" style="margin-bottom:15px;">
             <label>التطبيق الهدف للطباعة:</label>
             <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72;">
-                <option value="direct">طباعة النظام المباشرة (System Print / RawBT)</option>
-                <option value="4barcode">مشاركة صورة إلى تطبيق (4Barcode)</option>
+                <option value="direct">طباعة النظام المباشرة (Chrome / RawBT)</option>
+                <option value="4barcode">تنزيل صورة لبرنامج (4Barcode)</option>
             </select>
         </div>
 
@@ -1255,10 +1255,10 @@ function executeAdvancedPrint(prodId) {
 
     const targetApp = document.getElementById('lblTargetApp')?.value;
     
-    // 🔥 التعديل السحري: إجبار توليد ملصق واحد فقط لـ 4Barcode
+    // في حالة 4Barcode نولد صورة واحدة فقط، وفي حالة النظام المباشر نولد العدد المطلوب
     const count = targetApp === '4barcode' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
     
-    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 8;
+    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 6;
     const wMM = parseFloat(document.getElementById('lblW')?.value) || 35.56;
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
     const showName = document.getElementById('lblShowName')?.checked;
@@ -1275,13 +1275,14 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
+        // تم إضافة margin-bottom: 1mm للاسم، و margin-top: 1mm للسعر
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
                     <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.1}mm; shape-rendering: crispEdges;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 2px;">${finalPriceStr}</div>` : ''}
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm; shape-rendering: crispEdges;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1mm;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1304,40 +1305,29 @@ function executeAdvancedPrint(prodId) {
         });
     }
 
+    // --- مسار برنامج 4Barcode (تنزيل كصورة) ---
     if (targetApp === '4barcode') {
-        toast("⏳ تجهيز الصورة للمشاركة بأعلى دقة...", "info", 2000);
+        toast("⏳ جاري حفظ الصورة لبرنامج 4Barcode...", "info", 2000);
         const element = document.querySelector('.custom-label-card'); 
         
         html2canvas(element, { scale: 5, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
             canvas.toBlob(blob => {
-                const file = new File([blob], `Barcode_${prod.barcode}.png`, { type: 'image/png' });
-                
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    navigator.share({
-                        title: 'طباعة الباركود',
-                        text: 'إرسال الملصق للطباعة',
-                        files: [file]
-                    }).then(() => {
-                        printSec.style.display = 'none'; printSec.innerHTML = '';
-                        toast("✅ حدد عدد النسخ من داخل 4Barcode واطبع!", "success", 4000);
-                    }).catch(err => {
-                        printSec.style.display = 'none'; printSec.innerHTML = '';
-                    });
-                } else {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = `Barcode_${prod.barcode}.png`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    printSec.style.display = 'none'; printSec.innerHTML = '';
-                    toast("✅ تم حفظ الصورة. افتحها في 4Barcode", "success");
-                }
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `Barcode_${prod.barcode}.png`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = '';
+                toast("✅ تم التنزيل! افتح الصورة من داخل 4Barcode.", "success", 4000);
             }, 'image/png');
         });
-    } else {
+    } 
+    // --- مسار الطباعة المباشرة من كروم / النظام ---
+    else {
         const pageStyle = document.createElement('style');
         pageStyle.id = 'dynamic-page-size';
         pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
@@ -1356,7 +1346,6 @@ function executeAdvancedPrint(prodId) {
         }, 300);
     }
 }
-
 
 /* ---------- Shared Search Logic ---------- */
 
