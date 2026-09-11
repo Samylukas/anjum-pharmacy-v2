@@ -1233,14 +1233,14 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // تم إضافة margin-top: -1.5mm لرفع المحتوى، وتقليل ارتفاع الباركود ليناسب المسافة
+        // تم رفع اسم المنتج بـ margin-bottom: 2mm، وإبعاد السعر بـ margin-top: 1.5mm
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1.5mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1px;">${finalPriceStr}</div>` : ''}
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.5}mm; shape-rendering: crispEdges;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1250,12 +1250,12 @@ function executeAdvancedPrint(prodId) {
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
-    // تم إرجاع الـ width إلى 1.2 و الـ height إلى 35 لضمان قراءة الريدر
+    // تم إرجاع الـ width لـ 1 لمنع تداخل الأعمدة وإتاحة قراءتها بسهولة
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
-            width: 1.2,       
-            height: 35,       
+            width: 1,       
+            height: 28,       
             fontSize: 12,     
             margin: 0, 
             displayValue: true,
