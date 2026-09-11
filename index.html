@@ -146,7 +146,7 @@
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* هذا الكود تم ضبطه بدقة لمنع ظهور أي صفحة فارغة إضافية */
+        /* إخفاء كل محتوى الصفحة والإبقاء على قسم الطباعة فقط لمنع استهلاك الورق */
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { 
@@ -1212,8 +1212,6 @@ function executeAdvancedPrint(prodId) {
     if (!prod) return;
 
     const targetApp = document.getElementById('lblTargetApp')?.value;
-    
-    // في حالة 4Barcode نولد صورة واحدة فقط، وفي حالة النظام المباشر نولد العدد المطلوب
     const count = targetApp === '4barcode' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
     
     const fontSz = parseInt(document.getElementById('lblFont')?.value) || 6;
@@ -1233,13 +1231,13 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // تم رفع اسم المنتج بـ margin-bottom: 2mm، وإبعاد السعر بـ margin-top: 1.5mm
+        // تم استبدال SVG بـ <img> مع إضافة image-rendering: pixelated لمنع التمويه
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1.5mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
                     <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
                     ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.5}mm; shape-rendering: crispEdges;"></svg>
+                    <img id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;" />
                     ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
@@ -1250,12 +1248,17 @@ function executeAdvancedPrint(prodId) {
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
-    // تم إرجاع الـ width لـ 1 لمنع تداخل الأعمدة وإتاحة قراءتها بسهولة
+    // 🧠 نظام تحديد السُمك الذكي بناءً على عدد أرقام الباركود
+    let bCodeLength = prod.barcode ? prod.barcode.toString().length : 0;
+    let dynamicWidth = 1.5; // الافتراضي للأرقام القصيرة
+    if (bCodeLength >= 9) dynamicWidth = 1.3; // للأرقام المتوسطة
+    if (bCodeLength >= 12) dynamicWidth = 1.1; // للأرقام الطويلة زي 13 رقم لمنع تداخل الخطوط
+
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
-            width: 1,       
-            height: 28,       
+            width: dynamicWidth,  
+            height: 35,       
             fontSize: 12,     
             margin: 0, 
             displayValue: true,
