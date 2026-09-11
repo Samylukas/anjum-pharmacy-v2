@@ -1231,13 +1231,13 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // تم استبدال SVG بـ <img> مع إضافة image-rendering: pixelated لمنع التمويه
+        // رجعنا الـ SVG هنا مع شكل حاد جداً وبدون تمويه
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1.5mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
                     <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <img id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.2}mm; image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;" />
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 32px;"></svg>
                     ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
@@ -1248,18 +1248,13 @@ function executeAdvancedPrint(prodId) {
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
-    // 🧠 نظام تحديد السُمك الذكي بناءً على عدد أرقام الباركود
-    let bCodeLength = prod.barcode ? prod.barcode.toString().length : 0;
-    let dynamicWidth = 1.5; // الافتراضي للأرقام القصيرة
-    if (bCodeLength >= 9) dynamicWidth = 1.3; // للأرقام المتوسطة
-    if (bCodeLength >= 12) dynamicWidth = 1.1; // للأرقام الطويلة زي 13 رقم لمنع تداخل الخطوط
-
+    // تم تثبيت السُمك على 1 لضمان عدم التداخل أبداً
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
-            width: dynamicWidth,  
-            height: 35,       
-            fontSize: 12,     
+            width: 1,         // أرفع خط ممكن عشان الباركود الطويل ميقفلش على بعضه
+            height: 32,       
+            fontSize: 13,     // كبرت رقم الباركود شوية عشان يبقى مقروء
             margin: 0, 
             displayValue: true,
             background: "#ffffff",
@@ -1267,7 +1262,6 @@ function executeAdvancedPrint(prodId) {
         });
     }
 
-    // --- مسار برنامج 4Barcode (تنزيل كصورة) ---
     if (targetApp === '4barcode') {
         toast("⏳ جاري حفظ الصورة لبرنامج 4Barcode...", "info", 2000);
         const element = document.querySelector('.custom-label-card'); 
@@ -1287,9 +1281,7 @@ function executeAdvancedPrint(prodId) {
                 toast("✅ تم التنزيل! افتح الصورة من داخل 4Barcode.", "success", 4000);
             }, 'image/png');
         });
-    } 
-    // --- مسار الطباعة المباشرة من كروم / النظام ---
-    else {
+    } else {
         const pageStyle = document.createElement('style');
         pageStyle.id = 'dynamic-page-size';
         pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
@@ -1308,7 +1300,6 @@ function executeAdvancedPrint(prodId) {
         }, 300);
     }
 }
-
 /* ---------- Shared Search Logic ---------- */
 
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
