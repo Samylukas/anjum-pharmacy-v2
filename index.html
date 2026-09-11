@@ -17,7 +17,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations (النسخة الاحترافية المعدلة) ✨ --- */
+        /* --- ✨ Splash Screen Animations (النسخة الاحترافية النهائية) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -33,7 +33,7 @@
         .splash-anjum { color: #1e3c72; }
         .splash-green { color: #27ae60; }
         
-        .branch-container { position: relative; width: 200px; height: 200px; }
+        .branch-container { position: relative; width: 220px; height: 220px; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
         
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
@@ -191,24 +191,18 @@
 
         /* --- 🖨️ CSS الطباعة المخصص والنهائي --- */
         #receiptPrintSection { display: none; }
-        .barcode-print-container { display: flex; flex-wrap: wrap; gap: 2mm; justify-content: flex-start; width: 100%; }
-        
-        .custom-label-card {
-            border: 1px dashed #ccc; padding: 1px; text-align: center; box-sizing: border-box; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            page-break-inside: avoid; background: #fff; overflow: hidden;
-        }
+        .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* الكود ده بيمسح كل حاجة في الخلفية وبيسيب بس الباركود أو الفاتورة عشان الطابعة متسحبش ورق فاضي */
+        /* إخفاء كل محتوى الصفحة والإبقاء على قسم الطباعة فقط لمنع استهلاك الورق */
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; }
             body.printing-receipt #receiptPrintSection { display: block !important; position: relative !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
             
-            .custom-label-card { border: none !important; margin: 0 !important; }
-            .barcode-print-container { gap: 0 !important; }
+            .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-after: always !important; page-break-inside: avoid !important; }
+            .barcode-print-container { gap: 0 !important; display: block !important; }
             
-            /* إعدادات الفاتورة الكبيرة */
+            /* إعدادات الفاتورة الكبيرة للتقارير */
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
@@ -225,7 +219,8 @@
 <!-- ✨ Splash Screen الاحترافية ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
-        <svg viewBox="0 0 100 100" width="100%" height="100%">
+        <!-- توسيع الـ viewBox لمنع قص الورقة العلوية -->
+        <svg viewBox="-10 -10 120 120" width="100%" height="100%">
             <!-- الغصن الأساسي -->
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             
@@ -245,7 +240,7 @@
             <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
 
             <!-- 🌿 ورقة واحدة في قمة الغصن (التيب) متجهة للأعلى بشكل صحيح 🌿 -->
-            <g transform="translate(90, 20) rotate(60)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
+            <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
     </div>
     <div class="splash-title">
@@ -1235,7 +1230,7 @@ function promptPrintBarcodeLabel(prodId) {
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:5px;"> طباعة اسم المنتج</label>
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:5px;"> طباعة السعر</label>
             <label style="font-weight:bold; font-size:0.8rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:8px;">
-                <input type="checkbox" id="lblRotatePrint" style="margin-left:5px;"> 🔄 عكس أبعاد الورقة (لو الطباعة بتطلع مقصوصة أو بالطول)
+                <input type="checkbox" id="lblRotatePrint" style="margin-left:5px;"> 🔄 عكس أبعاد الورقة (لو الطباعة بتطلع مقصوصة بالطول)
             </label>
         </div>
 
@@ -1258,48 +1253,62 @@ function executeAdvancedPrint(prodId) {
     const prod = findProductById(prodId);
     if (!prod) return;
 
-    const count = parseInt(document.getElementById('lblCount')?.value) || 1;
+    const targetApp = document.getElementById('lblTargetApp')?.value;
+    
+    // 🔥 التعديل السحري: إجبار توليد ملصق واحد فقط لـ 4Barcode
+    const count = targetApp === '4barcode' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
+    
     const fontSz = parseInt(document.getElementById('lblFont')?.value) || 8;
     const wMM = parseFloat(document.getElementById('lblW')?.value) || 35.56;
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
     const showName = document.getElementById('lblShowName')?.checked;
     const showPrice = document.getElementById('lblShowPrice')?.checked;
     const isRotated = document.getElementById('lblRotatePrint')?.checked;
-    const targetApp = document.getElementById('lblTargetApp')?.value;
 
     closeModal();
     const guideMult = RATES.GUIDE_MULT || 3;
     const safeName = escapeHtml(prod.n);
     const finalPriceStr = showPrice ? `Price: ${(prod.p * guideMult).toFixed(2)} EGP` : '';
 
+    let printW = isRotated ? hMM : wMM;
+    let printH = isRotated ? wMM : hMM;
+
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${wMM}mm; height: ${hMM}mm; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; padding: 1mm; page-break-inside: avoid; margin-bottom:0;">
-                <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
-                ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                <svg id="bcode-${i}" style="max-width: ${wMM - 4}mm; max-height: ${hMM / 2.2}mm;"></svg>
-                ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 2px;">${finalPriceStr}</div>` : ''}
+            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="max-width: ${wMM - 2}mm; max-height: ${hMM / 2.1}mm; shape-rendering: crispEdges;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 2px;">${finalPriceStr}</div>` : ''}
+                </div>
             </div>
-            ${targetApp === '4barcode' && i < count - 1 ? '<div class="html2pdf__page-break"></div>' : ''}
         `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.innerHTML = `<div class="barcode-print-container" style="${targetApp === '4barcode' ? 'display:block;' : 'display:flex; flex-wrap:wrap; justify-content:flex-start; gap:0;'}">${labelsHtml}</div>`;
+    printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
-            format: "CODE128", width: 1.2, height: 25, fontSize: 10, margin: 0, displayValue: true
+            format: "CODE128", 
+            width: 1.6,       
+            height: 40,       
+            fontSize: 11,     
+            margin: 0, 
+            displayValue: true,
+            background: "#ffffff",
+            lineColor: "#000000"
         });
     }
 
     if (targetApp === '4barcode') {
-        toast("⏳ تجهيز الصورة للمشاركة مع 4Barcode...", "info", 2000);
+        toast("⏳ تجهيز الصورة للمشاركة بأعلى دقة...", "info", 2000);
         const element = document.querySelector('.custom-label-card'); 
         
-        html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+        html2canvas(element, { scale: 5, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
             canvas.toBlob(blob => {
                 const file = new File([blob], `Barcode_${prod.barcode}.png`, { type: 'image/png' });
                 
@@ -1310,7 +1319,7 @@ function executeAdvancedPrint(prodId) {
                         files: [file]
                     }).then(() => {
                         printSec.style.display = 'none'; printSec.innerHTML = '';
-                        toast("✅ تم إرسال الملصق بنجاح!", "success");
+                        toast("✅ حدد عدد النسخ من داخل 4Barcode واطبع!", "success", 4000);
                     }).catch(err => {
                         printSec.style.display = 'none'; printSec.innerHTML = '';
                     });
@@ -1324,19 +1333,13 @@ function executeAdvancedPrint(prodId) {
                     a.click();
                     window.URL.revokeObjectURL(url);
                     printSec.style.display = 'none'; printSec.innerHTML = '';
-                    toast("✅ تم حفظ صورة الملصق. قم بفتحها في 4Barcode", "success");
+                    toast("✅ تم حفظ الصورة. افتحها في 4Barcode", "success");
                 }
             }, 'image/png');
         });
     } else {
-        // --- 🛠️ إجبار المتصفح على مقاس الورقة الحقيقي ومنع استهلاك الورق ---
         const pageStyle = document.createElement('style');
         pageStyle.id = 'dynamic-page-size';
-        
-        // لو المستخدم اختار عكس الأبعاد عشان يحل مشكلة الطباعة بالطول
-        let printW = isRotated ? hMM : wMM;
-        let printH = isRotated ? wMM : hMM;
-        
         pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
         document.head.appendChild(pageStyle);
 
@@ -2412,7 +2415,7 @@ function generateSingleProductDetailsReport(productName) {
 /* ---------- Application Entry Point ---------- */
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // إخفاء الـ Splash Screen بعد انتهاء الأنيميشن بالكامل (حوالي 4 ثواني)
+    // إخفاء الـ Splash Screen بعد انتهاء الأنيميشن بالكامل
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) {
