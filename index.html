@@ -66,7 +66,6 @@
         th, td { padding: 4px 2px; border: 1px solid #ddd; text-align: center; font-size: 0.72rem; vertical-align: middle; word-wrap: break-word; }
         th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.75rem; }
 
-        /* --- Fine-tuned Column Widths --- */
         .col-seq { width: 22px !important; }
         .col-inv { width: 40px !important; }
         .col-date { width: 80px !important; font-size: 0.68rem !important; }
@@ -142,34 +141,37 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
 
-        /* --- Native Multi-Page Print Rules --- */
+        /* --- Native Multi-Page Print Rules & Barcode Formatting --- */
         #receiptPrintSection { display: none; }
+        
+        .barcode-print-container {
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;
+        }
+        .label-card {
+            width: 50mm; height: 25mm; border: 1px solid #333; border-radius: 4px; padding: 2px;
+            text-align: center; box-sizing: border-box; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; page-break-inside: avoid; margin-bottom: 5px; background: #fff;
+        }
+        .pharmacy-title { font-size: 7px; font-weight: bold; color: #000; }
+        .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; color: #000; }
+        .prod-price { font-size: 8px; font-weight: bold; color: #000; }
+        .label-card svg { width: 44mm; height: 11mm; }
+
         @media print {
-            @page {
-                size: portrait;
-                margin: 5mm;
-            }
+            @page { size: portrait; margin: 5mm; }
             body * { visibility: hidden !important; }
             .print-target-area, .print-target-area * { visibility: visible !important; }
             .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
             .no-pdf { display: none !important; }
             
-            html, body, .app-container, .table-responsive {
-                overflow: visible !important;
-                height: auto !important;
-                max-height: none !important;
-            }
+            html, body, .app-container, .table-responsive { overflow: visible !important; height: auto !important; max-height: none !important; }
 
             table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
             th, td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
             th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             tr { page-break-inside: avoid !important; page-break-after: auto !important; }
             
-            .print-summary-wrapper {
-                page-break-before: always !important;
-                break-before: page !important;
-                margin-top: 15px !important;
-            }
+            .print-summary-wrapper { page-break-before: always !important; break-before: page !important; margin-top: 15px !important; }
 
             body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
             body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
@@ -1142,6 +1144,49 @@ function onBarcodeScanned(key, decodedText) {
 
 function printBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
+    const count = parseInt(document.getElementById('labelCount')?.value) || 1;
+    closeModal();
+    if (!prod) return;
+
+    const guideMult = RATES.GUIDE_MULT || 3;
+    const safeName = escapeHtml(prod.n);
+
+    let labelsHtml = '';
+    for (let i = 0; i < count; i++) {
+        labelsHtml += `
+            <div class="label-card">
+                <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
+                <div class="prod-title">${safeName}</div>
+                <svg id="print-barcode-${i}"></svg>
+                <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
+            </div>
+        `;
+    }
+
+    const printSec = document.getElementById('receiptPrintSection');
+    if (printSec) {
+        printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
+
+        for (let i = 0; i < count; i++) {
+            JsBarcode("#print-barcode-" + i, prod.barcode, {
+                format: "CODE128", width: 1.5, height: 35, fontSize: 10, margin: 0, displayValue: true
+            });
+        }
+
+        document.body.classList.add('printing-receipt');
+        
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-receipt');
+                printSec.innerHTML = '';
+            }, 500);
+        }, 300);
+    }
+}
+
+function promptPrintBarcodeLabel(prodId) {
+    const prod = findProductById(prodId);
     if (!prod) { toast("❌ Product not found!", 'error'); return; }
     if (!prod.barcode) { toast("⚠️ This product has no barcode!", 'warn'); return; }
 
@@ -1149,61 +1194,12 @@ function printBarcodeLabel(prodId) {
         <h3>🏷️ Print Label — ${escapeHtml(prod.n)}</h3>
         <div class="pay-box"><label>Number of labels</label><input type="number" id="labelCount" value="1" min="1"></div>
         <div class="modal-actions">
-            <button class="btn" onclick="doPrintBarcodeLabel('${prodId}')">Print</button>
+            <button class="btn" onclick="printBarcodeLabel('${prodId}')">Print</button>
             <button class="btn" style="background:#95a5a6;" onclick="closeModal()">Cancel</button>
         </div>
     `);
 }
 
-function doPrintBarcodeLabel(prodId) {
-    const prod = findProductById(prodId);
-    const count = parseInt(document.getElementById('labelCount')?.value) || 1;
-    closeModal();
-    if (!prod) return;
-
-    const win = window.open('', '', 'height=600,width=800');
-    const guideMult = RATES.GUIDE_MULT || 3;
-    const safeName = escapeHtml(prod.n);
-
-    win.document.write(`
-        <html><head><title>Print Label - ${safeName}</title>
-        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
-            .label-card { width: 50mm; height: 25mm; border: 1px solid #ccc; border-radius: 4px; padding: 2px; text-align: center; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; page-break-inside: avoid; }
-            .pharmacy-title { font-size: 7px; font-weight: bold; color: #1e3c72; }
-            .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; }
-            .prod-price { font-size: 8px; font-weight: bold; }
-            svg { width: 44mm; height: 11mm; }
-            @media print { body { padding: 0; } .label-card { border: none; } }
-        </style></head><body>
-    `);
-
-    for (let i = 0; i < count; i++) {
-        win.document.write(`
-            <div class="label-card">
-                <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
-                <div class="prod-title">${safeName}</div>
-                <svg id="barcode-${i}"></svg>
-                <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
-            </div>
-        `);
-    }
-
-    win.document.write(`
-        <script>
-            window.onload = function() {
-                for (let i = 0; i < ${count}; i++) {
-                    JsBarcode("#barcode-" + i, ${JSON.stringify(prod.barcode)}, {
-                        format: "CODE128", width: 1.5, height: 35, fontSize: 10, margin: 0, displayValue: true
-                    });
-                }
-                setTimeout(function() { window.print(); window.close(); }, 400);
-            };
-        <\/script></body></html>
-    `);
-    win.document.close();
-}
 
 /* ---------- Shared Search Logic ---------- */
 
@@ -1830,7 +1826,7 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
         <td class="no-pdf">
             <button class="btn btn-blue" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="editProductSystem('${p.id}')">Edit ✏️</button>
             <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="scanAndEditProductBarcode('${p.id}')">Scan 📷</button>
-            <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="printBarcodeLabel('${p.id}')">Label 🏷️</button>
+            <button class="btn btn-purple" style="padding:2px 6px; font-size:0.7rem; margin:0; background:#8e44ad;" onclick="promptPrintBarcodeLabel('${p.id}')">Label 🏷️</button>
             <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem; margin:0;" onclick="deleteProductSystem('${p.id}')">Delete 🗑️</button>
         </td>
     </tr>`;
@@ -2257,20 +2253,6 @@ function generateSingleProductDetailsReport(productName) {
         </table></div>`;
     display.style.display = 'block';
     window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
-}
-
-/* ---------- In-App Full View ---------- */
-
-function renderInAppReportView() {
-    exportSalesReportPDF();
-}
-
-function hideInAppReportView() {
-    if (document.getElementById('inAppReportContainer')) document.getElementById('inAppReportContainer').style.display = 'none';
-}
-
-function downloadInAppReportPDF() {
-    exportSalesReportPDF();
 }
 
 /* ---------- Application Entry Point ---------- */
