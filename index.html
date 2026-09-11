@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
@@ -141,41 +142,16 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto; }
 
-        /* --- Native Multi-Page Print Rules & Barcode Formatting --- */
+        /* --- Custom Export Container for 4Barcode --- */
         #receiptPrintSection { display: none; }
         
-        .barcode-print-container {
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;
-        }
-        .label-card {
-            width: 50mm; height: 25mm; border: 1px solid #333; border-radius: 4px; padding: 2px;
-            text-align: center; box-sizing: border-box; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; page-break-inside: avoid; margin-bottom: 5px; background: #fff;
-        }
-        .pharmacy-title { font-size: 7px; font-weight: bold; color: #000; }
-        .prod-title { font-size: 8px; font-weight: bold; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46mm; color: #000; }
-        .prod-price { font-size: 8px; font-weight: bold; color: #000; }
-        .label-card svg { width: 44mm; height: 11mm; }
-
-        @media print {
-            @page { size: portrait; margin: 5mm; }
-            body * { visibility: hidden !important; }
-            .print-target-area, .print-target-area * { visibility: visible !important; }
-            .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
-            .no-pdf { display: none !important; }
-            
-            html, body, .app-container, .table-responsive { overflow: visible !important; height: auto !important; max-height: none !important; }
-
-            table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
-            th, td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
-            th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
-            
-            .print-summary-wrapper { page-break-before: always !important; break-before: page !important; margin-top: 15px !important; }
-
-            body.printing-receipt #receiptPrintSection, body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
-            body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 80mm !important; }
-        }
+        .pdf-export-mode { width: 750px !important; margin: 0 auto !important; padding: 0 !important; background: #ffffff !important; }
+        .pdf-export-mode table { min-width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
+        .pdf-export-mode th, .pdf-export-mode td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
+        .pdf-export-mode tr { page-break-inside: avoid !important; page-break-after: auto !important; }
+        .pdf-export-mode th { background-color: #1e3c72 !important; color: #fff !important; }
+        .pdf-export-mode .no-pdf { display: none !important; }
+        .pdf-export-mode .print-summary-wrapper { page-break-before: always !important; break-before: page !important; margin-top: 15px !important; }
     </style>
 </head>
 <body>
@@ -1140,9 +1116,25 @@ function onBarcodeScanned(key, decodedText) {
     stopCameraScanner(key);
 }
 
-/* ---------- Barcode Label Printing ---------- */
+/* ---------- 4Barcode Direct Export ---------- */
 
-function printBarcodeLabel(prodId) {
+function promptPrintBarcodeLabel(prodId) {
+    const prod = findProductById(prodId);
+    if (!prod) { toast("❌ Product not found!", 'error'); return; }
+    if (!prod.barcode) { toast("⚠️ This product has no barcode!", 'warn'); return; }
+
+    openModal(`
+        <h3 style="color:#1e3c72; margin-bottom:10px;">🏷️ طباعة الباركود لـ 4Barcode</h3>
+        <p style="font-size:0.8rem; margin-bottom:15px; color:#555; text-align:center;">${escapeHtml(prod.n)}</p>
+        <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="labelCount" value="1" min="1"></div>
+        <div class="modal-actions">
+            <button class="btn btn-purple" onclick="generate4BarcodeFile('${prodId}')">تصدير 🖨️</button>
+            <button class="btn" style="background:#95a5a6;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function generate4BarcodeFile(prodId) {
     const prod = findProductById(prodId);
     const count = parseInt(document.getElementById('labelCount')?.value) || 1;
     closeModal();
@@ -1154,50 +1146,45 @@ function printBarcodeLabel(prodId) {
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="label-card">
-                <div class="pharmacy-title">Anjum Green Pharmacy 🌿</div>
-                <div class="prod-title">${safeName}</div>
-                <svg id="print-barcode-${i}"></svg>
-                <div class="prod-price">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
+            <div style="width: 38.1mm; height: 25.4mm; text-align: center; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; padding: 2px;">
+                <div style="font-size: 7px; font-weight: bold; color: #000; margin-bottom: 2px;">Anjum Green Pharmacy</div>
+                <div style="font-size: 7px; font-weight: bold; color: #000; margin-bottom: 2px; max-width: 35mm; overflow: hidden; white-space: nowrap;">${safeName}</div>
+                <svg id="bcode-${i}"></svg>
+                <div style="font-size: 8px; font-weight: bold; color: #000; margin-top: 2px;">Price: ${(prod.p * guideMult).toFixed(2)} EGP</div>
             </div>
+            ${i < count - 1 ? '<div class="html2pdf__page-break"></div>' : ''}
         `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    if (printSec) {
-        printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
+    printSec.innerHTML = `<div id="exportBarcodeArea">${labelsHtml}</div>`;
+    printSec.style.display = 'block';
 
-        for (let i = 0; i < count; i++) {
-            JsBarcode("#print-barcode-" + i, prod.barcode, {
-                format: "CODE128", width: 1.5, height: 35, fontSize: 10, margin: 0, displayValue: true
-            });
-        }
-
-        document.body.classList.add('printing-receipt');
-        
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => {
-                document.body.classList.remove('printing-receipt');
-                printSec.innerHTML = '';
-            }, 500);
-        }, 300);
+    for (let i = 0; i < count; i++) {
+        JsBarcode("#bcode-" + i, prod.barcode, {
+            format: "CODE128", width: 1.2, height: 30, fontSize: 10, margin: 0, displayValue: true
+        });
     }
-}
 
-function promptPrintBarcodeLabel(prodId) {
-    const prod = findProductById(prodId);
-    if (!prod) { toast("❌ Product not found!", 'error'); return; }
-    if (!prod.barcode) { toast("⚠️ This product has no barcode!", 'warn'); return; }
+    toast("⏳ تجهيز الملصق لـ 4Barcode...", "info", 2000);
 
-    openModal(`
-        <h3>🏷️ Print Label — ${escapeHtml(prod.n)}</h3>
-        <div class="pay-box"><label>Number of labels</label><input type="number" id="labelCount" value="1" min="1"></div>
-        <div class="modal-actions">
-            <button class="btn" onclick="printBarcodeLabel('${prodId}')">Print</button>
-            <button class="btn" style="background:#95a5a6;" onclick="closeModal()">Cancel</button>
-        </div>
-    `);
+    const element = document.getElementById('exportBarcodeArea');
+    const opt = {
+        margin: 0,
+        filename: `Barcode_${prod.barcode}.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 4, useCORS: true },
+        jsPDF: { unit: 'mm', format: [38.1, 25.4], orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        printSec.style.display = 'none';
+        printSec.innerHTML = '';
+        toast("✅ تم التنزيل! افتحه الآن عبر تطبيق 4Barcode.", "success", 4000);
+    }).catch(err => {
+        printSec.style.display = 'none';
+        toast("❌ فشل التصدير", "error");
+    });
 }
 
 
