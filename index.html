@@ -1177,6 +1177,16 @@ function promptPrintBarcodeLabel(prodId) {
         <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:5px;"> طباعة اسم المنتج</label>
             <label style="font-weight:bold; font-size:0.85rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:5px;"> طباعة السعر</label>
+            <div class="pay-box" style="width:100%; margin-top:8px;">
+                <label>عملة السعر:</label>
+                <select id="lblCurrency" style="font-weight:bold; color:#27ae60;">
+                    <option value="EGP">EGP (جنيه)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="VISA">VISA</option>
+                </select>
+            </div>
             <label style="font-weight:bold; font-size:0.8rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:8px;">
                 <input type="checkbox" id="lblRotatePrint" style="margin-left:5px;"> 🔄 عكس أبعاد الورقة (لو الطباعة بتطلع مقصوصة بالطول)
             </label>
@@ -1210,24 +1220,38 @@ function executeAdvancedPrint(prodId) {
     const showName = document.getElementById('lblShowName')?.checked;
     const showPrice = document.getElementById('lblShowPrice')?.checked;
     const isRotated = document.getElementById('lblRotatePrint')?.checked;
+    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
 
     closeModal();
+    
     const guideMult = RATES.GUIDE_MULT || 3;
     const safeName = escapeHtml(prod.n);
-    const finalPriceStr = showPrice ? `Price: ${(prod.p * guideMult).toFixed(2)} EGP` : '';
+    
+    // حساب السعر النهائي بناءً على العملة المختارة
+    let baseEGP = prod.p * guideMult;
+    let finalPriceVal = baseEGP;
+    let currencySymbol = 'EGP';
+
+    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
+    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
+    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
+    else if (selectedCurrency === 'VISA') { finalPriceVal = baseEGP / (RATES.VISA || 1); currencySymbol = 'VISA'; }
+
+    const finalPriceStr = showPrice ? `Price: ${finalPriceVal.toFixed(2)} ${currencySymbol}` : '';
 
     let printW = isRotated ? hMM : wMM;
     let printH = isRotated ? wMM : hMM;
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
+        // تم استخدام space-evenly مع حذف الهوامش لمنع القص وتنسيق المحتوى في المنتصف
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: 1mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 32px;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>
+                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
+                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1237,14 +1261,13 @@ function executeAdvancedPrint(prodId) {
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
-    // ✨ التعديل الحاسِم: إضافة margin: 8 لإنشاء مسافة بيضاء جانبيّة تسمح للماسح الضوئي بالقراءة الفورية
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, {
             format: "CODE128", 
             width: 1.1,         
-            height: 32,       
-            fontSize: 12,     
-            margin: 8,          // مسافة الأمان الحاكمة لقرّاء الباركود
+            height: 28,       
+            fontSize: 11,     
+            margin: 8,          
             flat: true,
             displayValue: true,
             background: "#ffffff",
