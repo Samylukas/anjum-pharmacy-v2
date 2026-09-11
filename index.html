@@ -1221,19 +1221,18 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // الاعتماد على SVG حاد ورسومات فيكتور واضحة مع إتاحة سُمك رفع مستقر للطباعة الحرارية
-        labelsHtml += `
-            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${wMM}mm; height: ${hMM}mm; margin-top: -1mm; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 1mm;">Anjum Green Pharmacy</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2mm; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 32px;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1; margin-top: 1.5mm;">${finalPriceStr}</div>` : ''}
-                </div>
-            </div>
-        `;
+        JsBarcode("#bcode-" + i, prod.barcode, {
+            format: "CODE128", 
+            width: 1.1,         // سُمك مثالي للخط
+            height: 32,         // ارتفاع مناسب جداً
+            fontSize: 12,     
+            margin: 8,          // 👈 هام جداً: إضافة مسافة بيضاء على الجانبين ليقرأها الريدر فوراً
+            flat: true,
+            displayValue: true,
+            background: "#ffffff",
+            lineColor: "#000000"
+        });
     }
-
     const printSec = document.getElementById('receiptPrintSection');
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
