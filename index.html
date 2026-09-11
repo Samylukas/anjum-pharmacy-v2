@@ -17,7 +17,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; }
 
-        /* --- Splash Screen Animations --- */
+        /* --- ✨ Splash Screen Animations (النسخة الاحترافية) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -25,27 +25,45 @@
             transition: opacity 0.8s ease-in-out;
         }
         .splash-title {
-            font-size: 2.2rem; font-weight: bold; margin-top: 20px;
+            font-size: 2.4rem; font-weight: bold; margin-top: 20px;
             opacity: 0; transform: translateY(20px);
-            animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 1.8s;
-            text-align: center;
+            animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
+            text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .splash-anjum { color: #1e3c72; }
         .splash-green { color: #27ae60; }
         
-        .branch-container { position: relative; width: 180px; height: 180px; }
-        .branch-path { stroke-dasharray: 500; stroke-dashoffset: 500; animation: drawBranch 1.5s ease-out forwards; }
-        .falling-leaf { opacity: 0; transform-origin: center; }
-        .leaf-1 { animation: fallLeaf1 1s ease-in-out forwards 1.2s; }
-        .leaf-2 { animation: fallLeaf2 1.2s ease-in-out forwards 1.4s; }
-        .leaf-3 { animation: fallLeaf3 1s ease-in-out forwards 1.6s; }
-
+        .branch-container { position: relative; width: 200px; height: 200px; }
+        .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
+        
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
-        @keyframes fallLeaf1 { 0% { opacity: 0; transform: translate(-30px, -60px) rotate(-45deg); } 100% { opacity: 1; transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fallLeaf2 { 0% { opacity: 0; transform: translate(40px, -80px) rotate(60deg); } 100% { opacity: 1; transform: translate(0, 0) rotate(0deg); } }
-        @keyframes fallLeaf3 { 0% { opacity: 0; transform: translate(10px, -100px) rotate(180deg); } 100% { opacity: 1; transform: translate(0, 0) rotate(0deg); } }
 
+        /* أنيميشن الأوراق */
+        .anim-leaf { opacity: 0; transform-origin: center; }
+        
+        .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-right { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes flyFromTop { 
+            0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 
+            100% { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        @keyframes flyFromBottom { 
+            0% { opacity: 0; transform: translateY(40px) scale(0.3); } 
+            100% { opacity: 1; transform: translateY(0) scale(1); } 
+        }
+        @keyframes flyFromRight { 
+            0% { opacity: 0; transform: translateX(40px) scale(0.3); } 
+            100% { opacity: 1; transform: translateX(0) scale(1); } 
+        }
+
+        .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; }
+        .d-4 { animation-delay: 1.8s; } .d-5 { animation-delay: 2.0s; } .d-6 { animation-delay: 2.2s; }
+        .d-7 { animation-delay: 2.4s; }
+
+        /* --- Base UI Styles --- */
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
@@ -111,7 +129,7 @@
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
 
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 999999; }
         .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 340px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .seq-num { font-weight: bold; color: #1e3c72; display: inline-block; width: 100%; text-align: center; }
 
@@ -173,12 +191,12 @@
 
         /* --- Dynamic Barcode Styles & Print Media --- */
         #receiptPrintSection { display: none; }
-        .barcode-print-container { display: flex; flex-wrap: wrap; gap: 2mm; justify-content: flex-start; width: 100%; }
+        .barcode-print-container { display: flex; flex-wrap: wrap; justify-content: flex-start; width: 100%; }
         
         .custom-label-card {
             border: 1px dashed #ccc; padding: 1px; text-align: center; box-sizing: border-box; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            page-break-inside: avoid; background: #fff; overflow: hidden; margin-bottom: 5px;
+            page-break-inside: avoid; background: #fff; overflow: hidden;
         }
 
         @media print {
@@ -205,26 +223,34 @@
 </head>
 <body>
 
-<!-- Splash Screen -->
+<!-- ✨ Splash Screen الاحترافية ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="0 0 100 100" width="100%" height="100%">
-            <!-- Branch -->
-            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="4" stroke-linecap="round"/>
-            <!-- Leaves falling -->
-            <g class="falling-leaf leaf-1">
-                <path d="M40,50 Q30,40 40,30 Q50,40 40,50" fill="#27ae60"/>
-            </g>
-            <g class="falling-leaf leaf-2">
-                <path d="M65,35 Q55,25 65,15 Q75,25 65,35" fill="#2ecc71"/>
-            </g>
-            <g class="falling-leaf leaf-3">
-                <path d="M85,25 Q75,15 85,5 Q95,15 85,25" fill="#27ae60"/>
-            </g>
+            <!-- الغصن الأساسي -->
+            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
+            
+            <!-- تصميم الورقة الموحد -->
+            <defs>
+                <path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" />
+            </defs>
+
+            <!-- 3 أوراق تنزل من فوق -->
+            <g transform="translate(35, 55) rotate(20)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
+            <g transform="translate(60, 38) rotate(45)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
+            <g transform="translate(80, 25) rotate(60)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
+
+            <!-- 3 أوراق تصعد من تحت -->
+            <g transform="translate(25, 73) rotate(130)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
+            <g transform="translate(50, 48) rotate(150)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+            <g transform="translate(72, 33) rotate(160)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
+
+            <!-- 1 ورقة من اليمين لتكملة الشكل -->
+            <g transform="translate(90, 20) rotate(90)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-right d-7"/></g>
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum</span> <span class="splash-green">Green Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
     </div>
 </div>
 
@@ -1188,7 +1214,7 @@ function onBarcodeScanned(key, decodedText) {
     stopCameraScanner(key);
 }
 
-/* ---------- Professional Dynamic Barcode Print Options ---------- */
+/* ---------- 🖨️ Professional Dynamic Barcode Print Options ---------- */
 
 function promptPrintBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
@@ -1215,7 +1241,7 @@ function promptPrintBarcodeLabel(prodId) {
             <label>التطبيق الهدف للطباعة:</label>
             <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72;">
                 <option value="direct">طباعة النظام المباشرة (System Print / RawBT)</option>
-                <option value="4barcode">مشاركة لصورة إلى تطبيق (4Barcode)</option>
+                <option value="4barcode">مشاركة صورة إلى تطبيق (4Barcode)</option>
             </select>
         </div>
 
@@ -1246,10 +1272,10 @@ function executeAdvancedPrint(prodId) {
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${wMM}mm; height: ${hMM}mm; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; padding: 1mm; page-break-inside: avoid; margin-bottom:2px;">
+            <div class="custom-label-card" style="width: ${wMM}mm; height: ${hMM}mm; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; padding: 1mm; page-break-inside: avoid; margin-bottom:0;">
                 <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px;">Anjum Green Pharmacy</div>
                 ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-bottom: 2px; max-width: ${wMM - 2}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                <svg id="bcode-${i}" style="max-width: ${wMM - 4}mm; max-height: ${hMM / 2}mm;"></svg>
+                <svg id="bcode-${i}" style="max-width: ${wMM - 4}mm; max-height: ${hMM / 2.2}mm;"></svg>
                 ${showPrice ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; margin-top: 2px;">${finalPriceStr}</div>` : ''}
             </div>
             ${targetApp === '4barcode' && i < count - 1 ? '<div class="html2pdf__page-break"></div>' : ''}
@@ -1257,7 +1283,7 @@ function executeAdvancedPrint(prodId) {
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.innerHTML = `<div class="barcode-print-container" style="${targetApp === '4barcode' ? 'display:block;' : 'display:flex; flex-wrap:wrap; justify-content:flex-start; gap:2mm;'}">${labelsHtml}</div>`;
+    printSec.innerHTML = `<div class="barcode-print-container" style="${targetApp === '4barcode' ? 'display:block;' : 'display:flex; flex-wrap:wrap; justify-content:flex-start; gap:0;'}">${labelsHtml}</div>`;
     printSec.style.display = 'block';
 
     for (let i = 0; i < count; i++) {
@@ -1268,7 +1294,7 @@ function executeAdvancedPrint(prodId) {
 
     if (targetApp === '4barcode') {
         toast("⏳ تجهيز الصورة للمشاركة مع 4Barcode...", "info", 2000);
-        const element = document.querySelector('.custom-label-card'); // Capture the first label as image
+        const element = document.querySelector('.custom-label-card'); 
         
         html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
             canvas.toBlob(blob => {
@@ -1286,7 +1312,6 @@ function executeAdvancedPrint(prodId) {
                         printSec.style.display = 'none'; printSec.innerHTML = '';
                     });
                 } else {
-                    // Fallback to Download
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.style.display = 'none';
@@ -1301,6 +1326,12 @@ function executeAdvancedPrint(prodId) {
             }, 'image/png');
         });
     } else {
+        // --- 🛠️ إجبار المتصفح على مقاس الورقة الحقيقي للطباعة المباشرة ---
+        const pageStyle = document.createElement('style');
+        pageStyle.id = 'dynamic-page-size';
+        pageStyle.innerHTML = `@media print { @page { size: ${wMM}mm ${hMM}mm; margin: 0 !important; } body { margin: 0 !important; } }`;
+        document.head.appendChild(pageStyle);
+
         document.body.classList.add('printing-receipt');
         setTimeout(() => {
             window.print();
@@ -1308,6 +1339,8 @@ function executeAdvancedPrint(prodId) {
                 document.body.classList.remove('printing-receipt');
                 printSec.style.display = 'none';
                 printSec.innerHTML = '';
+                const pStyle = document.getElementById('dynamic-page-size');
+                if(pStyle) pStyle.remove();
             }, 500);
         }, 300);
     }
@@ -2371,7 +2404,7 @@ function generateSingleProductDetailsReport(productName) {
 /* ---------- Application Entry Point ---------- */
 
 window.addEventListener('DOMContentLoaded', async () => {
-    // Hide Splash Screen after animation completes (3.5 seconds)
+    // إخفاء الـ Splash Screen بعد انتهاء الأنيميشن بالكامل (حوالي 4 ثواني)
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) {
@@ -2381,7 +2414,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('loginOverlay').style.display = 'flex';
             }, 800);
         }
-    }, 3500);
+    }, 4000);
 
     await loadLocalUsers();
     fetchInitialUsersOnly();
