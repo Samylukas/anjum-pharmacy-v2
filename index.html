@@ -147,6 +147,7 @@
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
         @media print {
+            /* طباعة الشيكات والملصقات الحرارية */
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { 
                 margin: 0 !important; padding: 0 !important; background: #fff !important; 
@@ -159,14 +160,24 @@
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
             
-            .print-target-area, .print-target-area * { visibility: visible !important; }
-            .print-target-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; background: #fff !important; }
-            .no-pdf { display: none !important; }
-            table { width: 100% !important; font-size: 7.5px !important; table-layout: fixed !important; border-collapse: collapse !important; }
-            th, td { border: 1px solid #666 !important; padding: 3px 1px !important; word-wrap: break-word !important; page-break-inside: avoid !important; }
-            th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            tr { page-break-inside: avoid !important; page-break-after: auto !important; }
-            .print-summary-wrapper { page-break-before: always !important; break-before: page !important; margin-top: 15px !important; }
+            /* إعدادات طباعة التقارير العريضة النظيفة بدون تكسير خطوط */
+            body.printing-report {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            body.printing-report .app-container > *:not(.tab-content) { display: none !important; }
+            body.printing-report .tab-content:not(.active) { display: none !important; }
+            body.printing-report .no-pdf { display: none !important; }
+            body.printing-report .table-responsive { overflow: visible !important; border: none !important; }
+            body.printing-report table { width: 100% !important; min-width: 100% !important; font-size: 10px !important; table-layout: auto !important; }
+            body.printing-report th, body.printing-report td { padding: 6px 4px !important; font-size: 9px !important; border: 1px solid #333 !important; }
+            body.printing-report th { background-color: #1e3c72 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
         }
     </style>
 </head>
@@ -646,47 +657,13 @@ function formatDateDisplay(dateStr) {
 
 /* ---------- Master Print / PDF Export Method ---------- */
 
-// الدالة الأهم لإنشاء تقارير PDF بجودة عالية وتنسيق عريض Landscape بدون أخطاء تكسير الحروف العربية
+// الدالة الأحدث والأقوى: طباعة تقارير احترافية ممتدة بعرض الصفحة تفادياً لتشوه النصوص العربية
 function exportElementToPDF(elementId, fileName = 'Report.pdf') {
-    const element = document.getElementById(elementId);
-    if (!element) return toast("❌ تعذر إيجاد عنصر التقرير!", "error");
-
-    toast("⏳ جاري تجهيز التقرير (PDF)... برجاء الانتظار", "info", 3000);
-
-    // إخفاء أعمدة الأزرار (Actions) نهائياً من الـ PDF لتوفير المساحة
-    const noPdfElements = element.querySelectorAll('.no-pdf');
-    noPdfElements.forEach(el => el.style.display = 'none');
-
-    // إزالة قيود التمرير ليفرد الجدول بشكل صحيح داخل ملف الـ PDF
-    const responsiveTables = element.querySelectorAll('.table-responsive');
-    responsiveTables.forEach(t => {
-        t.style.overflow = 'visible';
-    });
-
-    const opt = {
-        margin:       [5, 5, 5, 5],
-        filename:     fileName,
-        image:        { type: 'jpeg', quality: 1 },
-        // تم استخدام windowWidth لإجبار التقاط الشاشة بالعرض الكامل لمنع تداخل الأعمدة
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1200 },
-        // استخدام تنسيق Landscape (بالعرض) للتقارير التي تحتوي جداول كبيرة
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-
-    html2pdf().set(opt).from(element).save().then(() => {
-        toast("✅ تم تنزيل التقرير بنجاح!", "success");
-        // إرجاع كل شيء لأصله على الشاشة بعد تحميل الملف
-        noPdfElements.forEach(el => el.style.display = '');
-        responsiveTables.forEach(t => {
-            t.style.overflow = 'auto';
-        });
-    }).catch(err => {
-        toast("❌ حدث خطأ أثناء إنشاء التقرير", "error");
-        noPdfElements.forEach(el => el.style.display = '');
-        responsiveTables.forEach(t => {
-            t.style.overflow = 'auto';
-        });
-    });
+    document.body.classList.add('printing-report');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('printing-report');
+    }, 1000);
 }
 
 function exportSalesReportPDF() {
@@ -1275,7 +1252,6 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
-        // تم استخدام space-evenly لضمان عدم قص السعر أو العنوان، المحتوى الآن موزع تلقائياً ومستقر 100%
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
@@ -2433,4 +2409,3 @@ window.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
-
