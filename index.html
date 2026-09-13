@@ -147,7 +147,6 @@
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
         @media print {
-            /* طباعة الشيكات والملصقات الحرارية */
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { 
                 margin: 0 !important; padding: 0 !important; background: #fff !important; 
@@ -160,12 +159,7 @@
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
             
-            /* إعدادات طباعة التقارير العريضة النظيفة بدون تكسير خطوط */
-            body.printing-report {
-                background: #fff !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
+            body.printing-report { background: #fff !important; padding: 0 !important; margin: 0 !important; }
             body.printing-report .app-container > *:not(.tab-content) { display: none !important; }
             body.printing-report .tab-content:not(.active) { display: none !important; }
             body.printing-report .no-pdf { display: none !important; }
@@ -198,6 +192,7 @@
 
             <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
             <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+
             <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
 
             <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
@@ -473,52 +468,56 @@
 
     <!-- 5. Sales Reports Tab -->
     <div id="reportsTab" class="tab-content admin-only">
-        <div class="section-title">📊 Sales Reports</div>
-        <div class="card date-filter-box">
-            <div class="date-inputs-row"><div>From: <input type="date" id="fromDate"></div><div>To: <input type="date" id="toDate"></div></div>
-            <div class="toolbar-row">
-                <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
-                <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
-                <button class="btn btn-purple" onclick="openRatesModal()">Set FX &amp; Multiplier ⚙️</button>
-                <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF / Print 📄</button>
-                <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
+        <!-- الخيار التحريري: خيارات الفلترة والبحث مغلفة بكلاس no-pdf لتستثنى تلقائياً من تقرير الـ PDF المطبوع -->
+        <div class="no-pdf">
+            <div class="section-title">📊 Sales Reports</div>
+            <div class="card date-filter-box">
+                <div class="date-inputs-row"><div>From: <input type="date" id="fromDate"></div><div>To: <input type="date" id="toDate"></div></div>
+                <div class="toolbar-row">
+                    <button class="btn btn-blue" onclick="generateReport()">Filter 📈</button>
+                    <button class="btn btn-purple" onclick="handleNetProfitAction()">Net Profit 💵</button>
+                    <button class="btn btn-purple" onclick="openRatesModal()">Set FX &amp; Multiplier ⚙️</button>
+                    <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF / Print 📄</button>
+                    <button class="btn btn-orange" onclick="exportSalesReportExcel()">Export Excel 📊</button>
+                </div>
+            </div>
+
+            <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:10px;">
+                <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History:</div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
+                    <button class="btn btn-red" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
+                    <button class="btn btn-blue" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
+                </div>
+                <div id="singleProductReportResults" class="results-list" style="margin-top:6px;"></div>
+                <div id="singleProdReportDisplay" style="display:none; margin-top:8px; background:#fff; padding:10px; border-radius:8px; border:2px solid #3498db;"></div>
+            </div>
+
+            <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:10px;">
+                <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
+                <h3 style="text-align:center; margin-bottom:8px;">💵 Comprehensive Sales Report</h3>
+                <div style="text-align:center; margin-bottom:8px; background:rgba(255,255,255,0.15); padding:4px; border-radius:6px;">
+                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:14px; height:14px; cursor:pointer;">
+                    <label for="deductExpensesToggle" style="font-size:0.75rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
+                </div>
+                <div class="totals-grid">
+                    <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
+                    <div class="total-item">Total EUR (€) <span id="repTotalEUR">€0.00</span></div>
+                    <div class="total-item">Total GBP (£) <span id="repTotalGBP">£0.00</span></div>
+                    <div class="total-item">Total EGP <span id="repTotalEGP">0.00 EGP</span></div>
+                    <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
+                    <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
+                    <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
+                    <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1rem;">0.00 EGP</span></div>
+                </div>
+                <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:6px;">
+                    <h4 style="text-align:center; color:#f1c40f; margin-bottom:4px;">⭐ Top Selling Products:</h4>
+                    <div id="topProductsList" style="font-size:0.75rem; text-align:center; line-height:1.4;"></div>
+                </div>
             </div>
         </div>
 
-        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:10px;">
-            <div style="font-size:0.85rem; font-weight:bold; color:#1e3c72; margin-bottom:6px;">🔍 Single Product Sales History:</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
-                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="Search or Select Product Name..." oninput="searchSingleProductReport()">
-                <button class="btn btn-red" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="clearSingleProductReportSearch()">Clear 🧹</button>
-                <button class="btn btn-blue" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="searchSingleProductReport()">Generate Report 📋</button>
-            </div>
-            <div id="singleProductReportResults" class="results-list" style="margin-top:6px;"></div>
-            <div id="singleProdReportDisplay" style="display:none; margin-top:8px; background:#fff; padding:10px; border-radius:8px; border:2px solid #3498db;"></div>
-        </div>
-
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:10px;">
-            <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ Close Summary</button>
-            <h3 style="text-align:center; margin-bottom:8px;">💵 Comprehensive Sales Report</h3>
-            <div style="text-align:center; margin-bottom:8px; background:rgba(255,255,255,0.15); padding:4px; border-radius:6px;">
-                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:14px; height:14px; cursor:pointer;">
-                <label for="deductExpensesToggle" style="font-size:0.75rem; font-weight:bold; color:#f1c40f; cursor:pointer;">💡 Deduct Expenses from Sales Profit (Real Net Profit)</label>
-            </div>
-            <div class="totals-grid">
-                <div class="total-item">Total USD ($) <span id="repTotalUSD">$0.00</span></div>
-                <div class="total-item">Total EUR (€) <span id="repTotalEUR">€0.00</span></div>
-                <div class="total-item">Total GBP (£) <span id="repTotalGBP">£0.00</span></div>
-                <div class="total-item">Total EGP <span id="repTotalEGP">0.00 EGP</span></div>
-                <div class="total-item">Total VISA <span id="repTotalVISA">0.00 EGP</span></div>
-                <div class="total-item" style="background:rgba(46,204,113,0.2);">Gross Sales <span id="repTotalSell">0.00 EGP</span></div>
-                <div class="total-item" style="background:rgba(231,76,60,0.2);">C-Total <span id="repTotalComm">0.00 EGP</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2;">Net Profit <span id="repNetProfit" style="font-size:1rem;">0.00 EGP</span></div>
-            </div>
-            <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.2); padding-top:6px;">
-                <h4 style="text-align:center; color:#f1c40f; margin-bottom:4px;">⭐ Top Selling Products:</h4>
-                <div id="topProductsList" style="font-size:0.75rem; text-align:center; line-height:1.4;"></div>
-            </div>
-        </div>
-
+        <!-- المنطقة النقية المخصصة للتصدير المباشر ببادئة التقرير فقط -->
         <div id="reportsPrintArea">
             <div style="text-align:center; margin-bottom:8px;">
                 <h2 style="color:#1e3c72; margin:0; font-size:18px;">Anjum Green Pharmacy</h2>
@@ -657,7 +656,7 @@ function formatDateDisplay(dateStr) {
 
 /* ---------- Master Print / PDF Export Method ---------- */
 
-// الدالة الأحدث والأقوى: طباعة تقارير احترافية ممتدة بعرض الصفحة تفادياً لتشوه النصوص العربية
+// استخدام محرك الطباعة المباشر للنظام مع الحفاظ على الوضع العريض Landscape ومسح أعمدة التحكم
 function exportElementToPDF(elementId, fileName = 'Report.pdf') {
     document.body.classList.add('printing-report');
     window.print();
@@ -2409,3 +2408,4 @@ window.addEventListener('DOMContentLoaded', async () => {
 </script>
 </body>
 </html>
+
