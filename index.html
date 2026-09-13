@@ -646,30 +646,46 @@ function formatDateDisplay(dateStr) {
 
 /* ---------- Master Print / PDF Export Method ---------- */
 
-// التعديل الجديد لإنشاء ملفات PDF بجودة عالية وتنزيلها تلقائياً لتفادي مشكلة شاشة الطباعة على الموبايل
+// الدالة الأهم لإنشاء تقارير PDF بجودة عالية وتنسيق عريض Landscape بدون أخطاء تكسير الحروف العربية
 function exportElementToPDF(elementId, fileName = 'Report.pdf') {
     const element = document.getElementById(elementId);
     if (!element) return toast("❌ تعذر إيجاد عنصر التقرير!", "error");
 
     toast("⏳ جاري تجهيز التقرير (PDF)... برجاء الانتظار", "info", 3000);
 
+    // إخفاء أعمدة الأزرار (Actions) نهائياً من الـ PDF لتوفير المساحة
+    const noPdfElements = element.querySelectorAll('.no-pdf');
+    noPdfElements.forEach(el => el.style.display = 'none');
+
+    // إزالة قيود التمرير ليفرد الجدول بشكل صحيح داخل ملف الـ PDF
+    const responsiveTables = element.querySelectorAll('.table-responsive');
+    responsiveTables.forEach(t => {
+        t.style.overflow = 'visible';
+    });
+
     const opt = {
         margin:       [5, 5, 5, 5],
         filename:     fileName,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        image:        { type: 'jpeg', quality: 1 },
+        // تم استخدام windowWidth لإجبار التقاط الشاشة بالعرض الكامل لمنع تداخل الأعمدة
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1200 },
+        // استخدام تنسيق Landscape (بالعرض) للتقارير التي تحتوي جداول كبيرة
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
-
-    const responsiveTables = element.querySelectorAll('.table-responsive');
-    responsiveTables.forEach(t => t.style.overflow = 'visible');
 
     html2pdf().set(opt).from(element).save().then(() => {
         toast("✅ تم تنزيل التقرير بنجاح!", "success");
-        responsiveTables.forEach(t => t.style.overflow = 'auto');
+        // إرجاع كل شيء لأصله على الشاشة بعد تحميل الملف
+        noPdfElements.forEach(el => el.style.display = '');
+        responsiveTables.forEach(t => {
+            t.style.overflow = 'auto';
+        });
     }).catch(err => {
         toast("❌ حدث خطأ أثناء إنشاء التقرير", "error");
-        responsiveTables.forEach(t => t.style.overflow = 'auto');
+        noPdfElements.forEach(el => el.style.display = '');
+        responsiveTables.forEach(t => {
+            t.style.overflow = 'auto';
+        });
     });
 }
 
@@ -1259,6 +1275,7 @@ function executeAdvancedPrint(prodId) {
 
     let labelsHtml = '';
     for (let i = 0; i < count; i++) {
+        // تم استخدام space-evenly لضمان عدم قص السعر أو العنوان، المحتوى الآن موزع تلقائياً ومستقر 100%
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
