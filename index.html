@@ -14,8 +14,9 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- مكتبة الـ PDF الوحيدة المعتمدة من كود Trans Pro (تم إزالة html2canvas من هنا لمنع تكسير العربي) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
@@ -23,7 +24,7 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; font-weight: 800; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations (الأصلية) ✨ --- */
+        /* --- ✨ Splash Screen Animations (الورق واللوجو - 3 ثواني) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -35,17 +36,26 @@
             opacity: 0; transform: translateY(20px);
             animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
             text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
         .splash-anjum { color: #1e3c72; }
         .splash-green { color: #27ae60; }
         
-        .branch-container { position: relative; width: 220px; height: 220px; }
+        .branch-container { position: relative; width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
         
+        /* اللوجو الجديد بأنيميشن نبض */
+        .splash-logo-img {
+            position: absolute; width: 120px; border-radius: 10px; z-index: 5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: pulseLogo 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseLogo { 0% { transform: scale(0.95); opacity: 0.9; } 100% { transform: scale(1.05); opacity: 1; } }
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
-        .anim-leaf { opacity: 0; transform-origin: center; }
+        .anim-leaf { opacity: 0; transform-origin: center; z-index: 2; }
         .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -174,17 +184,22 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 20px; width: 100%; max-width: 450px; max-height: 88vh; overflow-y: auto; text-align: center; }
 
-        /* --- 🖨️ CSS الطباعة المخصص --- */
+        /* --- 🖨️ CSS الطباعة المخصص والمأخوذ من كود Trans Pro --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* تنسيقات الـ PDF الخاصة بالجدول (المأخوذة من Trans Pro) لمنع كسر الصفحات */
+        /* تنسيقات الـ PDF (السر وراء تقسيم الجداول وتصغيرها لتناسب الصفحة البورتريت) */
         .page-break-row { page-break-after: always !important; break-after: page !important; }
-        .pdf-compact { margin-top: 0 !important; padding-top: 0 !important; direction: rtl !important; background: #fff; }
-        .pdf-compact .table-responsive { overflow: visible !important; margin-top: 0 !important; border: none !important; box-shadow: none !important; }
-        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; border-collapse: collapse !important; table-layout: auto !important; word-wrap: break-word !important; }
-        .pdf-compact th, .pdf-compact td { padding: 6px 4px !important; height: auto !important; border: 1px solid #333 !important; }
+        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
+        
+        .pdf-compact { margin-top: 0 !important; padding-top: 0 !important; direction: rtl !important; background: #fff; width: 100% !important; max-width: 100% !important; }
+        .pdf-compact .table-responsive { overflow: visible !important; margin: 0 !important; border: none !important; box-shadow: none !important; width: 100% !important; }
+        /* الضغط القوي ليناسب 10 أعمدة في صفحة بورتريت */
+        .pdf-compact table { font-size: 10px !important; line-height: 1.4 !important; width: 100% !important; border-collapse: collapse !important; table-layout: auto !important; }
+        .pdf-compact th, .pdf-compact td { padding: 4px 2px !important; height: auto !important; border: 1px solid #333 !important; word-wrap: break-word !important; white-space: normal !important; }
         .pdf-compact th { background-color: #1e3c72 !important; color: #fff !important; }
+        .pdf-compact .no-pdf { display: none !important; }
+        .pdf-compact .report-title-header { display: block !important; font-size: 1.3rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; margin-top: 0 !important;}
 
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
@@ -198,16 +213,18 @@
             }
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
+            .no-pdf { display: none !important; }
             .floating-scroll-btns { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<!-- ✨ Splash Screen الاحترافية (الخاصة بصيدلية أنجم - 3 ثواني) ✨ -->
+<!-- ✨ Splash Screen الاحترافية (الورق الأخضر واللوجو - 3 ثواني) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
-        <svg viewBox="-10 -10 120 120" width="100%" height="100%">
+        <!-- الورق المتحرك -->
+        <svg viewBox="-10 -10 120 120" width="100%" height="100%" style="position:absolute; z-index:1;">
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs>
                 <path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" />
@@ -223,6 +240,9 @@
 
             <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
+        
+        <!-- اللوجو الخاص بك في المنتصف بأنيميشن -->
+        <img src="WhatsApp Image 2026-09-14 at 21.54.21.jpeg" alt="Anjum Green Pharmacy Logo" class="splash-logo-img">
     </div>
     <div class="splash-title">
         <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
@@ -230,7 +250,7 @@
 </div>
 
 <!-- أزرار الصعود والنزول السريعة -->
-<div class="floating-scroll-btns">
+<div class="floating-scroll-btns no-pdf">
     <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="أعلى الصفحة">⬆️</button>
     <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="أسفل الصفحة">⬇️</button>
 </div>
@@ -298,7 +318,7 @@
             <div>📄 الفاتورة: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <!-- أزرار التنقل مرتبة من اليمين لليسار -->
+        <!-- أزرار التنقل مرتبة من اليمين لليسار (الأولى، السابقة، التالية، الأخيرة) -->
         <div class="nav-controls">
             <button class="btn-icon" onclick="navigateInvoice('first')" title="الأولى">⏮️</button>
             <button class="btn-icon" onclick="navigateInvoice('prev')" title="السابقة">◀️</button>
@@ -343,7 +363,7 @@
 
         <div class="section-title" style="margin-top: 20px;">📄 عناصر الفاتورة</div>
         <div class="table-responsive"><table>
-            <thead><tr><th style="width:35px;">#</th><th>الصنف</th><th>الكمية</th><th>التكلفة</th><th>الدفع</th><th>إجمالي البيع</th><th>البائع</th><th style="width:70px;">إجراء</th></tr></thead>
+            <thead><tr><th style="width:35px;">#</th><th>الصنف</th><th>الكمية</th><th>التكلفة</th><th>الدفع</th><th>إجمالي البيع</th><th>البائع</th><th style="width:70px;" class="no-pdf">إجراء</th></tr></thead>
             <tbody id="invoiceTableBody"><tr><td colspan="8" style="color: #7f8c8d;">لم يتم الإضافة بعد</td></tr></tbody>
         </table></div>
 
@@ -369,26 +389,29 @@
 
     <!-- 2. Stock Tab -->
     <div id="stockTab" class="tab-content manager-only">
-        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <span>📦 تفاصيل المخزون</span>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="btn btn-red" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="filterLowStock()">النواقص ⚠️</button>
-                <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="filterNearExpiryOneMonth()">الصلاحيات ⚠️</button>
-                <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="printStockTable()">طباعة / PDF 📄</button>
+        <div class="no-pdf">
+            <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <span>📦 تفاصيل المخزون</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="btn btn-red" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="filterLowStock()">النواقص ⚠️</button>
+                    <button class="btn btn-orange" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="filterNearExpiryOneMonth()">الصلاحيات ⚠️</button>
+                    <button class="btn btn-purple" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="printStockTable()">طباعة الجرد 📄</button>
+                </div>
+            </div>
+            <input type="text" id="stockFilterInput" class="search-box" placeholder="ابحث بالاسم أو الباركود..." oninput="filterStockTable(this.value)">
+
+            <div id="stockScannerContainer" class="scanner-box" style="margin-top:8px;">
+                <div id="stockCameraReader" class="camera-div"></div>
+                <button class="btn btn-red" style="margin:6px auto; width:90%; padding:8px; font-size:1rem;" onclick="stopCameraScanner('stock')">إغلاق ❌</button>
             </div>
         </div>
-        <input type="text" id="stockFilterInput" class="search-box" placeholder="ابحث بالاسم أو الباركود..." oninput="filterStockTable(this.value)">
 
-        <div id="stockScannerContainer" class="scanner-box" style="margin-top:8px;">
-            <div id="stockCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:6px auto; width:90%; padding:8px; font-size:1rem;" onclick="stopCameraScanner('stock')">إغلاق ❌</button>
-        </div>
-
-        <div class="table-responsive" id="stockTableContainer">
-            <table id="stockTableContent">
-                <thead><tr><th style="width:30px;">#</th><th>اسم المنتج</th><th>الكمية</th><th>التكلفة</th><th id="thStockGuideHead">الأدنى للبيع</th><th>الباركود</th><th>الصلاحية</th><th style="width:280px;">إجراءات</th></tr></thead>
+        <div id="stockPrintArea">
+            <h3 class="report-title-header">تقرير جرد المخزون - Anjum Green Pharmacy</h3>
+            <div class="table-responsive"><table>
+                <thead><tr><th style="width:30px;">#</th><th>اسم المنتج</th><th>الكمية</th><th>التكلفة</th><th id="thStockGuideHead">الأدنى للبيع</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:280px;">إجراءات</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
-            </table>
+            </table></div>
         </div>
     </div>
 
@@ -450,94 +473,102 @@
             <button class="btn btn-purple" style="margin-top: 15px; width: 100%; font-size:1.1rem; padding:12px;" onclick="saveFinanceEntry()">حفظ 💾</button>
         </div>
 
-        <div class="date-filter card" style="margin-top: 10px;">
-            <div class="date-inputs-row">
-                <div>من: <input type="date" id="finFromDate"></div>
-                <div>إلى: <input type="date" id="finToDate"></div>
-                <button class="btn btn-blue" onclick="renderFinanceTable()">فلترة 📈</button>
-            </div>
-            <div style="width:100%; margin-top:10px; display:flex; align-items:center; gap:8px;">
-                <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:20px; height:20px;">
-                <label for="includeSalesIncomeToggle" style="font-size:0.95rem; font-weight:800; color:#1e3c72; cursor:pointer;">💡 دمج أرباح المبيعات</label>
-            </div>
-            <div style="display:flex; gap:8px; margin-top:12px; width:100%;">
-                <button class="btn btn-purple" style="flex:1; font-size:1rem;" onclick="printFinanceReportPDF()">PDF / طباعة 📄</button>
-                <button class="btn btn-orange" style="flex:1; font-size:1rem;" onclick="exportFinanceExcel()">تصدير Excel 📊</button>
+        <div class="no-pdf">
+            <div class="date-filter card" style="margin-top: 10px;">
+                <div class="date-inputs-row">
+                    <div>من: <input type="date" id="finFromDate"></div>
+                    <div>إلى: <input type="date" id="finToDate"></div>
+                    <button class="btn btn-blue" onclick="renderFinanceTable()">فلترة 📈</button>
+                </div>
+                <div style="width:100%; margin-top:10px; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:20px; height:20px;">
+                    <label for="includeSalesIncomeToggle" style="font-size:0.95rem; font-weight:800; color:#1e3c72; cursor:pointer;">💡 دمج أرباح المبيعات</label>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:12px; width:100%;">
+                    <button class="btn btn-purple" style="flex:1; font-size:1rem;" onclick="printFinanceReportPDF()">PDF طباعة 📄</button>
+                    <button class="btn btn-orange" style="flex:1; font-size:1rem;" onclick="exportFinanceExcel()">تصدير Excel 📊</button>
+                </div>
             </div>
         </div>
 
-        <div class="report-summary-cards" style="margin-bottom:12px;">
-            <div class="report-card"><div class="report-card-title">الإيرادات</div><div class="report-card-value" id="sumRevenues" style="color:#27ae60;">0.00 ج.م</div></div>
-            <div class="report-card"><div class="report-card-title">المصروفات</div><div class="report-card-value" id="sumExpenses" style="color:#c0392b;">0.00 ج.م</div></div>
-            <div class="report-card" style="border-color:#27ae60; border-width:2px;"><div class="report-card-title">الصافي</div><div class="report-card-value" id="netBalance" style="color:#27ae60; font-size:1.2rem;">0.00 ج.م</div></div>
-        </div>
+        <div id="financePrintArea">
+            <h3 class="report-title-header">التقرير المالي - Anjum Green Pharmacy</h3>
+            <div class="report-summary-cards" style="margin-bottom:12px;">
+                <div class="report-card"><div class="report-card-title">الإيرادات</div><div class="report-card-value" id="sumRevenues" style="color:#27ae60;">0.00 ج.م</div></div>
+                <div class="report-card"><div class="report-card-title">المصروفات</div><div class="report-card-value" id="sumExpenses" style="color:#c0392b;">0.00 ج.م</div></div>
+                <div class="report-card" style="border-color:#27ae60; border-width:2px;"><div class="report-card-title">الصافي</div><div class="report-card-value" id="netBalance" style="color:#27ae60; font-size:1.2rem;">0.00 ج.م</div></div>
+            </div>
 
-        <div class="table-responsive" id="financeTableContainer">
-            <table id="financeTableContent">
-                <thead><tr><th style="width:25px;">#</th><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th><th>ملاحظات</th><th style="width:80px;">إجراء</th></tr></thead>
+            <div class="table-responsive"><table>
+                <thead><tr><th style="width:25px;">#</th><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th><th>ملاحظات</th><th class="no-pdf" style="width:80px;">إجراء</th></tr></thead>
                 <tbody id="financeTableBody"><tr><td colspan="7">لا توجد بيانات</td></tr></tbody>
-            </table>
+            </table></div>
         </div>
     </div>
 
     <!-- 5. Sales Reports Tab -->
     <div id="reportsTab" class="tab-content admin-only">
-        <div class="section-title">📊 تقارير المبيعات</div>
-        <div class="card date-filter-box">
-            <div class="date-inputs-row"><div>من: <input type="date" id="fromDate"></div><div>إلى: <input type="date" id="toDate"></div></div>
-            <div class="toolbar-row">
-                <button class="btn btn-blue" onclick="generateReport()">فلترة 📈</button>
-                <button class="btn btn-purple" onclick="handleNetProfitAction()">الصافي 💵</button>
-                <button class="btn btn-purple" onclick="openRatesModal()">الإعدادات ⚙️</button>
-                <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF / طباعة 📄</button>
-                <button class="btn btn-orange" onclick="exportSalesReportExcel()">Excel 📊</button>
+        <div class="no-pdf">
+            <div class="section-title">📊 تقارير المبيعات</div>
+            <div class="card date-filter-box">
+                <div class="date-inputs-row"><div>من: <input type="date" id="fromDate"></div><div>إلى: <input type="date" id="toDate"></div></div>
+                <div class="toolbar-row">
+                    <button class="btn btn-blue" onclick="generateReport()">فلترة 📈</button>
+                    <button class="btn btn-purple" onclick="handleNetProfitAction()">الصافي 💵</button>
+                    <button class="btn btn-purple" onclick="openRatesModal()">الإعدادات ⚙️</button>
+                    <button class="btn btn-purple" onclick="exportSalesReportPDF()">PDF طباعة 📄</button>
+                    <button class="btn btn-orange" onclick="exportSalesReportExcel()">Excel 📊</button>
+                </div>
+            </div>
+
+            <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:12px;">
+                <div style="font-size:0.95rem; font-weight:800; color:#1e3c72; margin-bottom:8px;">🔍 بحث مفصل لمنتج معين:</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="اكتب اسم المنتج..." oninput="searchSingleProductReport()">
+                    <button class="btn btn-red" style="width:auto; padding:10px 14px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
+                    <button class="btn btn-blue" style="width:auto; padding:10px 14px; font-size:0.9rem;" onclick="searchSingleProductReport()">عرض 📋</button>
+                </div>
+                <div id="singleProductReportResults" class="results-list" style="margin-top:8px;"></div>
+                <div id="singleProdReportDisplay" style="display:none; margin-top:10px; background:#fff; padding:12px; border-radius:8px; border:2px solid #3498db;"></div>
+            </div>
+
+            <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:12px;">
+                <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
+                <h3 style="text-align:center; margin-bottom:10px; font-size:1.2rem;">💵 التقرير الشامل</h3>
+                <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
+                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer; vertical-align:middle;">
+                    <label for="deductExpensesToggle" style="font-size:0.9rem; font-weight:800; color:#f1c40f; cursor:pointer; margin-right:4px;">💡 خصم المصروفات من الأرباح لاستخراج الصافي الحقيقي</label>
+                </div>
+                <div class="totals-grid">
+                    <div class="total-item">USD ($) <span id="repTotalUSD">$0.00</span></div>
+                    <div class="total-item">EUR (€) <span id="repTotalEUR">€0.00</span></div>
+                    <div class="total-item">GBP (£) <span id="repTotalGBP">£0.00</span></div>
+                    <div class="total-item">EGP <span id="repTotalEGP">0.00</span></div>
+                    <div class="total-item">VISA <span id="repTotalVISA">0.00</span></div>
+                    <div class="total-item" style="background:rgba(46,204,113,0.2);">المبيعات <span id="repTotalSell">0.00</span></div>
+                    <div class="total-item" style="background:rgba(231,76,60,0.2);">التكلفة <span id="repTotalComm">0.00</span></div>
+                    <div class="total-item" style="background:#27ae60; grid-column: span 2; border:2px solid #2ecc71;">الصافي <span id="repNetProfit" style="font-size:1.2rem; color:#fff;">0.00</span></div>
+                </div>
+                <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
+                    <h4 style="text-align:center; color:#f1c40f; margin-bottom:6px; font-size:1rem;">⭐ الأكثر مبيعاً:</h4>
+                    <div id="topProductsList" style="font-size:0.85rem; text-align:center; line-height:1.6; font-weight:800;"></div>
+                </div>
             </div>
         </div>
 
-        <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:10px; padding:12px;">
-            <div style="font-size:0.95rem; font-weight:800; color:#1e3c72; margin-bottom:8px;">🔍 بحث مفصل لمنتج معين:</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px;" placeholder="اكتب اسم المنتج..." oninput="searchSingleProductReport()">
-                <button class="btn btn-red" style="width:auto; padding:10px 14px; font-size:0.9rem;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
-                <button class="btn btn-blue" style="width:auto; padding:10px 14px; font-size:0.9rem;" onclick="searchSingleProductReport()">عرض 📋</button>
-            </div>
-            <div id="singleProductReportResults" class="results-list" style="margin-top:8px;"></div>
-            <div id="singleProdReportDisplay" style="display:none; margin-top:10px; background:#fff; padding:12px; border-radius:8px; border:2px solid #3498db;"></div>
-        </div>
-
-        <div id="profitBox" class="totals-box" style="display:none; background:#1e3c72; margin-bottom:12px;">
-            <button class="btn btn-red close-summary-btn" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
-            <h3 style="text-align:center; margin-bottom:10px; font-size:1.2rem;">💵 التقرير الشامل</h3>
-            <div style="text-align:center; margin-bottom:10px; background:rgba(255,255,255,0.15); padding:6px; border-radius:6px;">
-                <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer; vertical-align:middle;">
-                <label for="deductExpensesToggle" style="font-size:0.9rem; font-weight:800; color:#f1c40f; cursor:pointer; margin-right:4px;">💡 خصم المصروفات من الأرباح لاستخراج الصافي الحقيقي</label>
-            </div>
-            <div class="totals-grid">
-                <div class="total-item">USD ($) <span id="repTotalUSD">$0.00</span></div>
-                <div class="total-item">EUR (€) <span id="repTotalEUR">€0.00</span></div>
-                <div class="total-item">GBP (£) <span id="repTotalGBP">£0.00</span></div>
-                <div class="total-item">EGP <span id="repTotalEGP">0.00</span></div>
-                <div class="total-item">VISA <span id="repTotalVISA">0.00</span></div>
-                <div class="total-item" style="background:rgba(46,204,113,0.2);">المبيعات <span id="repTotalSell">0.00</span></div>
-                <div class="total-item" style="background:rgba(231,76,60,0.2);">التكلفة <span id="repTotalComm">0.00</span></div>
-                <div class="total-item" style="background:#27ae60; grid-column: span 2; border:2px solid #2ecc71;">الصافي <span id="repNetProfit" style="font-size:1.2rem; color:#fff;">0.00</span></div>
-            </div>
-            <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
-                <h4 style="text-align:center; color:#f1c40f; margin-bottom:6px; font-size:1rem;">⭐ الأكثر مبيعاً:</h4>
-                <div id="topProductsList" style="font-size:0.85rem; text-align:center; line-height:1.6; font-weight:800;"></div>
-            </div>
-        </div>
-
-        <div class="table-responsive" id="reportsTableContainer">
-            <table id="reportsTableContent">
+        <div id="reportsPrintArea">
+            <h3 class="report-title-header">تقرير المبيعات المالي - Anjum Green Pharmacy</h3>
+            <div class="table-responsive"><table>
                 <thead><tr>
-                    <th style="width:25px;">#</th><th>الفاتورة</th><th>التاريخ</th><th>العناصر</th><th>الدفع</th><th>التكلفة</th><th>خصم%</th><th>إجمالي البيع</th><th>الربح</th><th style="width:220px;">إجراء</th>
+                    <th style="width:25px;">#</th><th>الفاتورة</th><th>التاريخ</th><th>العناصر</th><th>الدفع</th><th>التكلفة</th><th>خصم%</th><th>البيع</th><th>الربح</th><th class="no-pdf" style="width:220px;">إجراء</th>
                 </tr></thead>
                 <tbody id="savedInvoicesBody"><tr><td colspan="10">لا توجد بيانات</td></tr></tbody>
-            </table>
-        </div>
+            </table></div>
 
-        <div class="report-summary-cards" id="reportSummaryCardsContainer" style="margin-top: 15px;"></div>
+            <div class="print-summary-wrapper">
+                <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
+            </div>
+        </div>
     </div>
 
     <!-- 6. Account Security Tab -->
@@ -633,17 +664,25 @@ function formatDateDisplay(dateStr) {
     return clean;
 }
 
-/* ---------- 🖨️ التصدير والطباعة النظيفة من كود Trans Pro ---------- */
-// بناء عنصر طباعة مؤقت (Temporary Container) مثل كود Trans Pro لضمان نظافة الجدول من أي تأثيرات وتكسير
-async function exportAdvancedPDF(htmlContent, titleText) {
+/* ---------- 🖨️ PDF & Export Engine (الطريقة المستنسخة 100% من Trans Pro) ---------- */
+// بناء عنصر طباعة مؤقت وفصل الصفحات لضمان جدول محمي من تداخل الـ CSS مع التطبيق
+async function exportAdvancedPDF(elementId, titleText) {
+    const sourceElement = document.getElementById(elementId);
+    if (!sourceElement || sourceElement.innerText.trim() === '') return toast('⚠️ لا توجد بيانات للطباعة!', 'warn');
+
+    // أخذ نسخة نقية من محتوى المنطقة المطلوب طباعتها
     const printContainer = document.createElement('div');
     printContainer.id = "tempExportContainer";
     printContainer.style.background = "#fff"; 
     printContainer.style.padding = "10px"; 
     printContainer.style.direction = "rtl";
     printContainer.style.fontFamily = "Cairo, sans-serif";
-    printContainer.innerHTML = htmlContent;
+    printContainer.innerHTML = sourceElement.innerHTML;
     
+    // إخفاء ما لا يجب طباعته في النسخة المؤقتة
+    printContainer.querySelectorAll('.no-pdf').forEach(el => el.remove());
+    printContainer.querySelectorAll('.report-title-header').forEach(el => el.style.display = 'block');
+
     document.body.appendChild(printContainer);
 
     let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (لتفادي قطع الجداول - أدخل رقم من 1 إلى 50)", "30");
@@ -693,67 +732,16 @@ async function exportAdvancedPDF(htmlContent, titleText) {
     }
 }
 
-function printStockTable() {
-    let f = (document.getElementById('stockFilterInput')?.value || '').toLowerCase();
-    let matched = products.filter(p => (p.n && p.n.toLowerCase().includes(f)) || (p.barcode && p.barcode.toLowerCase().includes(f)));
-    matched.sort((a,b) => a.n.localeCompare(b.n, 'ar'));
-
-    const guideMult = RATES.GUIDE_MULT || 3;
-    let tableRows = matched.map((i, index) => {
-        let isLow = i.q <= 3;
-        let bg = isLow ? 'background:#ffe6e6;' : '';
-        return `<tr style="${bg}"><td style="padding:6px; border:1px solid #ccc;">${index + 1}</td><td style="padding:6px; border:1px solid #ccc; font-weight:bold;">${i.n || '-'}</td><td style="padding:6px; border:1px solid #ccc; font-weight:bold;">${i.q}</td><td style="padding:6px; border:1px solid #ccc;">${(i.p || 0).toFixed(2)}</td><td style="padding:6px; border:1px solid #ccc; font-weight:bold; color:#27ae60;">${((i.p || 0) * guideMult).toFixed(2)}</td><td style="padding:6px; border:1px solid #ccc; direction:ltr;">${i.barcode || '-'}</td><td style="padding:6px; border:1px solid #ccc; direction:ltr;">${i.expiry || '-'}</td></tr>`;
-    }).join('');
-
-    let htmlContent = `
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:10px; border-bottom:2px solid #f39c12; padding-bottom:5px;">📄 تقرير جرد المخزون - صيدلية أنجم</h3>
-        <p style="text-align:center; font-size:12px; margin-bottom:10px; font-weight:bold;">تاريخ الجرد: ${formatDateDisplay(new Date().toLocaleString())}</p>
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px; direction:rtl;">
-            <thead><tr style="background:#1e3c72; color:#fff;">
-                <th style="padding:8px; border:1px solid #ccc;">#</th><th style="padding:8px; border:1px solid #ccc;">الصنف</th><th style="padding:8px; border:1px solid #ccc;">الكمية</th><th style="padding:8px; border:1px solid #ccc;">التكلفة</th><th style="padding:8px; border:1px solid #ccc;">الأدنى للبيع</th><th style="padding:8px; border:1px solid #ccc;">الباركود</th><th style="padding:8px; border:1px solid #ccc;">الصلاحية</th>
-            </tr></thead>
-            <tbody>${tableRows}</tbody>
-        </table>
-    `;
-
-    exportAdvancedPDF(htmlContent, 'جرد_المخزن');
-}
-
 function exportSalesReportPDF() {
-    let tbody = document.getElementById('savedInvoicesBody').innerHTML;
-    // مسح أزرار الإجراء من التقرير المطبوع
-    tbody = tbody.replace(/<td class="no-pdf">.*?<\/td>/g, '');
-    
-    let htmlContent = `
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:10px; border-bottom:2px solid #f39c12; padding-bottom:5px;">📊 تقرير المبيعات المالي - صيدلية أنجم</h3>
-        <p style="text-align:center; font-size:12px; margin-bottom:10px; font-weight:bold;">التاريخ: ${formatDateDisplay(new Date().toLocaleString())}</p>
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px; direction:rtl;">
-            <thead><tr style="background:#1e3c72; color:#fff;">
-                <th style="padding:6px; border:1px solid #ccc;">#</th><th style="padding:6px; border:1px solid #ccc;">الفاتورة</th><th style="padding:6px; border:1px solid #ccc;">التاريخ</th><th style="padding:6px; border:1px solid #ccc;">العناصر</th><th style="padding:6px; border:1px solid #ccc;">الدفع</th><th style="padding:6px; border:1px solid #ccc;">التكلفة</th><th style="padding:6px; border:1px solid #ccc;">خصم%</th><th style="padding:6px; border:1px solid #ccc;">البيع</th><th style="padding:6px; border:1px solid #ccc;">الربح</th>
-            </tr></thead>
-            <tbody>${tbody}</tbody>
-        </table>
-    `;
-    
-    exportAdvancedPDF(htmlContent, 'تقرير_المبيعات');
+    exportAdvancedPDF('reportsPrintArea', 'تقرير_مبيعات_صيدلية_أنجم');
 }
 
 function printFinanceReportPDF() {
-    let tbody = document.getElementById('financeTableBody').innerHTML;
-    tbody = tbody.replace(/<td class="no-pdf">.*?<\/td>/g, '');
-    
-    let htmlContent = `
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:10px; border-bottom:2px solid #f39c12; padding-bottom:5px;">💵 تقرير الحركات المالية - صيدلية أنجم</h3>
-        <p style="text-align:center; font-size:12px; margin-bottom:10px; font-weight:bold;">التاريخ: ${formatDateDisplay(new Date().toLocaleString())}</p>
-        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size:11px; direction:rtl;">
-            <thead><tr style="background:#1e3c72; color:#fff;">
-                <th style="padding:6px; border:1px solid #ccc;">#</th><th style="padding:6px; border:1px solid #ccc;">التاريخ</th><th style="padding:6px; border:1px solid #ccc;">النوع</th><th style="padding:6px; border:1px solid #ccc;">البيان</th><th style="padding:6px; border:1px solid #ccc;">المبلغ</th><th style="padding:6px; border:1px solid #ccc;">ملاحظات</th>
-            </tr></thead>
-            <tbody>${tbody}</tbody>
-        </table>
-    `;
-    
-    exportAdvancedPDF(htmlContent, 'تقرير_الماليات');
+    exportAdvancedPDF('financePrintArea', 'تقرير_ماليات_صيدلية_أنجم');
+}
+
+function printStockTable() {
+    exportAdvancedPDF('stockPrintArea', 'جرد_مخزن_صيدلية_أنجم');
 }
 
 /* ---------- State Variables ---------- */
@@ -1131,14 +1119,24 @@ function executeAdvancedLabelPrint(prodId) {
 
     if (targetApp === '4barcode') {
         toast("⏳ جاري الحفظ...", "info", 2000); const element = document.querySelector('.custom-label-card'); 
-        html2canvas(element, { scale: 5, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
-            canvas.toBlob(blob => { const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = `Barcode_${prod.barcode}.png`; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); printSec.style.display = 'none'; printSec.innerHTML = ''; toast("✅ تم التنزيل!", "success"); }, 'image/png');
-        });
+        // استدعاء html2canvas بشكل ديناميكي لتفادي تكسير الـ PDF
+        if (typeof html2canvas === 'undefined') {
+            const script = document.createElement('script');
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+            script.onload = () => { processCanvasDownload(element, prod.barcode, printSec); };
+            document.head.appendChild(script);
+        } else { processCanvasDownload(element, prod.barcode, printSec); }
     } else {
         const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size'; pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`; document.head.appendChild(pageStyle);
         document.body.classList.add('printing-receipt');
         setTimeout(() => { window.print(); setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; const pStyle = document.getElementById('dynamic-page-size'); if(pStyle) pStyle.remove(); }, 500); }, 300);
     }
+}
+
+function processCanvasDownload(element, barcode, printSec) {
+    html2canvas(element, { scale: 5, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+        canvas.toBlob(blob => { const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = `Barcode_${barcode}.png`; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); printSec.style.display = 'none'; printSec.innerHTML = ''; toast("✅ تم التنزيل!", "success"); }, 'image/png');
+    });
 }
 
 /* ---------- Shared Search Logic ---------- */
@@ -1480,7 +1478,7 @@ function loadInvoiceToEdit(invId) {
 function cancelInvoiceSystem(invId) {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للمدير فقط!", 'error'); return; }
     const invIdx = savedInvoices.findIndex(i => i.id === invId); if (invIdx === -1) return; const inv = savedInvoices[invIdx];
-    confirmModal(`هل أنت متأكد من حذف الفاتورة #${invId} نهائياً وإرجاع الأصناف للمخزن؟`, () => {
+    confirmModal(`حذف الفاتورة #${invId} نهائياً وإرجاع الأصناف للمخزن؟`, () => {
         if (inv.items && Array.isArray(inv.items)) { inv.items.forEach(item => { const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); if (p) { p.q += item.qty; syncToCloud("updateSingleProduct", p); } }); saveProductsToStorage(); renderStockTable(); updateAlertsBar(); }
         savedInvoices.splice(invIdx, 1); saveInvoicesToStorage(); syncToCloud("deleteInvoice", { id: invId }); toast(`🗑️ تم الحذف!`, 'success'); fetchCloudInvoicesData();
     });
