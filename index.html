@@ -14,7 +14,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- مكتبات PDF المستوردة للطباعة الناجحة -->
+    <!-- مكتبات استخراج PDF (المعتمدة في Trans Pro) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
@@ -24,24 +24,40 @@
         .app-container { width: 100%; max-width: 980px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; font-weight: 800; word-break: break-word; }
 
-        /* --- ✨ Splash Screen Animations ✨ --- */
+        /* --- ✨ Splash Screen Animations (الأصلية) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.8s ease-in-out;
         }
-        .splash-logo {
-            width: 280px;
-            max-width: 85%;
-            border-radius: 15px;
-            animation: pulseLogo 1.5s ease-in-out infinite alternate;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        .splash-title {
+            font-size: 2.4rem; font-weight: 800; margin-top: 20px;
+            opacity: 0; transform: translateY(20px);
+            animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
+            text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        @keyframes pulseLogo {
-            0% { transform: scale(0.95); opacity: 0.9; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
+        .splash-anjum { color: #1e3c72; }
+        .splash-green { color: #27ae60; }
+        
+        .branch-container { position: relative; width: 220px; height: 220px; }
+        .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
+        
+        @keyframes drawBranch { to { stroke-dashoffset: 0; } }
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+
+        .anim-leaf { opacity: 0; transform-origin: center; }
+        .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes flyFromTop { 0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromBottom { 0% { opacity: 0; transform: translateY(40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromRight { 0% { opacity: 0; transform: translateX(40px) scale(0.3); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+
+        .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; }
+        .d-4 { animation-delay: 1.2s; } .d-5 { animation-delay: 1.4s; } .d-6 { animation-delay: 1.6s; }
+        .d-7 { animation-delay: 2.0s; }
 
         /* --- Base UI Styles --- */
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
@@ -76,8 +92,8 @@
         .btn-blue { background: #3498db; } .btn-blue:hover { background: #2980b9; }
         .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
 
-        /* أزرار التنقل الدائرية المرتبة */
-        .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; margin-bottom: 12px; flex-direction: row; direction: ltr;}
+        /* أزرار التنقل الحديثة الدائرية بدون كلام مرتبة من اليمين لليسار */
+        .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; margin-bottom: 12px; flex-direction: row; direction: rtl; }
         .nav-controls .btn-icon { 
             width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; 
             display: flex; justify-content: center; align-items: center; 
@@ -90,11 +106,11 @@
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; margin-top: 0; padding: 8px 10px; }
         
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; direction: rtl;}
+        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; }
         th, td { padding: 8px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.85rem; vertical-align: middle; word-wrap: break-word; white-space: normal; font-weight: 700; }
         th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.9rem; font-weight: 800; }
         
-        /* أزرار الأكشن */
+        /* أزرار الأكشن بحجم أكبر للموبايل */
         .action-btn-group { display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px; justify-content: center; min-width: 180px; }
         .action-btn-group .btn { width: auto; font-size: 0.95rem; padding: 8px 14px; margin: 0; line-height: 1.2; font-weight: 800; }
 
@@ -140,7 +156,7 @@
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
         
-        /* أزرار الصعود والنزول */
+        /* أزرار الصعود والنزول السريعة */
         .floating-scroll-btns {
             position: fixed; bottom: 20px; left: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 99999;
         }
@@ -159,33 +175,22 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 20px; width: 100%; max-width: 450px; max-height: 88vh; overflow-y: auto; text-align: center; }
 
-        /* --- 🖨️ CSS الطباعة المخصص --- */
+        /* --- 🖨️ CSS الطباعة المخصص النظيف والمناسب للتقارير والملصقات --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* تنسيقات الـ PDF الخاصة بالجدول - مستوردة من كود السائح */
+        /* CSS التقرير المأخوذ من كود Trans Pro - لتقسيم الجداول بورتريت بشكل سليم */
         .page-break-row { page-break-after: always !important; break-after: page !important; }
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
         
         .pdf-compact { margin-top: 0 !important; padding-top: 0 !important; }
-        .pdf-compact .table-responsive { overflow: visible !important; margin-top: 0 !important; }
-        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; } /* تصغير الخط ليلائم الصفحة */
-        .pdf-compact th, .pdf-compact td { padding: 6px 4px !important; height: auto !important; }
-        .pdf-compact .report-title-header { display: block !important; font-size: 1.2rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; margin-top: 0 !important;}
+        .pdf-compact .table-responsive { overflow: visible !important; margin-top: 0 !important; border: none !important;}
+        .pdf-compact table { font-size: 11px !important; line-height: 1.3 !important; } /* تصغير الفونت */
+        .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
         .pdf-compact .no-pdf { display: none !important; }
+        .pdf-compact .report-title-header { display: block !important; font-size: 1.3rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; margin-top: 0 !important;}
 
         @media print {
-            body * { visibility: hidden !important; }
-            #reportsPrintArea, #reportsPrintArea * { visibility: visible !important; }
-            #reportsPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; direction: rtl; }
-            
-            #stockPrintArea, #stockPrintArea * { visibility: visible !important; }
-            #stockPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; direction: rtl; }
-            
-            #financePrintArea, #financePrintArea * { visibility: visible !important; }
-            #financePrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; direction: rtl; }
-
-            /* طباعة الملصقات والإيصالات */
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { 
                 margin: 0 !important; padding: 0 !important; background: #fff !important; 
@@ -194,22 +199,39 @@
             body.printing-receipt #receiptPrintSection { 
                 display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; 
                 margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; 
-                visibility: visible !important;
             }
-            body.printing-receipt #receiptPrintSection * { visibility: visible !important; }
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             .barcode-print-container { gap: 0 !important; display: block !important; }
-            
-            .login-overlay { display: none !important; }
+            .no-pdf { display: none !important; }
             .floating-scroll-btns { display: none !important; }
         }
     </style>
 </head>
 <body>
 
-<!-- ✨ Splash Screen ✨ -->
+<!-- ✨ Splash Screen الاحترافية (الخاصة بصيدلية أنجم - 3 ثواني) ✨ -->
 <div id="splashScreen">
-    <img src="WhatsApp Image 2026-09-14 at 21.54.21.jpeg" alt="Anjum Green Pharmacy Logo" class="splash-logo">
+    <div class="branch-container">
+        <svg viewBox="-10 -10 120 120" width="100%" height="100%">
+            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
+            <defs>
+                <path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" />
+            </defs>
+
+            <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
+            <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
+            <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
+
+            <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
+            <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+            <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
+
+            <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
+        </svg>
+    </div>
+    <div class="splash-title">
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
+    </div>
 </div>
 
 <!-- أزرار الصعود والنزول السريعة -->
@@ -281,8 +303,8 @@
             <div>📄 الفاتورة: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <!-- أزرار التنقل مرتبة من اليمين لليسار -->
-        <div class="nav-controls">
+        <!-- أزرار التنقل مرتبة من اليمين لليسار (أول سجل، السابق، التالي، آخر سجل) -->
+        <div class="nav-controls" style="direction: rtl;">
             <button class="btn-icon" onclick="navigateInvoice('first')" title="الأولى">⏮️</button>
             <button class="btn-icon" onclick="navigateInvoice('prev')" title="السابقة">◀️</button>
             <button class="btn-icon" onclick="navigateInvoice('next')" title="التالية">▶️</button>
@@ -627,44 +649,43 @@ function formatDateDisplay(dateStr) {
     return clean;
 }
 
-/* ---------- 🖨️ PDF & Export Engine (مستوردة بالكامل من السائح - PORTRAIT) ---------- */
+/* ---------- 🖨️ PDF & Export Engine (مستوردة بالكامل من السائح) ---------- */
 async function exportAdvancedPDF(elementId, titleText) {
     const element = document.getElementById(elementId);
-    if (!element || element.innerText.trim() === '') return toast('⚠️ لا توجد بيانات للطباعة!', 'warn');
+    if (!element || element.innerText.trim() === '') return toast('⚠️ استخرج التقرير أولاً', 'warn');
 
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // إخفاء الأزرار والأجزاء العلوية أثناء التقاط الـ PDF
     const noPdfElements = element.querySelectorAll('.no-pdf');
     noPdfElements.forEach(el => el.style.display = 'none');
     
-    // إظهار العناوين في الـ PDF
     const titles = element.querySelectorAll('.report-title-header');
     titles.forEach(t => t.style.display = 'block');
 
     let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (لتفادي قطع الجداول - أدخل رقم من 1 إلى 50)", "30");
-    let rowsPerPage = parseInt(rowInput); if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 30; if (rowsPerPage > 50) rowsPerPage = 50;
+    let rowsPerPage = parseInt(rowInput); 
+    if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 30; 
+    if (rowsPerPage > 50) rowsPerPage = 50;
     
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
     const rows = element.querySelectorAll('tbody tr');
-    rows.forEach((row, index) => { if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row'); });
-    
-    // تفعيل التنسيق المضغوط الخاص بالطباعة
+    rows.forEach((row, index) => { 
+        if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row'); 
+    });
     element.classList.add('pdf-compact');
     
+    toast('⏳ جاري تجهيز التقرير...', 'info'); 
+    await new Promise(r => setTimeout(r, 400)); 
+
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
-    
-    // استخدام الإعدادات الأصلية التي لا تكسر العربي مع التوجيه Portrait
     const opt = { 
         margin: 0.2, 
         filename: fileName, 
         image: { type: 'jpeg', quality: 0.98 }, 
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, 
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }, // تم تحويله لـ Portrait
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }, 
         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.totals-box', 'h3'] } 
     };
-
-    toast("⏳ جاري تجهيز التقرير (PDF)...", "info");
 
     try {
         if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
@@ -673,18 +694,14 @@ async function exportAdvancedPDF(elementId, titleText) {
                 let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
                 const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
                 await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'مشاركة التقرير 📄' });
+                toast('✅ تم فتح شاشة المشاركة!', 'success');
             } catch (shareErr) { window.print(); }
         } else {
             const blob = await html2pdf().set(opt).from(element).outputPdf('blob'); 
             const blobUrl = URL.createObjectURL(blob); 
-            const a = document.createElement('a'); 
-            a.style.display = 'none'; 
-            a.href = blobUrl; 
-            a.download = opt.filename; 
-            document.body.appendChild(a); 
-            a.click(); 
-            URL.revokeObjectURL(blobUrl); 
-            a.remove();
+            const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = opt.filename; 
+            document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove(); 
+            toast('✅ تم التنزيل!', 'success');
         }
     } catch (err) { window.print(); } finally { 
         element.classList.remove('pdf-compact'); 
