@@ -10,14 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- المكتبات المطلوبة -->
+    <!-- المكتبات المطلوبة للباركود، الإكسيل، التقارير والرسوم البيانية -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- مكتبة الـ PDF (نفس المعتمدة في كود Trans Pro) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- مكتبة الرسوم البيانية -->
     
     <style>
         * { box-sizing: border-box; font-family: 'Cairo', system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
@@ -44,6 +43,13 @@
         .branch-container { position: relative; width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
         
+        .splash-logo-img {
+            position: absolute; width: 130px; border-radius: 10px; z-index: 5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: pulseLogo 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseLogo { 0% { transform: scale(0.95); opacity: 0.9; } 100% { transform: scale(1.05); opacity: 1; } }
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
@@ -93,8 +99,7 @@
         .btn-blue { background: #3498db; } .btn-blue:hover { background: #2980b9; }
         .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
 
-        /* أزرار التنقل الحديثة الدائرية بدون كلام مرتبة من اليمين لليسار */
-        .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; margin-bottom: 12px; flex-direction: row; direction: rtl; }
+        .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; margin-bottom: 12px; flex-direction: row; direction: rtl;}
         .nav-controls .btn-icon { 
             width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; 
             display: flex; justify-content: center; align-items: center; 
@@ -111,7 +116,7 @@
         th, td { padding: 8px 4px; border: 1px solid #ddd; text-align: center; font-size: 0.85rem; vertical-align: middle; word-wrap: break-word; white-space: normal; font-weight: 700; }
         th { background: #1e3c72; color: white; white-space: nowrap; font-size: 0.9rem; font-weight: 800; }
         
-        /* تكبير أزرار الأكشن الخاصة بالمخزن لسهولة اللمس */
+        /* أزرار المخزن كبيرة وواضحة جداً للموبايل */
         .action-btn-group { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; justify-content: center; min-width: 250px; }
         .action-btn-group .btn { flex: 1; min-width: 100px; font-size: 1.1rem; padding: 12px; margin: 0; font-weight: 800; border-radius: 8px; }
 
@@ -145,7 +150,7 @@
         .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
         .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 800; color: #1e3c72; }
-        .date-inputs-row input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; font-weight: 700; outline: none; }
+        .date-inputs-row input, .date-inputs-row select { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; font-weight: 700; outline: none; }
         
         .live-invoice-summary { background: #ffffff; color: #1e3c72; border: 2px solid #1e3c72; border-radius: 10px; padding: 12px; margin-top: 14px; }
         .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; text-align: center; font-size: 0.85rem; font-weight: 800; }
@@ -176,11 +181,15 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 20px; width: 100%; max-width: 450px; max-height: 88vh; overflow-y: auto; text-align: center; }
 
+        /* ستايل الرسوم البيانية Charts */
+        .chart-page { width: 100%; height: 380px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 15px; background: #fff; border-radius: 12px; border: 1px solid #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.03); page-break-inside: avoid; }
+        .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
+
         /* --- 🖨️ CSS الطباعة المخصص النظيف --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
 
-        /* الكلاسات السحرية المستوردة من Trans Pro لتقسيم الجداول */
+        /* الكلاسات السحرية المستوردة من Trans Pro لتقسيم الجداول وحفظها كـ PDF بورتريت متناسق */
         .page-break-row { page-break-after: always !important; break-after: page !important; }
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
         
@@ -205,25 +214,25 @@
 </head>
 <body>
 
-<!-- ✨ Splash Screen الاحترافية (شاشة الورق الأخضر بـ 3 ثواني) ✨ -->
+<!-- ✨ Splash Screen الاحترافية (3 ثواني - ورق الشجر الأخضر + لوجو الصيدلية) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
-        <svg viewBox="-10 -10 120 120" width="100%" height="100%">
+        <!-- الورق المتحرك -->
+        <svg viewBox="-10 -10 120 120" width="100%" height="100%" style="position:absolute; z-index:1;">
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs>
                 <path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" />
             </defs>
-
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
             <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
             <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
-
             <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
             <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
             <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
-
             <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
+        <!-- اللوجو الخاص بك في المنتصف بأنيميشن النبض -->
+        <img src="WhatsApp Image 2026-09-14 at 21.54.21.jpeg" alt="Anjum Green Pharmacy Logo" class="splash-logo-img">
     </div>
     <div class="splash-title">
         <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
@@ -298,7 +307,7 @@
             <div>📄 الفاتورة: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <!-- أزرار التنقل الدائرية المرتبة من اليمين لليسار -->
+        <!-- أزرار التنقل الدائرية مرتبة من اليمين لليسار (أولى، سابقة، تالية، أخيرة) -->
         <div class="nav-controls">
             <button class="btn-icon" onclick="navigateInvoice('first')" title="الأولى">⏮️</button>
             <button class="btn-icon" onclick="navigateInvoice('prev')" title="السابقة">◀️</button>
@@ -485,7 +494,17 @@
         <div class="no-pdf">
             <div class="section-title">📊 تقارير المبيعات</div>
             <div class="card date-filter-box">
-                <div class="date-inputs-row"><div>من: <input type="date" id="fromDate"></div><div>إلى: <input type="date" id="toDate"></div></div>
+                <div class="date-inputs-row">
+                    <!-- تم إضافة اختيار بين الجداول والرسوم البيانية -->
+                    <div>نوع العرض: 
+                        <select id="reportTypeSelect" style="padding:6px; border-radius:6px; font-weight:bold; border:1px solid #ccc; width:100%; max-width:200px;" onchange="generateReport()">
+                            <option value="table">📋 جدول المبيعات التفصيلي</option>
+                            <option value="charts">📊 الرسوم البيانية (Dashboard)</option>
+                        </select>
+                    </div>
+                    <div>من: <input type="date" id="fromDate" onchange="generateReport()"></div>
+                    <div>إلى: <input type="date" id="toDate" onchange="generateReport()"></div>
+                </div>
                 <div class="toolbar-row">
                     <button class="btn btn-blue" onclick="generateReport()">فلترة 📈</button>
                     <button class="btn btn-purple" onclick="handleNetProfitAction()">الصافي 💵</button>
@@ -530,12 +549,22 @@
             </div>
         </div>
 
-        <div class="table-responsive"><table>
+        <div id="reportsTableContainer" class="table-responsive"><table>
             <thead><tr>
                 <th style="width:25px;">#</th><th>الفاتورة</th><th>التاريخ</th><th>العناصر</th><th>الدفع</th><th>التكلفة</th><th>خصم%</th><th>البيع</th><th>الربح</th><th class="no-pdf" style="width:220px;">إجراء</th>
             </tr></thead>
             <tbody id="savedInvoicesBody"><tr><td colspan="10">لا توجد بيانات</td></tr></tbody>
         </table></div>
+
+        <!-- حاوية الرسوم البيانية Dashboard المضافة كهدية للعمل -->
+        <div id="chartsContainer" style="display:none; flex-direction:column; gap:20px; margin-top:20px;">
+            <div class="chart-page" style="background:#fff; padding:15px; border-radius:12px; border:1px solid #ddd; height:350px;">
+                <canvas id="chartTopProducts"></canvas>
+            </div>
+            <div class="chart-page" style="background:#fff; padding:15px; border-radius:12px; border:1px solid #ddd; height:350px;">
+                <canvas id="chartDailySales"></canvas>
+            </div>
+        </div>
 
         <div class="print-summary-wrapper" style="margin-top: 15px;">
             <div id="reportSummaryCardsContainer" class="report-summary-cards"></div>
@@ -638,46 +667,58 @@ function formatDateDisplay(dateStr) {
 /* ========================================================================= */
 /* 🖨️ نظام تصدير الـ PDF المعزول لمنع الانقلاب (نسخ ولصق من Trans Pro)     */
 /* ========================================================================= */
-async function exportAdvancedPDF(htmlContent, titleText, isLandscape = false) {
-    const printContainer = document.createElement('div');
-    printContainer.id = "tempExportContainer";
-    printContainer.style.background = "#fff";
-    printContainer.style.padding = "15px";
-    printContainer.style.direction = "rtl";
-    printContainer.innerHTML = htmlContent;
-
-    document.body.appendChild(printContainer);
-
-    let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (أدخل رقم من 1 إلى 50)", "25");
-    let rowsPerPage = parseInt(rowInput);
-    if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 25;
-    if (rowsPerPage > 50) rowsPerPage = 50;
-    
-    const rows = printContainer.querySelectorAll('tbody tr');
-    rows.forEach((row, index) => {
-        if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) {
-            row.style.pageBreakAfter = 'always';
-        }
-    });
-
-    printContainer.classList.add('pdf-compact');
-
-    toast('⏳ جاري تجهيز التقرير (PDF)...', 'info');
-    await new Promise(r => setTimeout(r, 500));
-
-    const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
-    
-    // السر وراء عدم التكسير: windowWidth يفرض مقاس الشاشة الوهمي
-    const opt = {
-        margin: 0.2,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1200 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.totals-box', 'h3'] }
-    };
-
+async function exportAdvancedPDF(elementId, titleText, isLandscape = false) {
     try {
+        let sourceElement = document.getElementById(elementId);
+        
+        // لو التقرير مبيعات واليوزر فاتح الشارتات، هنستخرج الشارتات كصور للطباعة
+        if(elementId === 'reportsPrintArea' && document.getElementById('reportTypeSelect').value === 'charts') {
+            sourceElement = document.getElementById('chartsContainer');
+        }
+
+        if (!sourceElement || sourceElement.innerText.trim() === '') return toast('⚠️ لا توجد بيانات للطباعة!', 'warn');
+
+        const printContainer = document.createElement('div');
+        printContainer.id = "tempExportContainer";
+        printContainer.style.background = "#fff";
+        printContainer.style.padding = "15px";
+        printContainer.style.direction = "rtl";
+        printContainer.style.fontFamily = "'Cairo', sans-serif";
+        printContainer.innerHTML = sourceElement.innerHTML;
+
+        document.body.appendChild(printContainer);
+
+        let rowsPerPage = 25;
+        if(document.getElementById('reportTypeSelect')?.value !== 'charts') {
+            let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (لتفادي قطع الجداول - أدخل رقم من 1 إلى 50)", "25");
+            rowsPerPage = parseInt(rowInput);
+            if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 25;
+            if (rowsPerPage > 50) rowsPerPage = 50;
+        }
+
+        const rows = printContainer.querySelectorAll('tbody tr');
+        rows.forEach((row, index) => {
+            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) {
+                row.style.pageBreakAfter = 'always';
+            }
+        });
+
+        printContainer.classList.add('pdf-compact');
+
+        toast('⏳ جاري تجهيز التقرير (PDF)...', 'info');
+        await new Promise(r => setTimeout(r, 500));
+
+        const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
+        
+        const opt = {
+            margin: 0.2,
+            filename: fileName,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1200 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.totals-box', 'h3', '.chart-page'] }
+        };
+
         if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
             let pdfDataUri = await html2pdf().set(opt).from(printContainer).outputPdf('datauristring');
             let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
@@ -690,12 +731,12 @@ async function exportAdvancedPDF(htmlContent, titleText, isLandscape = false) {
             document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove();
             toast('✅ تم التنزيل بنجاح!', 'success');
         }
+        document.body.removeChild(printContainer);
     } catch (err) {
         console.error(err);
-        toast('❌ حدث خطأ، سيتم الطباعة المباشرة', 'error');
+        toast('❌ حدث خطأ في التصدير، سيتم الطباعة', 'error');
         window.print();
-    } finally {
-        document.body.removeChild(printContainer);
+        if(document.getElementById('tempExportContainer')) document.body.removeChild(document.getElementById('tempExportContainer'));
     }
 }
 
@@ -712,13 +753,13 @@ function buildAndPrintStockPDF() {
         let bgStyle = isLow ? 'background-color: #fff0f0;' : '';
         return `
             <tr style="${bgStyle}">
-                <td>${index + 1}</td>
-                <td style="font-weight: bold;">${escapeHtml(i.n)}</td>
-                <td style="font-weight: bold; color: ${isLow ? '#c0392b' : '#000'};">${i.q}</td>
-                <td>${(i.p || 0).toFixed(2)}</td>
-                <td style="font-weight: bold; color: #27ae60;">${((i.p || 0) * guideMult).toFixed(2)}</td>
-                <td style="direction: ltr;">${escapeHtml(i.barcode || '-')}</td>
-                <td style="direction: ltr;">${escapeHtml(i.expiry || '-')}</td>
+                <td style="padding: 6px; border: 1px solid #333;">${index + 1}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold;">${escapeHtml(i.n)}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold; color: ${isLow ? '#c0392b' : '#000'};">${i.q}</td>
+                <td style="padding: 6px; border: 1px solid #333;">${(i.p || 0).toFixed(2)}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold; color: #27ae60;">${((i.p || 0) * guideMult).toFixed(2)}</td>
+                <td style="padding: 6px; border: 1px solid #333; direction: ltr;">${escapeHtml(i.barcode || '-')}</td>
+                <td style="padding: 6px; border: 1px solid #333; direction: ltr;">${escapeHtml(i.expiry || '-')}</td>
             </tr>
         `;
     }).join('');
@@ -728,16 +769,16 @@ function buildAndPrintStockPDF() {
             <h2 style="color:#1e3c72; margin:0; border-bottom:2px solid #f39c12; padding-bottom:10px; display:inline-block;">📦 تقرير جرد المخزون - Anjum Green Pharmacy</h2>
             <h4 style="color:#555; margin-top:10px;">تاريخ الجرد: ${formatDateDisplay(new Date().toLocaleString())}</h4>
         </div>
-        <table>
+        <table style="width: 100%; border-collapse: collapse; font-family:'Cairo', sans-serif; font-size: 12px; direction: rtl; text-align: center;">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اسم المنتج</th>
-                    <th>الكمية</th>
-                    <th>التكلفة</th>
-                    <th>الأدنى للبيع</th>
-                    <th>الباركود</th>
-                    <th>الصلاحية</th>
+                <tr style="background-color: #1e3c72; color: #fff;">
+                    <th style="padding: 8px; border: 1px solid #333;">#</th>
+                    <th style="padding: 8px; border: 1px solid #333;">اسم المنتج</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الكمية</th>
+                    <th style="padding: 8px; border: 1px solid #333;">التكلفة</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الأدنى للبيع</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الباركود</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الصلاحية</th>
                 </tr>
             </thead>
             <tbody>${tbodyHtml}</tbody>
@@ -763,19 +804,19 @@ function buildAndPrintFinancePDF() {
         
         return `
             <tr style="${bgStyle}">
-                <td>${index + 1}</td>
-                <td style="direction: ltr;">${formatDateDisplay(f.date)}</td>
-                <td style="font-weight: bold; color: ${typeColor};">${typeStr}</td>
-                <td style="font-weight: bold;">${escapeHtml(f.category)}</td>
-                <td style="font-weight: bold;">${f.amount.toFixed(2)} ج.م</td>
-                <td>${escapeHtml(f.notes || '-')}</td>
+                <td style="padding: 6px; border: 1px solid #333;">${index + 1}</td>
+                <td style="padding: 6px; border: 1px solid #333; direction: ltr;">${formatDateDisplay(f.date)}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold; color: ${typeColor};">${typeStr}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold;">${escapeHtml(f.category)}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight: bold;">${f.amount.toFixed(2)} ج.م</td>
+                <td style="padding: 6px; border: 1px solid #333;">${escapeHtml(f.notes || '-')}</td>
             </tr>
         `;
     }).join('');
 
     let net = totRev - totExp;
     let summaryHtml = `
-        <div style="display:flex; justify-content:space-around; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-around; margin-bottom:15px; font-family:'Cairo', sans-serif;">
             <div style="border:2px solid #3498db; padding:10px; border-radius:8px; text-align:center;">إجمالي الإيرادات<br><span style="color:#27ae60; font-weight:bold; font-size:16px;">${totRev.toFixed(2)} ج.م</span></div>
             <div style="border:2px solid #3498db; padding:10px; border-radius:8px; text-align:center;">إجمالي المصروفات<br><span style="color:#c0392b; font-weight:bold; font-size:16px;">${totExp.toFixed(2)} ج.م</span></div>
             <div style="border:2px solid #27ae60; padding:10px; border-radius:8px; text-align:center;">الصافي<br><span style="color:${net >= 0 ? '#27ae60' : '#c0392b'}; font-weight:bold; font-size:16px;">${net.toFixed(2)} ج.م</span></div>
@@ -784,19 +825,19 @@ function buildAndPrintFinancePDF() {
 
     let htmlContent = `
         <div style="text-align:center; margin-bottom: 20px;">
-            <h2 style="color:#1e3c72; margin:0; border-bottom:2px solid #f39c12; padding-bottom:10px; display:inline-block;">💵 التقرير المالي - Anjum Green Pharmacy</h2>
+            <h2 style="color:#1e3c72; margin:0; font-family:'Cairo', sans-serif; border-bottom:2px solid #f39c12; padding-bottom:10px; display:inline-block;">💵 التقرير المالي - Anjum Green Pharmacy</h2>
             <h4 style="color:#555; margin-top:10px;">الفترة: ${fromD || 'البداية'} إلى ${toD || 'اليوم'}</h4>
         </div>
         ${summaryHtml}
-        <table>
+        <table style="width: 100%; border-collapse: collapse; font-family:'Cairo', sans-serif; font-size: 12px; direction: rtl; text-align: center;">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th>التاريخ</th>
-                    <th>النوع</th>
-                    <th>البيان</th>
-                    <th>المبلغ</th>
-                    <th>ملاحظات</th>
+                <tr style="background-color: #1e3c72; color: #fff;">
+                    <th style="padding: 8px; border: 1px solid #333;">#</th>
+                    <th style="padding: 8px; border: 1px solid #333;">التاريخ</th>
+                    <th style="padding: 8px; border: 1px solid #333;">النوع</th>
+                    <th style="padding: 8px; border: 1px solid #333;">البيان</th>
+                    <th style="padding: 8px; border: 1px solid #333;">المبلغ</th>
+                    <th style="padding: 8px; border: 1px solid #333;">ملاحظات</th>
                 </tr>
             </thead>
             <tbody>${tbodyHtml}</tbody>
@@ -812,6 +853,11 @@ function buildAndPrintSalesPDF() {
     
     if(filteredInvoices.length === 0) return toast('⚠️ لا توجد مبيعات للطباعة!', 'warn');
 
+    if(document.getElementById('reportTypeSelect').value === 'charts') {
+        exportAdvancedPDF('chartsContainer', 'لوحة_إحصائيات_المبيعات', true); // Landscape للشارتات
+        return;
+    }
+
     const tally = buildInvoiceTally(filteredInvoices);
     
     let tbodyHtml = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
@@ -819,21 +865,21 @@ function buildAndPrintSalesPDF() {
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
             <tr>
-                <td style="font-weight:bold;">${index + 1}</td>
-                <td style="font-weight:bold;">#${inv.id}</td>
-                <td style="direction:ltr;">${escapeHtml(cleanDateStr)}</td>
-                <td style="text-align:right; font-size:11px; line-height:1.4;">${itemsListHtml}</td>
-                <td style="direction:ltr;">${payBreakdown}</td>
-                <td style="font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td>
-                <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-                <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)}</td>
-                <td style="color:#1e3c72; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight:bold;">${index + 1}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight:bold;">#${inv.id}</td>
+                <td style="padding: 6px; border: 1px solid #333; direction:ltr;">${escapeHtml(cleanDateStr)}</td>
+                <td style="padding: 6px; border: 1px solid #333; text-align:right; font-size:11px; line-height:1.4;">${itemsListHtml}</td>
+                <td style="padding: 6px; border: 1px solid #333; direction:ltr;">${payBreakdown}</td>
+                <td style="padding: 6px; border: 1px solid #333; font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td>
+                <td style="padding: 6px; border: 1px solid #333; color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
+                <td style="padding: 6px; border: 1px solid #333; color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)}</td>
+                <td style="padding: 6px; border: 1px solid #333; color:#1e3c72; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)}</td>
             </tr>
         `;
     }).join('');
 
     let summaryHtml = `
-        <div style="display:flex; justify-content:space-around; margin-bottom:15px;">
+        <div style="display:flex; justify-content:space-around; margin-bottom:15px; font-family:'Cairo', sans-serif;">
             <div style="border:2px solid #3498db; padding:10px; border-radius:8px; text-align:center;">إجمالي المبيعات<br><span style="color:#27ae60; font-weight:bold; font-size:16px;">${tally.grandTotalSell.toFixed(2)} ج.م</span></div>
             <div style="border:2px solid #3498db; padding:10px; border-radius:8px; text-align:center;">إجمالي الأرباح<br><span style="color:#1e3c72; font-weight:bold; font-size:16px;">${tally.grandNetProfit.toFixed(2)} ج.م</span></div>
             <div style="border:2px solid #3498db; padding:10px; border-radius:8px; text-align:center; direction:ltr;">العملات الأجنبية<br><span style="font-size:12px; font-weight:bold;">$: ${tally.sumUSD} | €: ${tally.sumEUR}</span></div>
@@ -842,30 +888,29 @@ function buildAndPrintSalesPDF() {
 
     let htmlContent = `
         <div style="text-align:center; margin-bottom: 20px;">
-            <h2 style="color:#1e3c72; margin:0; border-bottom:2px solid #f39c12; padding-bottom:10px; display:inline-block;">📊 تقرير المبيعات والأرباح - Anjum Green Pharmacy</h2>
+            <h2 style="color:#1e3c72; margin:0; font-family:'Cairo', sans-serif; border-bottom:2px solid #f39c12; padding-bottom:10px; display:inline-block;">📊 تقرير المبيعات والأرباح - Anjum Green Pharmacy</h2>
             <h4 style="color:#555; margin-top:10px;">الفترة: ${fromD || 'البداية'} إلى ${toD || 'اليوم'}</h4>
         </div>
         ${summaryHtml}
-        <table>
+        <table style="width: 100%; border-collapse: collapse; font-family:'Cairo', sans-serif; font-size: 11px; direction: rtl; text-align: center;">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th>الفاتورة</th>
-                    <th>التاريخ</th>
-                    <th>العناصر</th>
-                    <th>الدفع</th>
-                    <th>التكلفة</th>
-                    <th>خصم%</th>
-                    <th>البيع</th>
-                    <th>الربح</th>
+                <tr style="background-color: #1e3c72; color: #fff;">
+                    <th style="padding: 8px; border: 1px solid #333;">#</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الفاتورة</th>
+                    <th style="padding: 8px; border: 1px solid #333;">التاريخ</th>
+                    <th style="padding: 8px; border: 1px solid #333;">العناصر</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الدفع</th>
+                    <th style="padding: 8px; border: 1px solid #333;">التكلفة</th>
+                    <th style="padding: 8px; border: 1px solid #333;">خصم%</th>
+                    <th style="padding: 8px; border: 1px solid #333;">البيع</th>
+                    <th style="padding: 8px; border: 1px solid #333;">الربح</th>
                 </tr>
             </thead>
             <tbody>${tbodyHtml}</tbody>
         </table>
     `;
 
-    // استخدام Landscape للمبيعات لكثرة الأعمدة
-    exportAdvancedPDF(htmlContent, 'تقرير_المبيعات', true); 
+    exportAdvancedPDF(htmlContent, 'تقرير_المبيعات', true); // Landscape
 }
 
 /* ========================================================================= */
@@ -1062,12 +1107,16 @@ function fetchCloudInvoicesData(callbackAfter) {
     const oldScript = document.getElementById('cloudSyncScript'); if (oldScript) oldScript.remove();
     window.handleCloudInvoicesResponse = function(resData) {
         if (resData && resData.status === "success") {
-            if (resData.users) saveLocalUsers(resData.users);
-            if (resData.products && resData.products.length > 0) { products = resData.products.map(p => ({ id: p.id || uid(), ...p })); saveProductsToStorage(); renderStockTable(); updateAlertsBar(); }
-            if (resData.nextInvoiceId) { invoiceCounter = resData.nextInvoiceId; localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
-            if (resData.invoices) { savedInvoices = resData.invoices; saveInvoicesToStorage(); generateReport(); }
-            if (resData.finances) { savedFinances = resData.finances; saveFinancesToStorage(); renderFinanceTable(); }
-            prepareNewInvoice(); if (callbackAfter) callbackAfter();
+            try {
+                if (resData.users) saveLocalUsers(resData.users);
+                if (resData.products && resData.products.length > 0) { products = resData.products.map(p => ({ id: p.id || uid(), ...p })); saveProductsToStorage(); renderStockTable(); updateAlertsBar(); }
+                if (resData.nextInvoiceId) { invoiceCounter = resData.nextInvoiceId; localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
+                if (resData.invoices) { savedInvoices = resData.invoices; saveInvoicesToStorage(); generateReport(); }
+                if (resData.finances) { savedFinances = resData.finances; saveFinancesToStorage(); renderFinanceTable(); }
+                prepareNewInvoice(); if (callbackAfter) callbackAfter();
+            } catch (err) {
+                console.error("Data Mapping Error:", err);
+            }
         }
     };
     const script = document.createElement('script'); script.id = 'cloudSyncScript'; script.src = GOOGLE_SCRIPT_URL + "?callback=handleCloudInvoicesResponse&nocache=" + Math.random(); document.body.appendChild(script);
@@ -1091,9 +1140,13 @@ function processOfflineQueue() {
 
 /* ---------- System Init ---------- */
 function initSystem() {
-    loadDataFromStorage(); loadRatesFromStorage(); prepareNewInvoice(); fetchCloudInvoicesData(); updateOnlineStatus(); updateAlertsBar();
-    const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    if (document.getElementById('finDate')) document.getElementById('finDate').value = now.toISOString().slice(0, 16);
+    try {
+        loadDataFromStorage(); loadRatesFromStorage(); prepareNewInvoice(); fetchCloudInvoicesData(); updateOnlineStatus(); updateAlertsBar();
+        const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        if (document.getElementById('finDate')) document.getElementById('finDate').value = now.toISOString().slice(0, 16);
+    } catch(e) {
+        console.error(e);
+    }
 }
 
 function loadDataFromStorage() {
@@ -1199,13 +1252,13 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
     const guideMult = RATES.GUIDE_MULT || 3;
     return `
     <tr class="${rowClass}">
-        <td>${index + 1}</td>
-        <td style="font-weight:bold;">${escapeHtml(p.n)}${statusSuffix}</td>
-        <td style="font-weight:bold;">${p.q}</td>
-        <td>${p.p.toFixed(2)}</td>
-        <td style="color:#27ae60; font-weight:800;">${(p.p * guideMult).toFixed(2)}</td>
-        <td style="direction:ltr;">${escapeHtml(p.barcode || '-')}</td>
-        <td style="direction:ltr;">${escapeHtml(p.expiry || '-')}</td>
+        <td style="font-weight:bold;">${index + 1}</td>
+        <td style="text-align:right; font-weight:bold; font-size:1rem;">${escapeHtml(p.n)}${statusSuffix}</td>
+        <td style="font-weight:bold; font-size:1.1rem;">${p.q}</td>
+        <td style="font-weight:bold; font-size:1rem;">${p.p.toFixed(2)}</td>
+        <td style="color:#27ae60; font-weight:800; font-size:1.1rem;">${(p.p * guideMult).toFixed(2)}</td>
+        <td style="font-family:monospace; font-weight:bold; font-size:0.9rem; color:#1e3c72; direction:ltr;">${escapeHtml(p.barcode || '-')}</td>
+        <td style="direction:ltr; font-weight:bold;">${escapeHtml(p.expiry || '-')}</td>
         <td class="no-pdf">
             <div class="action-btn-group">
                 <button class="btn btn-blue" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
@@ -1278,18 +1331,9 @@ function buildInvoiceTally(filteredInvoices) {
     filteredInvoices.forEach(inv => {
         let u = 0, eu = 0, g = 0, eg = 0, v = 0; let itemsListHtml = "";
         if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-            // التعديل السحري: وضع كل صنف في div منفصل بدل من br عشان الـ PDF ميقلبش الحروف
-            itemsListHtml = inv.items.map(i => { 
-                u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0); 
-                if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1); 
-                let pTxt = []; 
-                if(i.usd>0) pTxt.push(`${i.usd} $`); if(i.eur>0) pTxt.push(`${i.eur} €`); if(i.gbp>0) pTxt.push(`${i.gbp} £`); if(i.egp>0) pTxt.push(`${i.egp} ج.م`); if(i.visa>0) pTxt.push(`${i.visa} فيزا`); 
-                let pStr = pTxt.length>0 ? pTxt.join(" - ") : `${(i.sellTotal||0).toFixed(1)} ج.م`;
-                return `<div dir="rtl" style="margin-bottom: 4px;">• ${escapeHtml(i.name)} <span dir="ltr">(${i.qty})</span> - ${pStr}</div>`; 
-            }).join('');
+            itemsListHtml = inv.items.map(i => { u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0); if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1); return `• ${escapeHtml(getItemPaidText(i))}`; }).join('<br>');
         } else {
-            itemsListHtml = `<div dir="rtl">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</div>`; 
-            u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
+            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText)).replace(/\(\vert{}\)/g, '').split(' | ').map(t => `• ${t}`).join('<br>'); u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
             (inv.itemsText ? inv.itemsText.split(' | ') : []).forEach(raw => { const namePart = raw.split(' (')[0] || raw.split(' | ')[0]; const qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/); const qty = qtyPart ? parseInt(qtyPart[1]) : 1; const cleanName = namePart.trim(); if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty; });
         }
         sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v; grandTotalSell += inv.totalEGP || 0; grandNetProfit += inv.netProfit || 0; perInvoice.push({ inv, u, eu, g, eg, v, itemsListHtml });
@@ -1303,23 +1347,78 @@ function filteredInvoicesByRange(fromD, toD) {
 }
 
 function generateReport() {
-    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || ''; const filteredInvoices = filteredInvoicesByRange(fromD, toD); const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
-    if (filteredInvoices.length === 0) { tbody.innerHTML = '<tr><td colspan="10">لا توجد مبيعات</td></tr>'; if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = ''; if (document.getElementById('topProductsChartContainer')) document.getElementById('topProductsChartContainer').innerHTML = ''; return; }
+    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || ''; 
+    const rType = document.getElementById('reportTypeSelect')?.value || 'table';
+    const filteredInvoices = filteredInvoicesByRange(fromD, toD); 
+
+    const tbody = document.getElementById('savedInvoicesBody');
+    const tableContainer = document.getElementById('reportsTableContainer');
+    const chartsContainer = document.getElementById('chartsContainer');
+
+    if (filteredInvoices.length === 0) { 
+        if(tbody) tbody.innerHTML = '<tr><td colspan="10">لا توجد مبيعات</td></tr>'; 
+        if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = ''; 
+        if (document.getElementById('profitBox')) document.getElementById('profitBox').style.display = 'none';
+        return; 
+    }
 
     const tally = buildInvoiceTally(filteredInvoices);
-    tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`; const cleanDateStr = formatDateDisplay(inv.date);
-        return `<tr><td style="font-weight:bold;">${index + 1}</td><td style="font-weight:bold;">#${inv.id}</td><td style="direction:ltr;">${escapeHtml(cleanDateStr)}</td><td style="text-align:right;">${itemsListHtml}</td><td style="direction:ltr;">${payBreakdown}</td><td style="font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td><td style="color:#e67e22; font-weight:800;">${inv.discount || 0}%</td><td style="color:#27ae60; font-weight:800;">${(inv.totalEGP || 0).toFixed(2)}</td><td style="color:#1e3c72; font-weight:800;">${(inv.netProfit || 0).toFixed(2)}</td><td class="no-pdf"><div class="action-btn-group"><button class="btn btn-purple" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button><button class="btn btn-blue" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button><button class="btn btn-red" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button></div></td></tr>`;
-    }).join('');
 
-    const cardsContainer = document.getElementById('reportSummaryCardsContainer');
-    if (cardsContainer) {
-        cardsContainer.innerHTML = `
-            <div class="report-card"><div class="report-card-title">💵 العملات الأجنبية</div><div class="report-card-value" style="font-size:0.9rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
-            <div class="report-card"><div class="report-card-title">💳 إجمالي الفيزا</div><div class="report-card-value" style="font-size:1.1rem;">${tally.sumVISA.toFixed(2)} ج.م</div></div>
-            <div class="report-card" style="border-color:#27ae60; border-width:2px;"><div class="report-card-title" style="color:#27ae60;">🛒 إجمالي المبيعات</div><div class="report-card-value" style="color:#27ae60; font-size:1.3rem;">${tally.grandTotalSell.toFixed(2)} ج.م</div></div>
-            <div class="report-card" style="border-color:#1e3c72; border-width:2px;"><div class="report-card-title" style="color:#1e3c72;">💰 إجمالي الأرباح</div><div class="report-card-value" style="color:#1e3c72; font-size:1.3rem;">${tally.grandNetProfit.toFixed(2)} ج.م</div></div>
-        `;
+    if (rType === 'charts') {
+        tableContainer.style.display = 'none';
+        chartsContainer.style.display = 'flex';
+        document.getElementById('profitBox').style.display = 'none';
+
+        // تدمير الـ Charts السابقة إن وجدت لمنع تداخل الرسم
+        if(window.cProduct) window.cProduct.destroy(); 
+        if(window.cSales) window.cSales.destroy();
+
+        // 1. شارت الأدوية الأكثر مبيعاً
+        let topProducts = tally.sortedTop.slice(0, 10);
+        window.cProduct = new Chart(document.getElementById('chartTopProducts'), {
+            type: 'bar',
+            data: {
+                labels: topProducts.map(i => i.name),
+                datasets: [{ label: 'الأدوية الأكثر مبيعاً (الكمية)', data: topProducts.map(i => i.qty), backgroundColor: '#27ae60', borderRadius: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'أكثر 10 منتجات مبيعاً', font: {size: 16, family:'Cairo'} } } }
+        });
+
+        // 2. شارت حركة المبيعات اليومية
+        let dailyMap = {};
+        filteredInvoices.forEach(inv => {
+            let d = inv.date ? inv.date.slice(0, 10) : 'غير محدد';
+            dailyMap[d] = (dailyMap[d] || 0) + (parseFloat(inv.totalEGP) || 0);
+        });
+        let days = Object.keys(dailyMap).sort();
+        let salesData = days.map(d => dailyMap[d]);
+        window.cSales = new Chart(document.getElementById('chartDailySales'), {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [{ label: 'المبيعات اليومية (ج.م)', data: salesData, borderColor: '#1e3c72', backgroundColor: 'rgba(30, 60, 114, 0.15)', fill: true, tension: 0.4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'حركة المبيعات خلال الفترة', font: {size: 16, family:'Cairo'} } } }
+        });
+
+    } else {
+        chartsContainer.style.display = 'none';
+        tableContainer.style.display = 'block';
+
+        tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
+            const payBreakdown = `$:${u} | €:${eu} | £:${g} | EGP:${eg} | VISA:${v}`; const cleanDateStr = formatDateDisplay(inv.date);
+            return `<tr><td style="font-weight:bold;">${index + 1}</td><td style="font-weight:bold; font-size:1rem;">#${inv.id}</td><td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td><td style="text-align:right; font-size:0.85rem; line-height:1.6; font-weight:700;">${itemsListHtml}</td><td style="direction:ltr; font-weight:bold;">${payBreakdown}</td><td style="font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td><td style="color:#e67e22; font-weight:800;">${inv.discount || 0}%</td><td style="color:#27ae60; font-weight:800; font-size:1rem;">${(inv.totalEGP || 0).toFixed(2)}</td><td style="color:#1e3c72; font-weight:800; font-size:1rem;">${(inv.netProfit || 0).toFixed(2)}</td><td class="no-pdf"><div class="action-btn-group"><button class="btn btn-purple" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button><button class="btn btn-blue" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button><button class="btn btn-red" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button></div></td></tr>`;
+        }).join('');
+
+        const cardsContainer = document.getElementById('reportSummaryCardsContainer');
+        if (cardsContainer) {
+            cardsContainer.innerHTML = `
+                <div class="report-card"><div class="report-card-title">💵 العملات الأجنبية</div><div class="report-card-value" style="font-size:0.9rem;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div></div>
+                <div class="report-card"><div class="report-card-title">💳 إجمالي الفيزا</div><div class="report-card-value" style="font-size:1.1rem;">${tally.sumVISA.toFixed(2)} ج.م</div></div>
+                <div class="report-card" style="border-color:#27ae60; border-width:2px;"><div class="report-card-title" style="color:#27ae60;">🛒 إجمالي المبيعات</div><div class="report-card-value" style="color:#27ae60; font-size:1.3rem;">${tally.grandTotalSell.toFixed(2)} ج.م</div></div>
+                <div class="report-card" style="border-color:#1e3c72; border-width:2px;"><div class="report-card-title" style="color:#1e3c72;">💰 إجمالي الأرباح</div><div class="report-card-value" style="color:#1e3c72; font-size:1.3rem;">${tally.grandNetProfit.toFixed(2)} ج.م</div></div>
+            `;
+        }
     }
 }
 
