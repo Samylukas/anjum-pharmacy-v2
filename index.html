@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anjum Green Pharmacy 2026</title>
+    <title>Anjum Pharmacy 2026</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,14 +18,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* تصغير الخط العام للبرنامج ليصبح عملي */
+        /* تصغير الخط العام للبرنامج ليصبح 13px بدلاً من 14px */
         * { box-sizing: border-box; font-family: 'Cairo', system-ui, sans-serif; margin: 0; padding: 0; }
         html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; font-size: 13px; }
         
-        .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 50px; }
-        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; font-weight: 800; }
+        .app-container { width: 100%; max-width: 1050px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 50px; }
+        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.25rem; word-break: break-word; font-weight: 800; }
 
-        /* --- ✨ Splash Screen (English Only) ✨ --- */
+        /* --- ✨ Splash Screen (English Only & Brown Stem) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -58,18 +58,18 @@
         .d-7 { animation-delay: 2.0s; }
 
         /* --- Base UI Styles --- */
-        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 4px; border-radius: 6px; }
+        .sync-status { text-align: center; font-size: 0.8rem; font-weight: bold; margin-bottom: 8px; padding: 4px; border-radius: 6px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
         .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
         
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.9rem; flex-shrink: 0; transition: 0.2s; }
-        .tab-btn.active { background: #1e3c72; color: #fff; box-shadow: 0 2px 8px rgba(30,60,114,0.3); }
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 12px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; transition: 0.2s; }
+        .tab-btn.active { background: #1e3c72; color: #fff; }
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
         
-        .section-title { font-weight: 800; margin-top: 12px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #f39c12; padding-bottom: 5px; font-size: 1.1rem; text-align: right; }
+        .section-title { font-weight: 800; margin-top: 12px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #f39c12; padding-bottom: 5px; font-size: 1rem; text-align: right; }
         .search-box { width: 100%; padding: 8px 10px; font-size: 0.95rem; border: 1.5px solid #3498db; border-radius: 6px; outline: none; margin-bottom: 6px; box-sizing: border-box; font-weight: 600; }
         .large-search-box { width: 100%; padding: 10px; font-size: 1rem; font-weight: bold; border: 1.5px solid #1e3c72; border-radius: 6px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
         .results-list { max-height: 200px; overflow-y: auto; border: 1.5px solid #3498db; border-radius: 6px; margin-bottom: 10px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -87,21 +87,21 @@
         
         .warning-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; margin-top: 8px; text-align: center; display: none; }
         
-        .btn { background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s; }
+        .btn { background: #27ae60; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s; }
         .btn:hover { background: #219653; transform: scale(1.02); }
         .btn-blue { background: #1e3c72; } .btn-blue:hover { background: #152b52; }
         .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
         
-        /* أزرار المخزون الكبيرة */
-        .btn-large-stock { padding: 12px 20px !important; font-size: 1.1rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* أزرار المخزون الكبيرة المطلوبة */
+        .btn-large-stock { padding: 10px 18px !important; font-size: 1rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
-        .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
-        .toolbar-row .btn { flex: 1; min-width: 100px; padding: 10px; white-space: nowrap; }
+        .toolbar-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+        .toolbar-row .btn { flex: 1; min-width: 90px; white-space: nowrap; }
         
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
-        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 0.85rem; vertical-align: middle; }
+        table { width: 100%; min-width: 700px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 6px; border: 1px solid #ddd; text-align: center; font-size: 0.85rem; vertical-align: middle; word-wrap: break-word; white-space: normal; }
         th { background: #1e3c72; color: white; font-weight: 800; white-space: nowrap; }
         
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
@@ -135,29 +135,34 @@
         .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
         .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
         
-        /* أزرار التمرير (فوق وتحت) */
+        /* أزرار التمرير (فوق وتحت) واضحة جداً */
         .scroll-btn-group { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 99999; }
         .scroll-btn { width: 45px; height: 45px; border-radius: 50%; background: #1e3c72; color: #fff; border: 2px solid #fff; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: 0.3s;}
         .scroll-btn:hover { opacity: 1; transform: scale(1.1); background: #f39c12; }
 
         #toastStack { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; }
-        .toast { background: #1e3c72; color: #fff; padding: 12px; border-radius: 6px; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; animation: toastIn 0.3s ease-out; }
+        .toast { background: #1e3c72; color: #fff; padding: 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; animation: toastIn 0.3s ease-out; }
         .toast.success { background: #27ae60; } .toast.error { background: #e74c3c; } .toast.warn { background: #f39c12; }
         
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- 🖨️ CSS الطباعة المخصص --- */
+        /* --- 🖨️ CSS الطباعة المخصص والحل الجذري لمشكلة تداخل الخطوط --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
         
         .report-print-container { background: #fff; padding: 10px; border-radius: 6px; width: 100%; overflow-x: auto; } 
-        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; display: none; border-bottom: 2px solid #f39c12; padding-bottom: 6px; font-weight: 800; }
+        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 12px; font-size: 1.3rem; display: none; border-bottom: 2px solid #f39c12; padding-bottom: 6px; font-weight: 800; }
         
-        /* إعدادات الـ PDF التي تم استنساخها من Fleet Pro لضمان سلامة الحروف العربية */
-        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; table-layout: auto !important; }
-        .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; white-space: normal !important; text-align: center !important; word-wrap: break-word !important; }
+        /* هذا الجزء يحل مشكلة الـ PDF بإجبار html2canvas على استخدام خط Arial وتوسيع المسافات */
+        .pdf-compact, .pdf-compact * {
+            font-family: Arial, Helvetica, sans-serif !important;
+            letter-spacing: normal !important;
+        }
+        .pdf-compact table { font-size: 10px !important; line-height: 1.6 !important; width: 100% !important; table-layout: auto !important; direction: rtl !important; }
+        .pdf-compact th, .pdf-compact td { padding: 6px !important; white-space: normal !important; word-break: break-word !important; text-align: center !important; }
+        .pdf-compact .report-title-header { font-size: 1.2rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         
         .chart-page { width: 100%; height: 350px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 8px; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
@@ -173,11 +178,12 @@
 </head>
 <body>
 
-<!-- ✨ Splash Screen (English Only) ✨ -->
+<!-- ✨ Splash Screen (English Only & Brown Stem) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
-            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#27ae60" stroke-width="3" stroke-linecap="round"/>
+            <!-- الساق باللون البني -->
+            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
             <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
@@ -189,7 +195,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Pharmacy</span>
     </div>
 </div>
 
@@ -202,7 +208,7 @@
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:12px; font-size:1.4rem; font-weight:800;">
-            🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم الخضراء
+            🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم
         </h2>
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:12px; font-weight:bold;">
             <option value="">⏳ جاري تحميل المستخدمين...</option>
@@ -222,7 +228,7 @@
         <button class="btn btn-red" style="width:auto; margin:0;" onclick="logout()">تسجيل الخروج 🚪</button>
     </div>
 
-    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم الخضراء 2026</h1>
+    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم 2026</h1>
     <div id="syncIndicator" class="sync-status status-online">🟢 متصل بالإنترنت</div>
 
     <div id="alertsContainer" class="alerts-bar">
@@ -310,7 +316,7 @@
         </div>
 
         <div class="live-invoice-summary">
-            <h4 style="text-align:center; font-size:1rem; margin-bottom:8px; color:#1e3c72; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; font-weight:800;">💵 إجمالي الفاتورة</h4>
+            <h4 style="text-align:center; font-size:0.95rem; margin-bottom:8px; color:#1e3c72; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; font-weight:800;">💵 إجمالي الفاتورة</h4>
             <div class="live-summary-grid">
                 <div class="live-summary-item">دولار ($)<span id="liveUSD">$0</span></div>
                 <div class="live-summary-item">يورو (€)<span id="liveEUR">€0</span></div>
@@ -324,7 +330,7 @@
         <button class="btn btn-blue" style="margin-top: 15px; font-size: 1rem; width:100%; padding:10px;" onclick="saveInvoice()">حفظ ومزامنة الفاتورة (Ctrl+S) 💾</button>
     </div>
 
-    <!-- 2. Stock Tab (With Large Buttons) -->
+    <!-- 2. Stock Tab (أزرار بارزة وكبيرة للمخزون) -->
     <div id="stockTab" class="tab-content manager-only">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 تفاصيل المخزون</span>
@@ -343,7 +349,7 @@
 
         <div id="stockPrintArea">
             <div style="text-align:center; margin-bottom:15px;" class="report-title-header" id="stockPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.6rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.6rem; font-weight:800;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المخزون الحالي</h3>
             </div>
             <div class="table-responsive"><table>
@@ -389,7 +395,7 @@
             </div>
             <div id="addStockResults" class="results-list"></div>
             <div id="addStockCard" style="display: none; margin-top: 12px; padding:12px; border:1.5px solid #27ae60; border-radius:8px;">
-                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 8px; font-size:1rem;"></h4>
+                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 8px; font-size:0.95rem;"></h4>
                 <div class="info-row"><div>المخزون الحالي: <span id="currentStockVal" style="color:#27ae60; font-size:1.1rem;">0</span> وحدة</div></div>
                 <div class="pay-box" style="margin-top: 8px;"><label>الكمية المراد إضافتها:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1.5px solid #ccc; text-align: center;"></div>
                 <button class="btn btn-blue" style="margin-top: 12px; width: 100%;" onclick="saveStockAddition()">تأكيد الإضافة 📥</button>
@@ -422,14 +428,14 @@
                 <label for="includeSalesIncomeToggle" style="font-size:0.9rem; font-weight:bold; color:#1e3c72; cursor:pointer;">💡 تضمين أرباح المبيعات (EGP) في الملخص المالي</label>
             </div>
             <div style="display:flex; gap:8px; margin-top:12px; width:100%;">
-                <button class="btn btn-purple" style="flex:1;" onclick="printFinanceReportPDF()">طباعة / PDF 📄</button>
-                <button class="btn btn-orange" style="flex:1;" onclick="exportFinanceExcel()">تصدير إكسيل 📊</button>
+                <button class="btn btn-purple" style="flex:1; padding:10px;" onclick="printFinanceReportPDF()">طباعة / PDF 📄</button>
+                <button class="btn btn-orange" style="flex:1; padding:10px;" onclick="exportFinanceExcel()">تصدير إكسيل 📊</button>
             </div>
         </div>
 
         <div id="financePrintArea" class="report-print-container">
             <div class="report-title-header" id="financePrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">التقرير المالي (المصروفات والإيرادات)</h3>
             </div>
 
@@ -478,21 +484,21 @@
                 <div style="font-size:0.9rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 بحث عن تاريخ مبيعات منتج معين:</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                     <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px; margin-bottom:0;" placeholder="ابحث باسم المنتج..." oninput="searchSingleProductReport()">
-                    <button class="btn btn-red" style="width:auto;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
-                    <button class="btn btn-blue" style="width:auto;" onclick="searchSingleProductReport()">توليد التقرير 📋</button>
+                    <button class="btn btn-red" style="width:auto; padding:10px 15px;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
+                    <button class="btn btn-blue" style="width:auto; padding:10px 15px;" onclick="searchSingleProductReport()">توليد التقرير 📋</button>
                 </div>
                 <div id="singleProductReportResults" class="results-list" style="margin-top:8px;"></div>
                 <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px; border:1.5px solid #3498db;"></div>
             </div>
 
             <div id="profitBox" class="card" style="display:none; background:#1e3c72; color:white; margin-bottom:12px; position:relative; padding-top:30px;">
-                <button class="btn btn-red close-summary-btn" style="position:absolute; top:8px; left:8px;" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
+                <button class="btn btn-red close-summary-btn" style="position:absolute; top:8px; left:8px; padding:4px 8px;" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
                 <h3 style="text-align:center; margin-bottom:10px; font-weight:800;">💵 التقرير الشامل للمبيعات</h3>
                 <div style="text-align:center; margin-bottom:12px; background:rgba(255,255,255,0.15); padding:8px; border-radius:6px;">
-                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:14px; height:14px; cursor:pointer; vertical-align:middle;">
-                    <label for="deductExpensesToggle" style="font-size:0.85rem; font-weight:bold; color:#f1c40f; cursor:pointer; margin-right:6px;">💡 خصم المصروفات الخارجية للوصول لصافي الربح الحقيقي</label>
+                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer; vertical-align:middle;">
+                    <label for="deductExpensesToggle" style="font-size:0.9rem; font-weight:bold; color:#f1c40f; cursor:pointer; margin-right:6px;">💡 خصم المصروفات الخارجية للوصول لصافي الربح الحقيقي</label>
                 </div>
-                <div class="live-summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
+                <div class="live-summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي ($) <span id="repTotalUSD" style="color:#f1c40f;">$0.00</span></div>
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي (€) <span id="repTotalEUR" style="color:#f1c40f;">€0.00</span></div>
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي (£) <span id="repTotalGBP" style="color:#f1c40f;">£0.00</span></div>
@@ -507,7 +513,7 @@
 
         <div id="reportsPrintArea" class="report-print-container">
             <div class="report-title-header" id="salesPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المبيعات الشامل</h3>
             </div>
             
@@ -565,7 +571,7 @@
         </div>
     </div>
 
-    <!-- أزرار التمرير السريعة المستقلة -->
+    <!-- أزرار التمرير السريعة المستقلة للطلوع والنزول -->
     <div class="scroll-btn-group">
         <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">⬆️</button>
         <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});">⬇️</button>
@@ -670,14 +676,13 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
     toast('⏳ جاري تجهيز التقرير، يرجى الانتظار...', 'info');
     await new Promise(r => setTimeout(r, 500));
 
-    // إعدادات مستوحاة من Fleet Pro مع scale=2 لضمان جودة الصورة وحل مشكلة التشوه
     const opt = {
-        margin:       0.2,
+        margin:       0.3,
         filename:     fileName,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF:        { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
+        pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page'] }
     };
 
     try {
@@ -1170,7 +1175,7 @@ function executeAdvancedPrint(prodId) {
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-family: Arial, sans-serif; font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1;">صيدلية أنجم الخضراء</div>
+                    <div style="font-family: Arial, sans-serif; font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1;">صيدلية أنجم</div>
                     ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
                     <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
                     ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
@@ -1370,8 +1375,8 @@ function renderInvoice() {
         tbody.innerHTML = invoiceItems.map((item, index) => {
             sumUSD += parseFloat(item.usd || 0); sumEUR += parseFloat(item.eur || 0); sumGBP += parseFloat(item.gbp || 0); sumEGP += parseFloat(item.egp || 0); sumVISA += parseFloat(item.visa || 0); totalSellEGP += parseFloat(item.sellTotal || 0);
             
-            // جعل طريقة الدفع بنص مسطح لتجنب أي انعكاس
-            let payStr = `$${item.usd||0} | €${item.eur||0} | £${item.gbp||0} | ${item.egp||0}ج | ${item.visa||0}فيزا`;
+            // جعل الدفع نص عادي بدون أزرار أو رموز لتجنب قلب الـ PDF
+            let payStr = `دولار:${item.usd||0} | يورو:${item.eur||0} | استرليني:${item.gbp||0} | جنيه:${item.egp||0} | فيزا:${item.visa||0}`;
             
             return `
             <tr>
@@ -1379,7 +1384,7 @@ function renderInvoice() {
                 <td style="font-weight:bold; text-align:right;">${escapeHtml(item.name)}</td>
                 <td>${item.qty}</td>
                 <td>${(item.commTotal || 0).toFixed(2)}</td>
-                <td style="direction:ltr;">${payStr}</td>
+                <td style="direction:rtl;">${payStr}</td>
                 <td style="color:#27ae60; font-weight:bold;">${(item.sellTotal || 0).toFixed(2)}</td>
                 <td style="font-weight:bold; color:#1e3c72;">${escapeHtml(item.seller || 'Unknown')}</td>
                 <td><button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:0;" onclick="removeInvoiceItem(${index})">حذف 🗑️</button></td>
@@ -1400,7 +1405,7 @@ function renderInvoice() {
 
 function getItemPaidText(item) {
     if (!item) return ''; 
-    // نص مسطح (Flat) ومباشر بدون أي تركيبات معقدة
+    // تفكيك كامل لكل الرموز الإنجليزية عشان مكتبة الطباعة تقرأها من اليمين للشمال بنجاح
     return `صنف: ${escapeHtml(item.name)} | كمية: ${item.qty} | بائع: ${escapeHtml(item.seller || '-')}`;
 }
 
@@ -1468,7 +1473,7 @@ function renderFinanceTable() {
                 <td style="white-space:nowrap; direction:ltr;">${formatDateDisplay(f.date)}</td>
                 <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type === 'Revenue' ? 'إيراد' : 'مصروف'}</td>
                 <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category)}</td>
-                <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
+                <td style="font-weight:bold;">${f.amount.toFixed(2)}</td>
                 <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
                 <td class="no-pdf"><button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">حذف 🗑️</button></td>
             </tr>`;
@@ -1638,12 +1643,12 @@ function printSingleReceipt(invId) {
 
     let itemsHtml;
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold;">${escapeHtml(i.name)} (الكمية: ${i.qty}) <br><small>البائع: ${escapeHtml(i.seller || 'غير معروف')}</small></td><td style="text-align:left; font-weight:bold;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
-    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right;">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</td></tr>`; }
+        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty}) <br><small>البائع: ${escapeHtml(i.seller || 'غير معروف')}</small></td><td style="text-align:left; font-weight:bold; font-family: Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
+    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</td></tr>`; }
 
     const receiptHTML = `
         <div style="text-align:center; direction:rtl; padding:10px;">
-            <h2 style="margin-bottom:5px;">صيدلية أنجم الخضراء 🌿</h2>
+            <h2 style="margin-bottom:5px;">صيدلية أنجم 🌿</h2>
             <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
             <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
             <hr style="border-top:1.5px dashed #000; margin:8px 0;">
@@ -1673,7 +1678,6 @@ function exportSalesReportExcel() {
     });
 
     const excelData = filteredInvoices.map((inv, i) => {
-        // تنظيف النصوص المعقدة لتلائم خلايا إكسيل
         let cleanItems = '';
         if (inv.items && Array.isArray(inv.items)) {
             cleanItems = inv.items.map(item => `${item.name} (الكمية:${item.qty})`).join(' | ');
@@ -1697,12 +1701,11 @@ function buildInvoiceTally(filteredInvoices) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                // السطر البسيط الخالي من أي تداخل لغوي لضمان سلامة الـ PDF
+                // استخدام بناء نقي بدون أي لغة إنجليزية لمنع تشوه التقرير
                 return `صنف: ${escapeHtml(i.name)} | كمية: ${i.qty} | بائع: ${escapeHtml(i.seller || '-')}`;
             }).join('<br>');
         } else {
-            // تنظيف السجلات القديمة وإعادتها لنص بسيط
-            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, '').trim());
+            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
             u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
             (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
                 const namePart = raw.split(' | ')[0] || raw;
@@ -1740,15 +1743,15 @@ function generateReport() {
 
     tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
         // نص بسيط جداً للمدفوعات
-        const payBreakdown = `$${u} | €${eu} | £${g}<br>${eg}ج | فيزا${v}`;
+        const payBreakdown = `دولار:${u} | يورو:${eu} | استرليني:${g}<br>جنيه:${eg} | فيزا:${v}`;
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
             <td style="font-weight:bold;">${index + 1}</td>
             <td style="font-weight:bold; color:#e67e22;">#${inv.id}</td>
             <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
-            <td style="text-align:right; font-size:0.85rem;">${itemsListHtml}</td>
-            <td style="direction:ltr; font-weight:bold; font-size:0.8rem;">${payBreakdown}</td>
+            <td style="text-align:right;">${itemsListHtml}</td>
+            <td style="font-weight:bold;">${payBreakdown}</td>
             <td style="color:#2c3e50; font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td>
             <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
             <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)}</td>
@@ -1774,11 +1777,11 @@ function generateReport() {
             </div>
             <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #27ae60; border-radius:6px; padding:10px; text-align:center;">
                 <div style="font-weight:bold; color:#27ae60; margin-bottom:4px; font-size:0.85rem;">🛒 المبيعات الكلية</div>
-                <div style="font-size:1.1rem; font-weight:900; color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div>
+                <div style="font-size:1.1rem; font-weight:900; color:#27ae60;">${tally.grandTotalSell.toFixed(2)}</div>
             </div>
             <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #8e44ad; border-radius:6px; padding:10px; text-align:center;">
                 <div style="font-weight:bold; color:#8e44ad; margin-bottom:4px; font-size:0.85rem;">💰 صافي الأرباح</div>
-                <div style="font-size:1.1rem; font-weight:900; color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div>
+                <div style="font-size:1.1rem; font-weight:900; color:#8e44ad;">${tally.grandNetProfit.toFixed(2)}</div>
             </div>
         `;
     }
