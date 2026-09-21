@@ -118,6 +118,8 @@
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; font-weight: 600; }
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
         
+        .total-row td { background-color: #eafaf1 !important; border-top: 2px solid #27ae60 !important; font-weight: 900 !important; font-size: 1.1rem !important; color: #2c3e50; }
+
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
@@ -152,10 +154,10 @@
         .report-print-container { background: #fff; padding: 15px; border-radius: 10px; width: 100%; overflow-x: auto; margin-top: 15px; } 
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.5rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
         
-        /* إعدادات الطباعة */
         .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
         .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
         .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
+        .page-break-row { page-break-after: always !important; break-after: page !important; }
         
         .chart-page { width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
@@ -201,11 +203,10 @@
     <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
 </div>
 
-<!-- ✨ Splash Screen (English & Brown Stem) ✨ -->
+<!-- ✨ Splash Screen ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
-            <!-- الساق باللون البني -->
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
@@ -289,7 +290,6 @@
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📄 رقم: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <!-- أزرار النافيجيشن الجديدة (أسهم دائرية) -->
         <div class="nav-controls">
             <button class="nav-icon-btn" onclick="navigateInvoice('first')" title="الأولى">⏭️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('prev')" title="السابقة">▶️</button>
@@ -535,7 +535,7 @@
             </div>
             
             <div id="profitBox" style="display:none; text-align:center; margin-top:20px; margin-bottom:20px; background:#fff; padding:12px; border-radius:8px; border:1px solid #ccc; box-shadow:0 2px 5px rgba(0,0,0,0.05); position:relative;">
-                <button class="btn btn-red close-summary-btn" style="position:absolute; top:10px; left:10px; padding:6px 12px; font-size:0.9rem;" onclick="document.getElementById('profitBox').style.display='none'">إغلاق ❌</button>
+                <button class="btn btn-red close-summary-btn" style="position:absolute; top:10px; left:10px; padding:6px 12px; font-size:0.9rem;" onclick="document.getElementById('profitBox').style.display='none'; document.getElementById('deductExpensesToggle').checked=false; generateReport();">إغلاق ❌</button>
                 <input type="checkbox" id="deductExpensesToggle" onchange="generateReport()" style="width:18px; height:18px; cursor:pointer; vertical-align:middle;">
                 <label for="deductExpensesToggle" style="font-size:1.1rem; font-weight:bold; color:#1e3c72; cursor:pointer; margin-right:8px;">💡 خصم المصروفات للوصول لصافي الربح الحقيقي</label>
             </div>
@@ -1725,7 +1725,7 @@ function printSingleReceipt(invId) {
             <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
             <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
             <p style="font-size:11px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Green Pharmacy 2026</div>
+            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Green Pharmacy</div>
         </div>
     `;
 
@@ -1755,6 +1755,35 @@ function exportSalesReportExcel() {
     const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
+function parseCustomDate(dStr) {
+    if (!dStr) return "غير محدد";
+    dStr = dStr.trim();
+    let dateOnly = dStr.split(' ')[0] || dStr;
+    
+    // Format YYYY-MM-DD
+    if (dateOnly.includes('-')) {
+        let parts = dateOnly.split('-');
+        if (parts.length >= 2 && parts[0].length === 4) {
+            return `${parts[0]}-${parts[1].padStart(2, '0')}`;
+        }
+    } 
+    // Format DD/MM/YYYY
+    else if (dateOnly.includes('/')) {
+        let parts = dateOnly.split('/');
+        if (parts.length >= 3 && parts[2].length === 4) {
+            return `${parts[2]}-${parts[1].padStart(2, '0')}`;
+        }
+    }
+    
+    // Fallback: Try JS Date Parser
+    let parsed = new Date(dStr.replace(' ', 'T'));
+    if(!isNaN(parsed)) {
+        return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    return "غير محدد";
+}
+
 function buildInvoiceTally(filteredInvoices) {
     let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
     let grandTotalSell = 0, grandNetProfit = 0, grandTotalComm = 0; 
@@ -1764,27 +1793,7 @@ function buildInvoiceTally(filteredInvoices) {
     filteredInvoices.forEach(inv => {
         let u = 0, eu = 0, g = 0, eg = 0, v = 0; let itemsListHtml = "";
         
-        // خوارزمية ذكية لاستخراج الشهر من أي صيغة تاريخ ممكنة
-        let dStr = inv.date ? inv.date.trim() : "";
-        let monthKey = "غير محدد";
-        
-        // محاولة فصل التاريخ عن الوقت
-        let dateOnly = dStr.split(' ')[0] || dStr;
-        // إذا كان التنسيق YYYY-MM-DD
-        if (dateOnly.includes('-')) {
-            let parts = dateOnly.split('-');
-            if (parts.length >= 2 && parts[0].length === 4) {
-                monthKey = `${parts[0]}-${parts[1].padStart(2, '0')}`;
-            }
-        } 
-        // إذا كان التنسيق DD/MM/YYYY
-        else if (dateOnly.includes('/')) {
-            let parts = dateOnly.split('/');
-            if (parts.length >= 3 && parts[2].length === 4) {
-                monthKey = `${parts[2]}-${parts[1].padStart(2, '0')}`;
-            }
-        }
-
+        let monthKey = parseCustomDate(inv.date);
         monthlySales[monthKey] = (monthlySales[monthKey] || 0) + (parseFloat(inv.totalEGP) || 0);
 
         if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
@@ -1821,13 +1830,11 @@ function filteredInvoicesByRange(fromD, toD) {
 
 function generateReport() {
     const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
-    
-    // جلب الفواتير وحساب الملخص الأساسي
     const filteredInvoices = filteredInvoicesByRange(fromD, toD);
     const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
 
     if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
         if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
         if (document.getElementById('advancedChartsArea')) document.getElementById('advancedChartsArea').style.display = 'none';
         return;
@@ -1835,9 +1842,9 @@ function generateReport() {
 
     const tally = buildInvoiceTally(filteredInvoices);
 
-    // تطبيق خصم المصروفات إذا كان محدداً
     let finalNetProfit = tally.grandNetProfit;
     const deductExp = document.getElementById('deductExpensesToggle')?.checked || false;
+    
     if (deductExp) {
         let totalExpensesInPeriod = 0;
         savedFinances.forEach(f => {
@@ -1846,6 +1853,10 @@ function generateReport() {
             }
         });
         finalNetProfit -= totalExpensesInPeriod;
+        // إشعار سريع لو كان الزر هو اللي نده الدالة
+        if (event && event.type !== 'change') {
+            toast(`تم خصم إجمالي المصروفات (${totalExpensesInPeriod.toFixed(2)} ج.م)`, 'info', 3000);
+        }
     }
 
     const rowsHtml = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
@@ -1876,17 +1887,7 @@ function generateReport() {
         </tr>`;
     }).join('');
 
-    const totalRowHtml = `
-    <tr class="total-row">
-        <td colspan="5" style="text-align: right; color: #1e3c72; padding: 12px;">الإجماليات الكلية للفترة المحددة:</td>
-        <td style="color: #2c3e50;">${tally.grandTotalComm.toFixed(2)}</td>
-        <td>-</td>
-        <td style="color: #27ae60;">${tally.grandTotalSell.toFixed(2)}</td>
-        <td style="color: #8e44ad;">${tally.grandNetProfit.toFixed(2)}</td>
-        <td class="no-pdf"></td>
-    </tr>`;
-
-    tbody.innerHTML = rowsHtml + totalRowHtml;
+    tbody.innerHTML = rowsHtml;
 
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
@@ -1986,6 +1987,15 @@ function cancelInvoiceSystem(invId) {
 
 function handleNetProfitAction() {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    
+    const pBox = document.getElementById('profitBox');
+    const chk = document.getElementById('deductExpensesToggle');
+    
+    if(pBox && chk) {
+        pBox.style.display = 'block';
+        chk.checked = true;
+    }
+    
     generateReport();
 }
 
