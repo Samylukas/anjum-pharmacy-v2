@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anjum Green Pharmacy 2026</title>
+    <title>Anjum Pharmacy 2026</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -23,7 +22,7 @@
         .app-container { width: 100%; max-width: 1050px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; font-weight: 800; }
 
-        /* --- ✨ Splash Screen ✨ --- */
+        /* --- ✨ Splash Screen (English Only) ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -31,7 +30,7 @@
             transition: opacity 0.8s ease-in-out; direction: ltr;
         }
         .splash-title {
-            font-size: 2.4rem; font-weight: 800; margin-top: 20px;
+            font-size: 2.8rem; font-weight: 800; margin-top: 20px;
             opacity: 0; transform: translateY(20px);
             animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
             text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -143,21 +142,16 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- 🖨️ CSS الطباعة المخصص والحل الجذري لمشكلة تداخل الخطوط --- */
+        /* --- 🖨️ CSS الطباعة المخصص --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
         
         .report-print-container { background: #fff; padding: 10px; border-radius: 6px; width: 100%; overflow-x: auto; } 
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 12px; font-size: 1.3rem; display: none; border-bottom: 2px solid #f39c12; padding-bottom: 6px; font-weight: 800; }
         
-        /* هذا الجزء هو الذي يحل مشكلة تداخل الحروف في الـ PDF عن طريق إجبار html2canvas على استخدام خطوط النظام الأساسية للغة العربية */
-        .pdf-compact, .pdf-compact * {
-            font-family: Tahoma, Arial, sans-serif !important;
-            letter-spacing: normal !important;
-        }
-        .pdf-compact table { font-size: 10px !important; line-height: 1.5 !important; width: 100% !important; table-layout: auto !important; direction: rtl !important; }
-        .pdf-compact th, .pdf-compact td { padding: 5px !important; white-space: normal !important; word-break: break-word !important; text-align: center !important; }
-        .pdf-compact .report-title-header { font-size: 1.2rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
+        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; table-layout: auto !important; direction: rtl !important; }
+        .pdf-compact th, .pdf-compact td { padding: 6px !important; white-space: normal !important; word-break: break-word !important; text-align: center !important; }
+        .pdf-compact .report-title-header { font-size: 1.3rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         
         .chart-page { width: 100%; height: 350px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 8px; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
@@ -173,7 +167,7 @@
 </head>
 <body>
 
-<!-- ✨ Splash Screen (English) ✨ -->
+<!-- ✨ Splash Screen (English Only) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
@@ -189,7 +183,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Pharmacy</span>
     </div>
 </div>
 
@@ -202,7 +196,7 @@
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:12px; font-size:1.3rem; font-weight:800;">
-            🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم الخضراء
+            🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم
         </h2>
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:12px; font-weight:bold;">
             <option value="">⏳ جاري تحميل المستخدمين...</option>
@@ -222,7 +216,7 @@
         <button class="btn btn-red" style="width:auto; margin:0; padding:6px 12px; font-size:0.8rem;" onclick="logout()">تسجيل الخروج 🚪</button>
     </div>
 
-    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم الخضراء 2026</h1>
+    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم 2026</h1>
     <div id="syncIndicator" class="sync-status status-online">🟢 متصل بالإنترنت</div>
 
     <div id="alertsContainer" class="alerts-bar">
@@ -344,7 +338,7 @@
 
         <div id="stockPrintArea">
             <div style="text-align:center; margin-bottom:12px;" class="report-title-header" id="stockPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem; font-weight:800;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المخزون الحالي</h3>
             </div>
             <div class="table-responsive"><table>
@@ -430,7 +424,7 @@
 
         <div id="financePrintArea" class="report-print-container">
             <div class="report-title-header" id="financePrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">التقرير المالي (المصروفات والإيرادات)</h3>
             </div>
 
@@ -508,7 +502,7 @@
 
         <div id="reportsPrintArea" class="report-print-container">
             <div class="report-title-header" id="salesPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المبيعات الشامل</h3>
             </div>
             
@@ -1101,7 +1095,7 @@ function promptPrintBarcodeLabel(prodId) {
     if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
 
     openModal(`
-        <h3 style="color:#1e3c72; margin-bottom:10px; text-align:center;">🏷️ خيارات طباعة الباركود</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:10px;">🏷️ خيارات طباعة الباركود</h3>
         <p style="font-size:1rem; font-weight:bold; margin-bottom:12px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
         
         <div class="payment-grid" style="margin-bottom:12px;">
@@ -1399,10 +1393,9 @@ function renderInvoice() {
 }
 
 function getItemPaidText(item) {
-    if (!item) return ''; let parts = [];
-    if (item.usd > 0) parts.push(`${item.usd} $`); if (item.eur > 0) parts.push(`${item.eur} €`); if (item.gbp > 0) parts.push(`${item.gbp} £`); if (item.egp > 0) parts.push(`${item.egp} EGP`); if (item.visa > 0) parts.push(`${item.visa} Visa`);
-    const paidStr = parts.length > 0 ? parts.join(" - ") : `${(item.sellTotal || 0).toFixed(1)} EGP`;
-    return `${item.name} | كمية: ${item.qty} | دفع: ${paidStr} | بائع: ${item.seller || 'Unknown'}`;
+    if (!item) return ''; 
+    // هذه الصيغة هي التي منعت تداخل النصوص واللغات في الـ PDF
+    return `صنف: ${escapeHtml(item.name)} - كمية: ${item.qty} - بائع: ${escapeHtml(item.seller || '-')}`;
 }
 
 function saveInvoice() {
@@ -1640,7 +1633,7 @@ function printSingleReceipt(invId) {
 
     const receiptHTML = `
         <div style="text-align:center; direction:rtl; font-family: Tahoma, Arial, sans-serif; padding:10px;">
-            <h2 style="margin-bottom:5px;">صيدلية أنجم الخضراء 🌿</h2>
+            <h2 style="margin-bottom:5px;">صيدلية أنجم 🌿</h2>
             <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
             <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
             <hr style="border-top:1.5px dashed #000; margin:8px 0;">
@@ -1687,10 +1680,12 @@ function buildInvoiceTally(filteredInvoices) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                return `• ${escapeHtml(getItemPaidText(i))}`;
-            }).join('<br>');
+                // استخدام بناء نقي بدون تداخل اللغات
+                return `<div style="text-align:right;">• صنف: ${escapeHtml(i.name)} | كمية: ${i.qty} | بائع: ${escapeHtml(i.seller || '-')}</div>`;
+            }).join('');
         } else {
-            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText)).replace(/\(\vert{}\)/g, '').split(' | ').map(t => `• ${t}`).join('<br>');
+            // محاولة تنظيف السجل القديم
+            itemsListHtml = `<div style="text-align:right;">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</div>`;
             u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
             (inv.itemsText ? inv.itemsText.split(' | ') : []).forEach(raw => {
                 const namePart = raw.split(' (العدد: ')[0] || raw.split(' (x')[0] || raw.split(' | ')[0]; const qtyPart = raw.match(/العدد:\s*(\d+)/) || raw.match(/Qty:\s*(\d+)/); const qty = qtyPart ? parseInt(qtyPart[1]) : 1; const cleanName = namePart.trim();
@@ -1724,7 +1719,8 @@ function generateReport() {
     const tally = buildInvoiceTally(filteredInvoices);
 
     tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        const payBreakdown = `<div style="direction:ltr; font-size:0.8rem; font-weight:bold;">$:${u} | €:${eu} | £:${g}<br>EGP:${eg} | VISA:${v}</div>`;
+        // حماية الأرقام بوضعها في DIV من اليسار لليمين لمنع تداخلها
+        const payBreakdown = `<div dir="ltr" style="font-size:0.8rem; font-weight:bold; text-align:center;">$:${u} | €:${eu} | £:${g}<br>EGP:${eg} | VISA:${v}</div>`;
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
@@ -1792,7 +1788,7 @@ function generateReport() {
             options: {
                 animation: false, responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Tahoma' } },
+                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Cairo' } },
                     legend: { display: false }
                 },
                 scales: {
