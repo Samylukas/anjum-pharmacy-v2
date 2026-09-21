@@ -100,9 +100,6 @@
         .btn-orange { background: #f39c12; } 
         .btn-gray { background: #7f8c8d; }
         .btn-dark { background: #34495e; }
-        
-        .btn-outline { background: #fff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-outline:hover { background: #1e3c72; color: #fff; }
 
         .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
@@ -118,13 +115,10 @@
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; font-weight: 600; }
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
         
-        .total-row td { background-color: #eafaf1 !important; border-top: 2px solid #27ae60 !important; font-weight: 900 !important; font-size: 1.1rem !important; color: #2c3e50; }
-
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
         
-        /* شاشة الدخول الأصلية الأنيقة */
         .login-overlay { position: fixed; inset: 0; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
         .login-card { background: white; padding: 35px 25px; border-radius: 16px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .pass-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
@@ -141,7 +135,7 @@
 
         /* حل مشكلة ألوان الإشعارات */
         #toastStack { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { color: white !important; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; animation: toastIn 0.3s ease-out; background: #34495e; }
+        .toast { color: white !important; padding: 15px; border-radius: 8px; font-size: 1.05rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; animation: toastIn 0.3s ease-out; background: #34495e; }
         .toast.success { background: #27ae60 !important; } 
         .toast.error { background: #e74c3c !important; } 
         .toast.warn { background: #f39c12 !important; }
@@ -164,7 +158,7 @@
         .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
         .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         
-        .chart-page { width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
+        .chart-page { width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; margin-top: 20px; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
 
         .modern-date-picker { display: flex; flex-direction: row; gap: 20px; align-items: center; justify-content: center; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; flex-wrap: wrap; }
@@ -209,7 +203,7 @@
     <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
 </div>
 
-<!-- ✨ Splash Screen (English & Brown Stem) ✨ -->
+<!-- ✨ Splash Screen ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
@@ -226,7 +220,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
+        <span class="splash-anjum" style="color:#1e3c72;">Anjum</span> <br> <span class="splash-green" style="color:#27ae60;">Green Pharmacy</span>
     </div>
 </div>
 
@@ -297,6 +291,7 @@
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📄 رقم: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
+        <!-- أزرار النافيجيشن الجديدة (أسهم دائرية) -->
         <div class="nav-controls">
             <button class="nav-icon-btn" onclick="navigateInvoice('first')" title="الأولى">⏭️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('prev')" title="السابقة">▶️</button>
@@ -516,7 +511,6 @@
             <h2 class="section-title">📊 التقارير ولوحة المؤشرات</h2>
             
             <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:20px; align-items: center; justify-content:center;">
-                <!-- حقول التاريخ المودرن أفقية -->
                 <div class="modern-date-picker">
                     <div class="modern-date-row"><label>📅 من تاريخ:</label> <input type="date" id="fromDate"></div>
                     <div class="modern-date-row"><label>📅 إلى تاريخ:</label> <input type="date" id="toDate"></div>
@@ -531,7 +525,7 @@
                 </div>
             </div>
 
-            <!-- الكارت العلوي المنفصل لصافي الربح (يظهر عند الضغط على زر صافي الربح) -->
+            <!-- الكارت العلوي المنفصل لصافي الربح (الماستر بيس) -->
             <div id="profitBox" class="card" style="display:none; background:#1e3c72; color:white; margin-top:20px; position:relative; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
                 <button class="btn btn-red close-summary-btn" style="position:absolute; top:10px; left:10px; padding:6px 12px; font-size:0.9rem;" onclick="document.getElementById('profitBox').style.display='none'">إغلاق ❌</button>
                 <h3 style="text-align:center; margin-bottom:15px; font-size:1.5rem; font-weight:800; color:#fff;">📊 الملخص المالي الشامل (مفصل)</h3>
@@ -592,12 +586,12 @@
                 </table>
             </div>
 
-            <!-- بطاقات الإجماليات المُعرّبة الأنيقة (السفلية الأساسية) -->
+            <!-- بطاقات الإجماليات المُعرّبة الأنيقة -->
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px;">
                 <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:center; flex-wrap:wrap;"></div>
                 
                 <!-- الرسوم البيانية المتراصة عمودياً -->
-                <div id="advancedChartsArea" style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
+                <div id="advancedChartsArea" style="display:none; flex-direction:column; gap:20px; margin-top:20px;">
                     <div class="chart-page" style="page-break-inside: avoid; width: 100%;">
                         <canvas id="monthlyChart"></canvas>
                     </div>
@@ -670,11 +664,41 @@ async function sha256Hex(text) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// دالة الإشعارات الجديدة بألوان واضحة وتصميم قوي
+async function handleFileExport(blob, fileName, fileType) {
+    const file = new File([blob], fileName, { type: fileType });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                files: [file],
+                title: fileName,
+                text: 'مشاركة التقرير'
+            });
+            toast('✅ تم استخراج التقرير والمشاركة بنجاح!', 'success');
+        } catch (e) {
+            forceDownload(blob, fileName);
+        }
+    } else {
+        forceDownload(blob, fileName);
+    }
+}
+
+function forceDownload(blob, fileName) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    toast('✅ تم الحفظ. إذا لم تجد الملف، تحقق من مدير الملفات (التنزيلات).', 'success', 4000);
+}
+
 function toast(message, type = 'info', ms = 3500) {
     const stack = document.getElementById('toastStack');
     if (!stack) return;
     const el = document.createElement('div');
-    // Ensure all toasts have distinct visible backgrounds
     const typeClass = (type === 'success' || type === 'error' || type === 'warn' || type === 'info') ? type : 'info';
     el.className = 'toast ' + typeClass;
     el.innerHTML = message; 
@@ -753,8 +777,10 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
     };
 
     try {
-        await html2pdf().set(opt).from(element).save();
-        toast('✅ تم التنزيل بنجاح!', 'success');
+        const worker = html2pdf().set(opt).from(element);
+        const pdf = await worker.toPdf().get('pdf');
+        const pdfBlob = pdf.output('blob');
+        await handleFileExport(pdfBlob, fileName, 'application/pdf');
     } catch (err) {
         console.error('PDF Error:', err);
         toast('❌ حدث خطأ، سيتم استخدام الطباعة العادية', 'error');
@@ -1267,24 +1293,7 @@ function executeAdvancedPrint(prodId) {
         const element = document.querySelector('.custom-label-card'); 
         html2canvas(element, { scale: 6, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
             canvas.toBlob(async (blob) => {
-                const fileName = `Barcode_${prod.barcode}.png`;
-                const file = new File([blob], fileName, { type: 'image/png' });
-                
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            title: 'طباعة باركود',
-                            text: 'مشاركة لتطبيق الطابعة'
-                        });
-                        toast("✅ تم الإرسال للطابعة!", "success");
-                    } catch (err) {
-                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
-                    }
-                } else {
-                    const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
-                }
-                
+                await handleFileExport(blob, `Barcode_${prod.barcode}.png`, 'image/png');
                 printSec.style.display = 'none'; printSec.innerHTML = '';
             }, 'image/png');
         });
@@ -1570,8 +1579,6 @@ function renderFinanceTable() {
                 <td class="no-pdf"><button class="btn btn-red" style="padding:4px 8px; font-size:0.9rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">حذف 🗑️</button></td>
             </tr>`;
         }).join('');
-        
-        // لا يوجد صف اجماليات بناء على طلبك الأخير
     }
 
     if (includeSales) {
@@ -1591,8 +1598,12 @@ function exportFinanceExcel() {
     const filtered = savedFinances.filter(f => {
         if (!f.date) return true; const fD = f.date.slice(0, 10); if (fromD && fD < fromD) return false; if (toD && fD > toD) return false; return true;
     });
+    
+    // استخدام طريقة Blob + Web Share لنجاح تحميل الإكسيل على الأندرويد
     const excelData = filtered.map((f, i) => ({ "#": i + 1, "التاريخ": f.date, "النوع": f.type === 'Revenue'?'إيراد':'مصروف', "التصنيف": f.category, "المبلغ (EGP)": f.amount, "ملاحظات": f.notes || "" }));
-    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المالية"); XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المالية"); 
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    handleFileExport(new Blob([wbout]), `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 
 /* ---------- Stock Operations ---------- */
@@ -1795,7 +1806,7 @@ function filteredInvoicesByRange(fromD, toD) {
     return savedInvoices.filter(inv => { if (!inv.date) return true; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return false; if (toD && invD > toD) return false; return true; });
 }
 
-// دالة منفصلة لتحديث الكارت العلوي الفخم لصافي الربح
+// دالة تحديث الكارت العلوي المنفصل لصافي الربح
 function updateTopProfitBox() {
     const fromD = document.getElementById('fromDate')?.value || ''; 
     const toD = document.getElementById('toDate')?.value || '';
@@ -1814,6 +1825,8 @@ function updateTopProfitBox() {
             }
         });
         finalNetProfit -= totalExpensesInPeriod;
+        // إشعار باللون الأزرق المريح لمعلومات الخصم
+        toast(`تم خصم إجمالي المصروفات (${totalExpensesInPeriod.toFixed(2)} ج.م)`, 'info', 3000);
     }
 
     if(document.getElementById('topUSD')) document.getElementById('topUSD').textContent = '$' + tally.sumUSD.toFixed(2);
@@ -1829,7 +1842,6 @@ function updateTopProfitBox() {
 
 function handleNetProfitAction() {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
-    
     const pBox = document.getElementById('profitBox');
     if(pBox) {
         pBox.style.display = 'block';
@@ -1837,7 +1849,6 @@ function handleNetProfitAction() {
     }
 }
 
-// دالة توليد التقرير الأساسي (الجدول، الكروت السفلية، والرسومات البيانية)
 function generateReport() {
     const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
     
@@ -1845,7 +1856,7 @@ function generateReport() {
     const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
 
     if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
         if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
         if (document.getElementById('advancedChartsArea')) document.getElementById('advancedChartsArea').style.display = 'none';
         return;
@@ -1881,9 +1892,9 @@ function generateReport() {
         </tr>`;
     }).join('');
 
-    tbody.innerHTML = rowsHtml; // إزالة صف الإجماليات من الجدول بناء على طلبك
+    tbody.innerHTML = rowsHtml;
 
-    // تحديث الكروت السفلية لتكون ملخص سريع
+    // البطاقات السفلية للتقرير
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
         cardsContainer.innerHTML = `
@@ -1960,39 +1971,6 @@ function generateReport() {
     }
 }
 
-function printSingleReceipt(invId) {
-    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
-
-    let itemsHtml;
-    if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty})</td><td style="text-align:left; font-weight:bold; font-family: Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
-    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<br>/g, ' | '))}</td></tr>`; }
-
-    const receiptHTML = `
-        <div style="text-align:center; direction:rtl; padding:10px;">
-            <h2 style="margin-bottom:5px;">Anjum Green Pharmacy 🌿</h2>
-            <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
-            <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
-            <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                <thead><tr><th style="text-align:right; border-bottom:1px solid #000; padding-bottom:5px;">الصنف</th><th style="text-align:left; border-bottom:1px solid #000; padding-bottom:5px;">الإجمالي</th></tr></thead>
-                <tbody>${itemsHtml}</tbody>
-            </table>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
-            <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
-            <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
-            <p style="font-size:11px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Green Pharmacy 2026</div>
-        </div>
-    `;
-
-    const printSec = document.getElementById('receiptPrintSection');
-    if (printSec) {
-        printSec.innerHTML = receiptHTML; document.body.classList.add('printing-receipt'); window.print();
-        setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.innerHTML = ''; }, 500);
-    }
-}
-
 function exportSalesReportExcel() {
     const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
     const filteredInvoices = savedInvoices.filter(inv => {
@@ -2009,7 +1987,30 @@ function exportSalesReportExcel() {
         return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صافي الربح": inv.netProfit || 0 };
     });
 
-    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); 
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    handleFileExport(new Blob([wbout]), `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+
+function loadInvoiceToEdit(invId) {
+    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
+    showTab('salesTab'); loadInvoiceIntoForm(inv);
+}
+
+function cancelInvoiceSystem(invId) {
+    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    const invIdx = savedInvoices.findIndex(i => i.id === invId); if (invIdx === -1) return;
+    const inv = savedInvoices[invIdx];
+
+    confirmModal(`هل أنت متأكد من حذف الفاتورة #${invId} بشكل نهائي؟`, () => {
+        if (inv.items && Array.isArray(inv.items)) {
+            inv.items.forEach(item => { const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); if (p) { p.q += item.qty; syncToCloud("updateSingleProduct", p); } });
+            saveProductsToStorage(); renderStockTable(); updateAlertsBar();
+        }
+        savedInvoices.splice(invIdx, 1); saveInvoicesToStorage(); syncToCloud("deleteInvoice", { id: invId });
+        toast(`🗑️ تم حذف الفاتورة #${invId}!`, 'success'); fetchCloudInvoicesData();
+    });
 }
 
 /* ---------- Single Product History ---------- */
@@ -2030,7 +2031,7 @@ function searchSingleProductReport() {
 
     if (matchedProds.length > 0 && query.length < 3) {
         list.innerHTML = matchedProds.map(p => `<div class="result-item" data-name="${escapeHtml(p.n)}"><span style="font-weight:bold; color:#1e3c72;">${escapeHtml(p.n)}</span></div>`).join('');
-        list.querySelectorAll('.result-item').forEach(el => el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
+        list.querySelectorAll('.result-item').forEach(el => { el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
         list.style.display = 'block';
     } else { if(list) list.style.display = 'none'; generateSingleProductDetailsReport(query); }
 }
