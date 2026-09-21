@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anjum Green Pharmacy 2026</title>
+    <title>Anjum Pharmacy 2026</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
         html, body { width: 100%; overflow-x: hidden; background-color: #f4f7f6; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; font-size: 13.5px; }
         
         .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: transparent; padding: 10px; min-height: 95vh; padding-bottom: 60px; }
-        h1 { text-align: center; color: #1e3c72; margin-bottom: 12px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
         /* --- ✨ Splash Screen (English & Brown Stem) ✨ --- */
         #splashScreen {
@@ -90,16 +90,31 @@
         
         .warning-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; margin-top: 10px; text-align: center; display: none; }
         
+        /* ألوان الأزرار المتطابقة مع الصور */
         .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; color: white; }
         .btn:hover { opacity: 0.9; transform: scale(1.02); }
-        .btn-green { background: #27ae60; } .btn-blue { background: #1e3c72; } .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #f39c12; } .btn-gray { background: #7f8c8d; }
+        .btn-green { background: #27ae60; } 
+        .btn-blue { background: #1e3c72; } 
+        .btn-red { background: #e74c3c; } 
+        .btn-purple { background: #8e44ad; } 
+        .btn-orange { background: #f39c12; } 
+        .btn-gray { background: #7f8c8d; }
+        .btn-dark { background: #34495e; }
         
+        /* أزرار المخزون الكبيرة المطلوبة */
+        .btn-large-stock { padding: 12px 20px !important; font-size: 1.05rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .nav-controls .btn-outline { background: #fff; color: #1e3c72; border: 1px solid #1e3c72; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .nav-controls .btn-outline:hover { background: #1e3c72; color: #fff; }
+
         .toolbar-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; }
         
         .table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; border-radius: 8px; border: 1px solid #eee; background: #fff; -webkit-overflow-scrolling: touch; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; text-align: center; }
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.85rem; font-weight: 600; }
+        /* اللون البرتقالي لرأس الجدول كما في الصور */
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
         
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
@@ -132,8 +147,8 @@
         .report-print-container { background: #fff; padding: 15px; border-radius: 10px; width: 100%; overflow-x: auto; margin-top: 15px; } 
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.5rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
         
-        /* إعدادات الطباعة المستنسخة تماماً من Fleet Pro لضمان نجاح الـ PDF */
-        .pdf-compact table { font-size: 11px !important; line-height: 1.3 !important; width: 100% !important; }
+        /* إعدادات الطباعة المستنسخة تماماً من Fleet Pro لضمان نجاح الـ PDF وعدم التداخل */
+        .pdf-compact table { font-size: 11px !important; line-height: 1.5 !important; width: 100% !important; }
         .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
         .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         .page-break-row { page-break-after: always !important; break-after: page !important; }
@@ -155,6 +170,7 @@
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
+            <!-- الساق باللون البني الأصلي -->
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
@@ -167,7 +183,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Pharmacy</span>
     </div>
 </div>
 
@@ -177,7 +193,7 @@
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:8px; font-size:1.6rem; font-weight:800;">تسجيل الدخول</h2>
-        <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1rem;">نظام صيدلية أنجم الخضراء</p>
+        <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1rem;">نظام صيدلية أنجم</p>
         
         <div class="pay-box" style="margin-bottom:15px;">
             <select id="entryUserSelect" class="search-box" style="text-align:center; font-weight:bold; font-size:1.1rem; padding:12px;">
@@ -189,7 +205,7 @@
             <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
         <button class="btn btn-blue" style="width: 100%; font-size:1.1rem; padding:12px;" onclick="validateEntryPassword()">دخول 🚀</button>
-        <div style="margin-top:20px; font-size:0.8rem; font-weight:700; color:#95a5a6;">✨ برمجة وتصميم Samy Lukas</div>
+        <div style="margin-top:20px; font-size:0.8rem; font-weight:700; color:#95a5a6;">✨ برمجة وتصميم صيدلية أنجم</div>
     </div>
 </div>
 
@@ -202,7 +218,7 @@
         </div>
     </div>
 
-    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم الخضراء 2026</h1>
+    <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم 2026</h1>
 
     <div id="alertsContainer" class="alerts-bar">
         <div>🔔 ملخص الحالة: <span id="lowStockCountVal" style="color:#c0392b;">0 نواقص</span> | <span id="expiringCountVal" style="color:#e67e22;">0 صلاحية قريبة</span></div>
@@ -210,7 +226,7 @@
     </div>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', this)">🛒 نقاط البيع</button>
+        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', this)">🛒 بيع مباشر</button>
         <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', this)">🔒 📦 المخزون</button>
         <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', this)">🔒 ➕ إضافة أصناف</button>
         <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', this)">🔒 💵 المالية</button>
@@ -222,6 +238,7 @@
     <div id="salesTab" class="tab-content active">
         <h2 class="section-title">📝 فاتورة مبيعات</h2>
 
+        <!-- أزرار بالألوان المطابقة لطلبك -->
         <div class="toolbar-row" style="margin-bottom: 15px;">
             <button class="btn btn-blue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
             <button class="btn btn-orange" onclick="prepareNewInvoice()">جديدة ➕</button>
@@ -236,10 +253,10 @@
         </div>
 
         <div class="nav-controls" style="margin-bottom: 15px;">
-            <button class="btn btn-outline" style="color:#1e3c72; border:1px solid #1e3c72; background:#fff;" onclick="navInvoice('first')">الأولى ⏮️</button>
-            <button class="btn btn-outline" style="color:#1e3c72; border:1px solid #1e3c72; background:#fff;" onclick="navInvoice('prev')">السابقة ◀️</button>
-            <button class="btn btn-outline" style="color:#1e3c72; border:1px solid #1e3c72; background:#fff;" onclick="navInvoice('next')">التالية ▶️</button>
-            <button class="btn btn-outline" style="color:#1e3c72; border:1px solid #1e3c72; background:#fff;" onclick="navInvoice('last')">الأخيرة ⏭️</button>
+            <button class="btn btn-outline" onclick="navigateInvoice('first')">الأولى ⏮️</button>
+            <button class="btn btn-outline" onclick="navigateInvoice('prev')">السابقة ◀️</button>
+            <button class="btn btn-outline" onclick="navigateInvoice('next')">التالية ▶️</button>
+            <button class="btn btn-outline" onclick="navigateInvoice('last')">الأخيرة ⏭️</button>
         </div>
 
         <div style="display:flex; gap:10px; margin-top:10px;">
@@ -277,12 +294,13 @@
             <button class="btn btn-green" style="width: 100%; margin-top: 15px; font-size:1.1rem; padding:12px;" onclick="addToInvoice()">إضافة للفاتورة 🛒</button>
         </div>
 
+        <!-- شكل الجدول الكحلي والبرتقالي الذي تفضله -->
         <div class="card" style="margin-top:20px; padding:0; overflow:hidden;">
             <h3 style="background:#1e3c72; color:#fff; padding:12px; font-size:1.1rem; margin:0;">📄 الأصناف المضافة</h3>
             <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
                 <table style="width:100%;">
-                    <thead><tr><th style="width:40px;">#</th><th>الصنف</th><th>الكمية</th><th>إجمالي الجملة</th><th>الدفع</th><th>إجمالي البيع</th><th>البائع</th><th style="width:70px;">إجراء</th></tr></thead>
-                    <tbody id="invoiceTableBody"><tr><td colspan="8" style="color: #7f8c8d; padding:20px;">الفاتورة فارغة</td></tr></tbody>
+                    <thead><tr><th style="width:40px;">#</th><th>الصنف</th><th>الكمية</th><th>إجمالي الجملة</th><th>الدفع</th><th>إجمالي البيع</th><th style="width:70px;">إجراء</th></tr></thead>
+                    <tbody id="invoiceTableBody"><tr><td colspan="7" style="color: #7f8c8d; padding:20px;">الفاتورة فارغة</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -307,7 +325,7 @@
         <button class="btn btn-blue" style="margin-top: 20px; font-size: 1.2rem; width:100%; padding:15px;" onclick="saveInvoice()">حفظ الفاتورة (Ctrl+S) 💾</button>
     </div>
 
-    <!-- 2. Stock Tab (أزرار كبيرة وبارزة جداً للمخزون) -->
+    <!-- 2. Stock Tab -->
     <div id="stockTab" class="tab-content manager-only">
         <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; background:#f9fbfd;">
             <h2 class="section-title" style="margin:0; border:none; padding:0;">📦 إدارة المخزون</h2>
@@ -327,7 +345,7 @@
 
         <div class="card" id="stockPrintArea" style="padding:0; overflow:hidden;">
             <div style="text-align:center; margin:20px 0;" class="report-title-header" id="stockPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:5px 0; font-size:1.2rem;">تقرير المخزون الشامل</h3>
             </div>
             <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
@@ -435,7 +453,7 @@
 
             <div id="financePrintArea" style="background:#fff; border-radius:8px; overflow:hidden;">
                 <div class="report-title-header" id="financePrintHeader" style="margin:20px 0;">
-                    <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                    <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم</h2>
                     <h3 style="color:#333; margin:5px 0; font-size:1.2rem;">تقرير الحركات المالية الشامل</h3>
                 </div>
                 <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
@@ -460,7 +478,7 @@
                 <div class="toolbar-row" style="gap:10px;">
                     <button class="btn btn-blue" style="padding:12px; font-size:1rem;" onclick="generateReport()">بحث 📈</button>
                     <button class="btn btn-purple" style="padding:12px; font-size:1rem;" onclick="handleNetProfitAction()">صافي الربح 💵</button>
-                    <button class="btn btn-dark" style="background:#34495e; padding:12px; font-size:1rem;" onclick="openRatesModal()">إعدادات العملات ⚙️</button>
+                    <button class="btn btn-dark" style="padding:12px; font-size:1rem;" onclick="openRatesModal()">إعدادات العملات ⚙️</button>
                     <button class="btn btn-red" style="padding:12px; font-size:1rem;" onclick="exportSalesReportPDF()">طباعة / PDF 📄</button>
                     <button class="btn btn-orange" style="padding:12px; font-size:1rem;" onclick="exportSalesReportExcel()">إكسيل 📊</button>
                 </div>
@@ -497,9 +515,10 @@
             </div>
         </div>
 
+        <!-- شكل جدول التقارير مطابق لكود Fleet Pro -->
         <div id="reportsPrintArea" class="card" style="padding:0; overflow:hidden; margin-top:20px;">
             <div class="report-title-header" id="salesPrintHeader" style="margin:20px 0;">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم</h2>
                 <h3 style="color:#333; margin:5px 0; font-size:1.2rem;">تقرير المبيعات الشامل</h3>
             </div>
             
@@ -509,7 +528,7 @@
                         <th style="width:40px;">#</th>
                         <th>الفاتورة</th>
                         <th>التاريخ والوقت</th>
-                        <th>تفاصيل الأصناف</th>
+                        <th>البيان / الأصناف</th>
                         <th>تفاصيل الدفع</th>
                         <th>الجملة</th>
                         <th>خصم %</th>
@@ -642,7 +661,7 @@ function formatDateDisplay(dateStr) {
 }
 
 /* ---------- 🖨️ Master Print / PDF Export Method ---------- */
-/* هنا نضمن طباعة التقارير بشكل ممتاز وبدون أي تقطيع أو تداخل تماماً مثل كود السيارات */
+/* هنا نضمن طباعة التقارير بشكل ممتاز وبدون أي تقطيع تماماً مثل كود السيارات */
 
 async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscape = false) {
     const element = document.getElementById(elementId);
@@ -836,7 +855,7 @@ async function createNewUserSystem() {
     cloudUsers.push(newUser); saveLocalUsers(cloudUsers);
     syncToCloud("createUser", { username: uName, passwordHash: passHash, role: uRole });
 
-    toast(`✅ تم إنشاء المستخدم [${uName.toUpperCase()}] بنجاح!`, 'success');
+    toast(`✅ تم إنشاء الحساب بنجاح!`, 'success');
     document.getElementById('addUserName').value = ''; document.getElementById('addUserPass').value = '';
 }
 
@@ -850,7 +869,7 @@ async function changeUserPasswordSystem() {
     if (uObj) {
         uObj.passwordHash = await sha256Hex(newPass); saveLocalUsers(cloudUsers);
         syncToCloud("updateUserPassword", { username: targetUser, newPasswordHash: uObj.passwordHash });
-        toast(`✅ تم تحديث الرقم السري للمستخدم [${targetUser.toUpperCase()}]!`, 'success');
+        toast(`✅ تم تحديث الرقم السري للمستخدم!`, 'success');
         document.getElementById('newAccountPass').value = '';
     }
 }
@@ -1367,18 +1386,17 @@ function renderInvoice() {
         tbody.innerHTML = invoiceItems.map((item, index) => {
             sumUSD += parseFloat(item.usd || 0); sumEUR += parseFloat(item.eur || 0); sumGBP += parseFloat(item.gbp || 0); sumEGP += parseFloat(item.egp || 0); sumVISA += parseFloat(item.visa || 0); totalSellEGP += parseFloat(item.sellTotal || 0);
             
-            // جعل الدفع نصاً عربياً بحتاً لتجنب أي تداخل
-            let payStr = `دولار: ${item.usd||0} | يورو: ${item.eur||0} | استرليني: ${item.gbp||0} | جنيه: ${item.egp||0} | فيزا: ${item.visa||0}`;
+            // جعل طريقة الدفع بالعلامات فقط كما طلبت
+            let payStr = `$ ${item.usd||0} | € ${item.eur||0} | £ ${item.gbp||0} | ${item.egp||0} ج.م | 💳 ${item.visa||0}`;
             
             return `
             <tr>
-                <td style="font-weight:bold;">${index + 1}</td>
-                <td style="font-weight:bold; text-align:right;">${escapeHtml(item.name)}</td>
-                <td style="font-weight:bold; font-size:1.1rem;">${item.qty}</td>
-                <td>${(item.commTotal || 0).toFixed(2)}</td>
+                <td style="font-weight:bold; font-size:1.05rem;">${index + 1}</td>
+                <td style="font-weight:bold; text-align:right; font-size:1.05rem;">${escapeHtml(item.name)}</td>
+                <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${item.qty}</td>
+                <td style="font-weight:bold;">${(item.commTotal || 0).toFixed(2)}</td>
                 <td style="direction:rtl;">${payStr}</td>
                 <td style="color:#27ae60; font-weight:bold; font-size:1.1rem;">${(item.sellTotal || 0).toFixed(2)}</td>
-                <td style="font-weight:bold; color:#1e3c72;">${escapeHtml(item.seller || 'Unknown')}</td>
                 <td><button class="btn btn-red" style="padding:6px 12px; font-size:0.9rem; margin:0;" onclick="removeInvoiceItem(${index})">حذف 🗑️</button></td>
             </tr>`;
         }).join('');
@@ -1396,12 +1414,12 @@ function renderInvoice() {
 }
 
 /* 
- * هذا الجزء الحيوي: إزالة أي حروف LTR (كالكلمات الإنجليزية ورموز العملات) 
- * وجعل النص عربياً صريحاً مفصولاً بـ <br> كما في Fleet Pro لضمان الـ PDF
+ * هذا الجزء هو الجوهر الذي يمنع تداخل اللغات في الـ PDF
+ * تم تحويل السجل ليكون نصاً مبسطاً تماماً بدون أي لغة إنجليزية
  */
 function getItemPaidText(item) {
     if (!item) return ''; 
-    return `&rlm;صنف: ${escapeHtml(item.name)} | كمية: ${item.qty} | بائع: ${escapeHtml(item.seller || 'غير معروف')}&rlm;`;
+    return `صنف: ${escapeHtml(item.name)} - كمية: ${item.qty}`;
 }
 
 function saveInvoice() {
@@ -1416,7 +1434,6 @@ function saveInvoice() {
     });
 
     const finalTotalAfterDiscount = totalSell - ((totalSell * invoiceDiscountPercent) / 100);
-    
     // دمج عناصر الفاتورة بـ <br> لسهولة القراءة والطباعة الصافية
     const finalItemsHtml = itemsSummaryText.join("<br>");
 
@@ -1535,7 +1552,7 @@ function editProductSystem(prodId) {
     const prod = findProductById(prodId); if (!prod) return;
 
     openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.5rem; font-weight:800;">✏️ تعديل بيانات المنتج</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">✏️ تعديل بيانات المنتج</h3>
         <div class="payment-grid">
             <div class="pay-box" style="grid-column:span 2;"><label>اسم المنتج</label><input type="text" id="editName" value="${escapeHtml(prod.n)}" style="padding:12px; font-size:1.1rem;"></div>
             <div class="pay-box"><label>سعر الجملة (EGP)</label><input type="number" id="editPrice" value="${prod.p}" style="padding:12px; font-size:1.1rem;"></div>
@@ -1544,8 +1561,8 @@ function editProductSystem(prodId) {
             <div class="pay-box"><label>تاريخ الصلاحية</label><input type="date" id="editExpiry" value="${escapeHtml(prod.expiry || '')}" style="padding:12px; font-size:1.1rem;"></div>
         </div>
         <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-            <button class="btn btn-green" style="padding:12px 25px; font-size:1.1rem;" onclick="saveProductEdit('${prodId}')">حفظ التعديل ✅</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 25px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+            <button class="btn btn-green" style="padding:10px 20px; font-size:1.1rem;" onclick="saveProductEdit('${prodId}')">حفظ التعديل ✅</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
         </div>
     `);
 }
@@ -1587,10 +1604,10 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
         <td style="font-family:monospace; font-weight:bold; color:#e67e22; direction:ltr; font-size:1.05rem;">${escapeHtml(p.barcode || '-')}</td>
         <td style="direction:ltr; font-weight:bold;">${escapeHtml(p.expiry || '-')}</td>
         <td class="no-pdf">
-            <button class="btn btn-blue" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
-            <button class="btn btn-purple" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="scanAndEditProductBarcode('${p.id}')">باركود 📷</button>
-            <button class="btn btn-purple" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px; background:#8e44ad;" onclick="promptPrintBarcodeLabel('${p.id}')">ملصق 🏷️</button>
-            <button class="btn btn-red" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="deleteProductSystem('${p.id}')">حذف 🗑️</button>
+            <button class="btn btn-blue" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
+            <button class="btn btn-purple" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="scanAndEditProductBarcode('${p.id}')">باركود 📷</button>
+            <button class="btn btn-purple" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px; background:#8e44ad;" onclick="promptPrintBarcodeLabel('${p.id}')">ملصق 🏷️</button>
+            <button class="btn btn-red" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="deleteProductSystem('${p.id}')">حذف 🗑️</button>
         </td>
     </tr>`;
 }
@@ -1639,8 +1656,8 @@ function printSingleReceipt(invId) {
 
     let itemsHtml;
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold;">${escapeHtml(i.name)} (الكمية: ${i.qty}) <br><small>البائع: ${escapeHtml(i.seller || 'غير معروف')}</small></td><td style="text-align:left; font-weight:bold;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
-    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right;">${escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<br>/g, ' | '))}</td></tr>`; }
+        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Tahoma, Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty})</td><td style="text-align:left; font-weight:bold; font-family: Tahoma, Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
+    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Tahoma, Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<br>/g, ' | '))}</td></tr>`; }
 
     const receiptHTML = `
         <div style="text-align:center; direction:rtl; padding:10px;">
@@ -1656,7 +1673,7 @@ function printSingleReceipt(invId) {
             <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
             <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
             <p style="font-size:11px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ برمجة Samy Lukas , Powered By Gemini</div>
+            <div style="font-size:10px; color:#555; margin-top:10px;">✨ برمجة وتصميم صيدلية أنجم</div>
         </div>
     `;
 
@@ -1697,12 +1714,15 @@ function buildInvoiceTally(filteredInvoices) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                // استنساخ بناء Fleet Pro بالضبط (نص عادي بدون تقسيمات معقدة لضمان الـ PDF)
-                return `صنف: ${escapeHtml(i.name)} | كمية: ${i.qty} | بائع: ${escapeHtml(i.seller || '-')}`;
+                // استنساخ بناء Fleet Pro بالضبط (نص عادي بدون أي علامات لضمان الـ PDF)
+                return `صنف: ${escapeHtml(i.name)} | كمية: ${i.qty}`;
             }).join('<br>');
         } else {
             // معالجة الفواتير القديمة المحفوظة بصيغ سابقة
             itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
+            // إزالة كلمة بائع أو Seller منها لتوحيد الشكل
+            itemsListHtml = itemsListHtml.replace(/\|?\s*(بائع|Seller):.*?(?=(\||$))/gi, '').trim();
+            
             u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
             (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
                 const namePart = raw.split(' | ')[0] || raw;
@@ -1730,7 +1750,7 @@ function generateReport() {
     const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
 
     if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
         if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
         if (document.getElementById('chartsArea')) document.getElementById('chartsArea').style.display = 'none';
         return;
@@ -1739,20 +1759,20 @@ function generateReport() {
     const tally = buildInvoiceTally(filteredInvoices);
 
     tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        // نص الدفع مسطح وبالعربي لضمان الطباعة بدون عكس
-        const payBreakdown = `دولار: ${u} | يورو: ${eu} | استرليني: ${g} <br> جنيه: ${eg} | فيزا: ${v}`;
+        // نص الدفع مسطح وبالرموز فقط لتجنب أي انعكاس
+        const payBreakdown = `$ ${u} | € ${eu} | £ ${g} <br> ${eg} ج.م | 💳 ${v}`;
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
-            <td style="font-weight:bold; font-size:1.1rem;">${index + 1}</td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#e67e22;">#${inv.id}</td>
-            <td style="direction:ltr; font-weight:bold; font-size:1.05rem;">${escapeHtml(cleanDateStr)}</td>
+            <td style="font-weight:bold; font-size:1.05rem;">${index + 1}</td>
+            <td style="font-weight:bold; font-size:1.05rem; color:#e67e22;">#${inv.id}</td>
+            <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
             <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
-            <td style="font-weight:bold;">${payBreakdown}</td>
+            <td style="font-weight:bold; direction:rtl;">${payBreakdown}</td>
             <td style="color:#2c3e50; font-weight:bold; font-size:1.1rem;">${(inv.totalComm || 0).toFixed(2)}</td>
             <td style="color:#e67e22; font-weight:bold; font-size:1.1rem;">${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold; font-size:1.2rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
-            <td style="color:#8e44ad; font-weight:bold; font-size:1.2rem;">${(inv.netProfit || 0).toFixed(2)}</td>
+            <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
+            <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
             <td class="no-pdf">
                 <button class="btn btn-purple" style="padding:6px 12px; font-size:0.9rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
                 <button class="btn btn-blue" style="padding:6px 12px; font-size:0.9rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
@@ -1930,16 +1950,16 @@ function generateSingleProductDetailsReport(productName) {
             <td style="font-weight:bold;">${idx + 1}</td>
             <td style="font-weight:bold; color:#e67e22; font-size:1.1rem;">#${h.invId}</td>
             <td style="direction:ltr; font-weight:bold;">${escapeHtml(formatDateDisplay(h.date))}</td>
-            <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${h.qty}</td>
-            <td style="font-weight:bold; color:#27ae60; font-size:1.1rem;">${parseFloat(h.sellTotal).toFixed(2)}</td>
+            <td style="font-weight:bold; font-size:1.1rem; color:#1e3c72;">${h.qty}</td>
+            <td style="font-weight:bold; font-size:1.1rem; color:#27ae60;">${parseFloat(h.sellTotal).toFixed(2)}</td>
             <td style="font-weight:bold;">${escapeHtml(h.seller)}</td>
         </tr>`).join('');
 
     display.innerHTML = `
         <h3 style="color:#1e3c72; text-align:center; margin-bottom:15px; font-weight:800;">📦 تقرير مبيعات المنتج: <span style="color:#27ae60;">${escapeHtml(productName)}</span></h3>
-        <div class="info-row" style="background:#eef7fe; padding:12px; border-radius:8px; margin-bottom:15px;">
-            <div style="font-size:1.05rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.2rem; font-weight:bold;">${totalQtySold}</span></div>
-            <div style="font-size:1.05rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.2rem; font-weight:bold;">${totalRevenue.toFixed(2)} ج.م</span></div>
+        <div class="info-row" style="background:#eef7fe; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <div style="font-size:1.05rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.3rem; font-weight:bold;">${totalQtySold}</span></div>
+            <div style="font-size:1.05rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.3rem; font-weight:bold;">${totalRevenue.toFixed(2)} ج.م</span></div>
         </div>
         <div class="table-responsive"><table>
             <thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ والوقت</th><th>الكمية</th><th>المبلغ الإجمالي</th><th>البائع</th></tr></thead>
