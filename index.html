@@ -143,16 +143,21 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- 🖨️ CSS الطباعة المخصص --- */
+        /* --- 🖨️ CSS الطباعة المخصص والحل الجذري لمشكلة تداخل الخطوط --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
         
         .report-print-container { background: #fff; padding: 10px; border-radius: 6px; width: 100%; overflow-x: auto; } 
         .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 12px; font-size: 1.3rem; display: none; border-bottom: 2px solid #f39c12; padding-bottom: 6px; font-weight: 800; }
         
-        .pdf-compact table { font-size: 9px !important; line-height: 1.2 !important; width: 100% !important; table-layout: auto !important; }
-        .pdf-compact th, .pdf-compact td { padding: 4px !important; white-space: normal !important; word-break: break-word !important; }
-        .pdf-compact .report-title-header { font-size: 1.1rem !important; margin-bottom: 8px !important; padding-bottom: 4px !important; }
+        /* هذا الجزء هو الذي يحل مشكلة تداخل الحروف في الـ PDF عن طريق إجبار html2canvas على استخدام خطوط النظام الأساسية للغة العربية */
+        .pdf-compact, .pdf-compact * {
+            font-family: Tahoma, Arial, sans-serif !important;
+            letter-spacing: normal !important;
+        }
+        .pdf-compact table { font-size: 10px !important; line-height: 1.5 !important; width: 100% !important; table-layout: auto !important; direction: rtl !important; }
+        .pdf-compact th, .pdf-compact td { padding: 5px !important; white-space: normal !important; word-break: break-word !important; text-align: center !important; }
+        .pdf-compact .report-title-header { font-size: 1.2rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         
         .chart-page { width: 100%; height: 350px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 8px; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
@@ -168,7 +173,7 @@
 </head>
 <body>
 
-<!-- ✨ Splash Screen الاحترافية ✨ -->
+<!-- ✨ Splash Screen (English) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
@@ -319,11 +324,12 @@
         <button class="btn btn-blue" style="margin-top: 15px; font-size: 1rem; padding: 12px; width:100%;" onclick="saveInvoice()">حفظ ومزامنة الفاتورة (Ctrl+S) 💾</button>
     </div>
 
-    <!-- 2. Stock Tab (تم توفير أزرار واضحة وبارزة) -->
+    <!-- 2. Stock Tab -->
     <div id="stockTab" class="tab-content manager-only">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 تفاصيل المخزون</span>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <!-- أزرار واضحة وكبيرة للمخزون -->
                 <button class="btn btn-red" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="filterLowStock()">النواقص ⚠️</button>
                 <button class="btn btn-orange" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="filterNearExpiryOneMonth()">صلاحية قريبة ⚠️</button>
                 <button class="btn btn-purple" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="printStockTable()">طباعة / PDF 📄</button>
@@ -560,7 +566,7 @@
         </div>
     </div>
 
-    <!-- أزرار التمرير الصعود والهبوط -->
+    <!-- أزرار التمرير السريعة المستقلة -->
     <div class="scroll-btn-group">
         <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">⬆️</button>
         <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});">⬇️</button>
@@ -646,7 +652,7 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
     const element = document.getElementById(elementId);
     if (!element) return;
     
-    // إخفاء الأزرار يدوياً لتجنب ظهورها في الـ PDF (الحل المباشر للمشكلة)[cite: 1]
+    // إخفاء الأزرار يدوياً لتجنب ظهورها في الـ PDF
     const noPdfElements = element.querySelectorAll('.no-pdf');
     noPdfElements.forEach(el => el.style.display = 'none');
 
@@ -654,7 +660,7 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
-    // تفعيل وضع PDF المصغر للجدول وتقليل الخط لتجنب التداخل
+    // تفعيل وضع PDF المصغر للجدول وإجبار خط النظام للغة العربية
     element.classList.add('pdf-compact');
 
     // توزيع الصفحات للجداول الطويلة
@@ -1168,10 +1174,10 @@ function executeAdvancedPrint(prodId) {
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1;">صيدلية أنجم</div>
-                    ${showName ? `<div style="font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <div style="font-family: Tahoma, Arial, sans-serif; font-size: ${fontSz - 1}px; font-weight: bold; color: #000; line-height: 1;">صيدلية أنجم</div>
+                    ${showName ? `<div style="font-family: Tahoma, Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
                     <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
-                    ${showPrice ? `<div style="font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
+                    ${showPrice ? `<div style="font-family: Tahoma, Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
@@ -1629,11 +1635,11 @@ function printSingleReceipt(invId) {
 
     let itemsHtml;
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold;">${escapeHtml(i.name)} (الكمية: ${i.qty}) <br><small>البائع: ${escapeHtml(i.seller || 'غير معروف')}</small></td><td style="text-align:left; font-weight:bold;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
-    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right;">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</td></tr>`; }
+        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Tahoma, Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty}) <br><small>البائع: ${escapeHtml(i.seller || 'غير معروف')}</small></td><td style="text-align:left; font-weight:bold; font-family: Tahoma, Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
+    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Tahoma, Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText))}</td></tr>`; }
 
     const receiptHTML = `
-        <div style="text-align:center; direction:rtl; font-family:'Courier New', 'Cairo', monospace; padding:10px;">
+        <div style="text-align:center; direction:rtl; font-family: Tahoma, Arial, sans-serif; padding:10px;">
             <h2 style="margin-bottom:5px;">صيدلية أنجم الخضراء 🌿</h2>
             <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
             <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
@@ -1786,7 +1792,7 @@ function generateReport() {
             options: {
                 animation: false, responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Cairo' } },
+                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Tahoma' } },
                     legend: { display: false }
                 },
                 scales: {
