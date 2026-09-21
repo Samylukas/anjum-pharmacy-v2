@@ -24,7 +24,7 @@
         .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: transparent; padding: 10px; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        /* --- ✨ Splash Screen (English & Brown Stem) ✨ --- */
+        /* --- ✨ Splash Screen ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
@@ -37,6 +37,8 @@
             animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
             text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        .splash-anjum { color: #1e3c72; } /* أزرق */
+        .splash-green { color: #27ae60; } /* أخضر */
         
         .branch-container { position: relative; width: 220px; height: 220px; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
@@ -102,9 +104,13 @@
         .btn-outline { background: #fff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .btn-outline:hover { background: #1e3c72; color: #fff; }
 
+        /* أزرار النافيجيشن الجديدة (دوائر مودرن) */
+        .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
+
         .btn-large-stock { padding: 12px 20px !important; font-size: 1.05rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        .nav-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; }
         
@@ -117,9 +123,10 @@
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
         
-        .login-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, rgba(30,60,114,0.95), rgba(42,82,152,0.95)); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
-        .login-card { background: white; padding: 35px 25px; border-radius: 16px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .pass-wrapper { position: relative; width: 100%; margin-bottom: 20px; }
+        /* شاشة الدخول الأصلية الأنظف */
+        .login-overlay { position: fixed; inset: 0; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
+        .login-card { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .pass-container { position: relative; width: 100%; margin-bottom: 20px; }
         .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.2rem; }
         
         .live-invoice-summary { background: #fff; border: 2px solid #1e3c72; border-radius: 10px; padding: 15px; margin-top: 15px; }
@@ -147,14 +154,8 @@
         .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
         .page-break-row { page-break-after: always !important; break-after: page !important; }
         
-        .chart-page { width: 100%; height: 400px; margin-bottom: 30px; display: flex; justify-content: center; align-items: center; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .chart-page { width: 100%; height: 350px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
-
-        .modern-date-picker { display: flex; flex-direction: column; gap: 15px; background: #fff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; flex: 1; min-width: 250px; }
-        .modern-date-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #f0f2f5; }
-        .modern-date-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .modern-date-row label { font-weight: bold; color: #1e3c72; font-size: 0.95rem; }
-        .modern-date-row input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; }
 
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
@@ -166,7 +167,7 @@
 </head>
 <body>
 
-<!-- ✨ Splash Screen ✨ -->
+<!-- ✨ Splash Screen (English Only & Brown Stem) ✨ -->
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
@@ -183,29 +184,28 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum" style="color:#1e3c72;">Anjum Green</span> <br> <span class="splash-green" style="color:#27ae60;">Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
     </div>
 </div>
 
 <div id="toastStack"></div>
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalBox"></div></div>
 
+<!-- شاشة الدخول الأصلية الأنيقة -->
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
-        <h2 style="color:#1e3c72; margin-bottom:8px; font-size:1.6rem; font-weight:800;">تسجيل الدخول</h2>
-        <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1rem;">Anjum Green Pharmacy</p>
-        
-        <div class="pay-box" style="margin-bottom:15px;">
-            <select id="entryUserSelect" class="search-box" style="text-align:center; font-weight:bold; font-size:1.1rem; padding:12px;">
-                <option value="">⏳ جاري تحميل المستخدمين...</option>
-            </select>
-        </div>
-        <div class="pass-wrapper">
-            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; font-size:1.1rem; padding:12px; letter-spacing:2px;" placeholder="..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+        <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.5rem; font-weight:800;">
+            🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم الخضراء
+        </h2>
+        <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:15px; font-weight:bold; font-size:1.1rem; padding:10px;">
+            <option value="">⏳ جاري تحميل المستخدمين...</option>
+        </select>
+        <div class="pass-container">
+            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; font-size:1.1rem; padding:10px; letter-spacing:2px;" placeholder="كلمة المرور..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
             <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
-        <button class="btn btn-darkblue" style="width: 100%; font-size:1.1rem; padding:12px;" onclick="validateEntryPassword()">دخول 🚀</button>
-        <div style="margin-top:20px; font-size:0.8rem; font-weight:700; color:#95a5a6;">✨ برمجة وتصميم Samy Lukas</div>
+        <button class="btn btn-blue" style="width: 100%; font-size:1.1rem; padding:12px;" onclick="validateEntryPassword()">تسجيل الدخول 🚀</button>
+        <div style="margin-top:20px; font-size:0.8rem; font-weight:700; color:#7f8c8d;">✨ برمجة وتصميم Samy Lukas</div>
     </div>
 </div>
 
@@ -237,12 +237,12 @@
     <!-- 1. POS Tab -->
     <div id="salesTab" class="tab-content active">
         <div class="section-title">
-            <span style="font-size:1.4rem;">📝 فاتورة مبيعات</span>
+            <span style="font-size:1.4rem;">📝 بيع مباشر</span>
         </div>
 
         <div class="toolbar-row" style="margin-bottom: 15px;">
             <button class="btn btn-darkblue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
-            <button class="btn btn-orange" onclick="prepareNewInvoice()">جديدة ➕</button>
+            <button class="btn btn-orange" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
             <button class="btn btn-gray" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
         </div>
 
@@ -251,14 +251,15 @@
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📄 رقم: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <div class="nav-controls" style="margin-bottom: 15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-            <button class="btn-outline" onclick="navigateInvoice('first')">الأولى ⏭️</button>
-            <button class="btn-outline" onclick="navigateInvoice('prev')">السابقة ▶️</button>
-            <button class="btn-outline" onclick="navigateInvoice('next')">التالية ◀️</button>
-            <button class="btn-outline" onclick="navigateInvoice('last')">الأخيرة ⏮️</button>
+        <!-- أزرار النافيجيشن الجديدة (أسهم دائرية) -->
+        <div class="nav-controls">
+            <button class="nav-icon-btn" onclick="navigateInvoice('first')" title="الأولى">⏭️</button>
+            <button class="nav-icon-btn" onclick="navigateInvoice('prev')" title="السابقة">▶️</button>
+            <button class="nav-icon-btn" onclick="navigateInvoice('next')" title="التالية">◀️</button>
+            <button class="nav-icon-btn" onclick="navigateInvoice('last')" title="الأخيرة">⏮️</button>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div style="display:flex; gap:10px; margin-top:15px;">
             <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="ابحث بالاسم أو الباركود... (F4)" oninput="searchProduct()">
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
         </div>
@@ -418,9 +419,16 @@
         </div>
 
         <div class="card" style="margin-top: 20px;">
-            <div class="modern-date-row-inline" style="margin-bottom:15px; justify-content:center;">
-                <div><label>📅 من تاريخ:</label> <input type="date" id="finFromDate"></div>
-                <div><label>📅 إلى تاريخ:</label> <input type="date" id="finToDate"></div>
+            <!-- تواريخ أفقية -->
+            <div style="display:flex; justify-content:center; align-items:center; gap:20px; background:#fff; padding:15px; border-radius:10px; border:1px solid #e0e0e0; margin-bottom:15px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 من تاريخ:</label>
+                    <input type="date" id="finFromDate" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; outline:none; font-family:inherit;">
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 إلى تاريخ:</label>
+                    <input type="date" id="finToDate" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; outline:none; font-family:inherit;">
+                </div>
                 <button class="btn btn-darkblue" style="padding:8px 20px;" onclick="renderFinanceTable()">تصفية 📈</button>
             </div>
             
@@ -469,26 +477,25 @@
         <div class="no-pdf">
             <h2 class="section-title">📊 التقارير ولوحة المؤشرات</h2>
             
-            <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:20px; align-items: flex-end;">
-                <!-- حقول التاريخ بشكل مودرن -->
-                <div class="modern-date-picker">
-                    <div class="modern-date-row">
-                        <label>📅 من تاريخ:</label>
-                        <input type="date" id="fromDate">
+            <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:20px; align-items: center; justify-content:center;">
+                <!-- حقول التاريخ أفقية متجاورة -->
+                <div style="display:flex; justify-content:center; align-items:center; gap:20px; background:#fff; padding:15px; border-radius:10px; border:1px solid #e0e0e0; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <label style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 من تاريخ:</label>
+                        <input type="date" id="fromDate" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; outline:none; font-family:inherit;">
                     </div>
-                    <div class="modern-date-row">
-                        <label>📅 إلى تاريخ:</label>
-                        <input type="date" id="toDate">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <label style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 إلى تاريخ:</label>
+                        <input type="date" id="toDate" style="padding:8px 12px; border:1px solid #ccc; border-radius:6px; outline:none; font-family:inherit;">
                     </div>
                 </div>
                 
-                <!-- أزرار الإجراءات بترتيب وألوان دقيقة -->
-                <div style="flex:2; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start;">
-                    <button class="btn btn-orange" style="padding:12px 20px; font-size:1.05rem;" onclick="exportSalesReportExcel()">إكسيل 📊</button>
-                    <button class="btn btn-red" style="padding:12px 20px; font-size:1.05rem;" onclick="exportSalesReportPDF()">طباعة / PDF 📄</button>
-                    <button class="btn btn-dark" style="padding:12px 20px; font-size:1.05rem;" onclick="openRatesModal()">إعدادات العملات ⚙️</button>
-                    <button class="btn btn-purple" style="padding:12px 20px; font-size:1.05rem;" onclick="handleNetProfitAction()">صافي الربح 💵</button>
-                    <button class="btn btn-darkblue" style="padding:12px 25px; font-size:1.05rem;" onclick="generateReport()">بحث 📈</button>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                    <button class="btn btn-orange" style="padding:10px 18px; font-size:1rem;" onclick="exportSalesReportExcel()">إكسيل 📊</button>
+                    <button class="btn btn-red" style="padding:10px 18px; font-size:1rem;" onclick="exportSalesReportPDF()">طباعة / PDF 📄</button>
+                    <button class="btn btn-dark" style="padding:10px 18px; font-size:1rem;" onclick="openRatesModal()">إعدادات العملات ⚙️</button>
+                    <button class="btn btn-purple" style="padding:10px 18px; font-size:1rem;" onclick="handleNetProfitAction()">صافي الربح 💵</button>
+                    <button class="btn btn-darkblue" style="padding:10px 25px; font-size:1rem;" onclick="generateReport()">بحث واستخراج 📈</button>
                 </div>
             </div>
 
@@ -547,12 +554,14 @@
                 </table>
             </div>
 
+            <!-- الرسوم البيانية المتطورة المضافة بناءً على طلبك -->
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px; border-top:2px solid #eee;">
-                <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:space-between; flex-wrap:wrap;"></div>
-                
-                <div id="chartsArea" style="display:none; flex-direction:column; width:100%;">
-                    <div class="chart-page" style="page-break-inside: avoid;">
-                        <canvas id="topProductsChart"></canvas>
+                <div id="advancedChartsArea" style="display:none; flex-wrap:wrap; gap:20px; margin-top:10px;">
+                    <div class="chart-page" style="flex:1; min-width:300px; padding:15px;">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <div class="chart-page" style="flex:1; min-width:300px; padding:15px;">
+                        <canvas id="sellerChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -681,25 +690,28 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
 
     element.classList.add('pdf-compact');
 
-    // توزيع الصفحات بذكاء للجداول الطويلة
-    const rowsPerPage = 40;
+    let rowInput = prompt("كم عدد السجلات التي تريد طباعتها في الصفحة الواحدة؟ (ينصح بـ 35-40)", "40");
+    let rowsPerPage = parseInt(rowInput);
+    if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 40;
+
     const rows = element.querySelectorAll('tbody tr');
     rows.forEach((row, index) => {
         row.classList.remove('page-break-row');
-        if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row');
+        if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) {
+            row.classList.add('page-break-row');
+        }
     });
 
     toast('⏳ جاري تجهيز التقرير، يرجى الانتظار...', 'info');
     await new Promise(r => setTimeout(r, 600));
 
-    // إعدادات صريحة ومجربة لـ html2pdf لضمان أعلى جودة وحل مشاكل الخطوط
     const opt = {
         margin:       0.2,
         filename:     fileName,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page'] }
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['css', 'legacy'], avoid: ['tr'] }
     };
 
     try {
@@ -739,7 +751,10 @@ let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
 let invoiceCounter = 1001; let activeInvoiceId = 1001;
-let topProductsChartInstance = null;
+
+// مراجع الرسوم البيانية المتطورة
+let monthlyChartInst = null;
+let sellerChartInst = null;
 
 /* ---------- User & Auth Management ---------- */
 
@@ -902,9 +917,9 @@ function openRatesModal() {
     openModal(`
         <h3 style="text-align:center; color:#1e3c72; margin-bottom:20px; font-size:1.5rem; font-weight:800;">⚙️ إعدادات أسعار الصرف والمضاعف</h3>
         <div class="payment-grid" style="gap:15px;">
-            <div class="pay-box"><label>💵 سعر الدولار</label><input type="number" id="rateUSD" value="${RATES.USD}" style="padding:12px; font-size:1.2rem;"></div>
-            <div class="pay-box"><label>💶 سعر اليورو</label><input type="number" id="rateEUR" value="${RATES.EUR}" style="padding:12px; font-size:1.2rem;"></div>
-            <div class="pay-box"><label>💷 سعر الاسترليني</label><input type="number" id="rateGBP" value="${RATES.GBP}" style="padding:12px; font-size:1.2rem;"></div>
+            <div class="pay-box"><label>💵 سعر الدولار (USD)</label><input type="number" id="rateUSD" value="${RATES.USD}" style="padding:12px; font-size:1.2rem;"></div>
+            <div class="pay-box"><label>💶 سعر اليورو (EUR)</label><input type="number" id="rateEUR" value="${RATES.EUR}" style="padding:12px; font-size:1.2rem;"></div>
+            <div class="pay-box"><label>💷 سعر الاسترليني (GBP)</label><input type="number" id="rateGBP" value="${RATES.GBP}" style="padding:12px; font-size:1.2rem;"></div>
             <div class="pay-box"><label>💳 عمولة الفيزا</label><input type="number" id="rateVISA" value="${RATES.VISA}" style="padding:12px; font-size:1.2rem;"></div>
             <div class="pay-box" style="grid-column:span 2;"><label>📈 معامل الحد الأدنى للسعر (مضاعف الجملة)</label><input type="number" id="rateGuideMult" value="${RATES.GUIDE_MULT || 3}" style="padding:12px; font-size:1.2rem; border-color:#f39c12;"></div>
         </div>
@@ -1219,7 +1234,7 @@ function executeAdvancedPrint(prodId) {
         });
     } else {
         const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
+        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm${printH}mm; margin: 0 !important; } }`;
         document.head.appendChild(pageStyle);
         document.body.classList.add('printing-receipt');
         setTimeout(() => {
@@ -1295,7 +1310,7 @@ function addToInvoice() {
 
     invoiceItems.push({
         productId: p.id, name: p.n, qty: qty, commUnitPrice: p.p, sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
-        commTotal, sellTotal, netProfit, usd: u, eur: eu, gbp: g, egp: eg, visa: v
+        commTotal, sellTotal, netProfit, seller: currentUser ? currentUser.username : 'Unknown', usd: u, eur: eu, gbp: g, egp: eg, visa: v
     });
     renderInvoice(); document.getElementById('productCard').style.display = 'none'; document.getElementById('searchInput').value = '';
 }
@@ -1335,7 +1350,7 @@ function loadInvoiceIntoForm(inv) {
 
     if (Array.isArray(inv.items)) { invoiceItems = JSON.parse(JSON.stringify(inv.items)); } 
     else {
-        invoiceItems = [{ name: cleanItemSummaryText(inv.itemsText), qty: 1, commUnitPrice: inv.totalComm || 0, sellUnitPrice: inv.totalEGP || 0, commTotal: inv.totalComm || 0, sellTotal: inv.totalEGP || 0, netProfit: inv.netProfit || 0, usd: inv.usd || 0, eur: inv.eur || 0, gbp: inv.gbp || 0, egp: inv.egp || 0, visa: inv.visa || 0 }];
+        invoiceItems = [{ name: cleanItemSummaryText(inv.itemsText), qty: 1, commUnitPrice: inv.totalComm || 0, sellUnitPrice: inv.totalEGP || 0, commTotal: inv.totalComm || 0, sellTotal: inv.totalEGP || 0, netProfit: inv.netProfit || 0, seller: currentUser ? currentUser.username : 'Unknown', usd: inv.usd || 0, eur: inv.eur || 0, gbp: inv.gbp || 0, egp: inv.egp || 0, visa: inv.visa || 0 }];
     }
     invoiceDiscountPercent = inv.discount || 0;
     if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
@@ -1378,7 +1393,12 @@ function renderInvoice() {
         tbody.innerHTML = invoiceItems.map((item, index) => {
             sumUSD += parseFloat(item.usd || 0); sumEUR += parseFloat(item.eur || 0); sumGBP += parseFloat(item.gbp || 0); sumEGP += parseFloat(item.egp || 0); sumVISA += parseFloat(item.visa || 0); totalSellEGP += parseFloat(item.sellTotal || 0);
             
-            let payStr = `$ ${item.usd||0} | € ${item.eur||0} | £ ${item.gbp||0} | ${item.egp||0} ج.م | 💳 ${item.visa||0}`;
+            let payStr = ``;
+            if(item.usd > 0) payStr += `دولار: ${item.usd} | `;
+            if(item.eur > 0) payStr += `يورو: ${item.eur} | `;
+            if(item.gbp > 0) payStr += `استرليني: ${item.gbp} | `;
+            if(item.visa > 0) payStr += `فيزا: ${item.visa} | `;
+            payStr += `جنيه: ${item.egp||0}`;
             
             return `
             <tr>
@@ -1406,7 +1426,7 @@ function renderInvoice() {
 
 function getItemPaidText(item) {
     if (!item) return ''; 
-    return `صنف: ${escapeHtml(item.name)} - كمية: ${item.qty}`;
+    return `صنف: ${escapeHtml(item.name)} - كمية: ${item.qty} - بائع: ${escapeHtml(item.seller || '-')}`;
 }
 
 function saveInvoice() {
@@ -1635,7 +1655,7 @@ function filterNearExpiryOneMonth() {
     }
 }
 
-/* ---------- Sales Reports (With Chart.js) ---------- */
+/* ---------- Sales Reports (With Advanced Charts) ---------- */
 
 function printSingleReceipt(invId) {
     const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
@@ -1647,7 +1667,7 @@ function printSingleReceipt(invId) {
 
     const receiptHTML = `
         <div style="text-align:center; direction:rtl; padding:10px;">
-            <h2 style="margin-bottom:5px;">Anjum Green Pharmacy 🌿</h2>
+            <h2 style="margin-bottom:5px;">Anjum Pharmacy 🌿</h2>
             <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
             <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
             <hr style="border-top:2px dashed #000; margin:10px 0;">
@@ -1659,7 +1679,7 @@ function printSingleReceipt(invId) {
             <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
             <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
             <p style="font-size:11px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Green Pharmacy 2026</div>
+            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Pharmacy 2026</div>
         </div>
     `;
 
@@ -1691,22 +1711,47 @@ function exportSalesReportExcel() {
 
 function buildInvoiceTally(filteredInvoices) {
     let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-    let grandTotalSell = 0, grandNetProfit = 0; const productStats = {}; const perInvoice = [];
+    let grandTotalSell = 0, grandNetProfit = 0; 
+    const productStats = {}; const perInvoice = [];
+    
+    // للرسوم البيانية المتقدمة
+    const monthlySales = {};
+    const sellerSales = {};
 
     filteredInvoices.forEach(inv => {
         let u = 0, eu = 0, g = 0, eg = 0, v = 0; let itemsListHtml = "";
         
+        // حسابات الشهور للرسم البياني
+        let dateObj = new Date(inv.date.replace(' ', 'T'));
+        if(!isNaN(dateObj)) {
+            let yyyy = dateObj.getFullYear();
+            let mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            let monthKey = `${yyyy}-${mm}`;
+            monthlySales[monthKey] = (monthlySales[monthKey] || 0) + (inv.totalEGP || 0);
+        }
+
         if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                return `صنف: ${escapeHtml(i.name)} | كمية: ${i.qty}`;
+                
+                // حسابات البائعين للرسم البياني
+                let s = i.seller || 'غير محدد';
+                sellerSales[s] = (sellerSales[s] || 0) + (i.sellTotal || 0);
+
+                return `صنف: ${escapeHtml(i.name)} \vert{} كمية: ${i.qty}`;
             }).join('<br>');
         } else {
             itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
             itemsListHtml = itemsListHtml.replace(/\|?\s*(بائع|Seller):.*?(?=(\||$))/gi, '').trim();
             
             u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
+            
+            // استخراج البائع من الفواتير القديمة لو أمكن، وإلا نضعه كعنصر محفوظ
+            let oldSellerMatch = inv.itemsText ? inv.itemsText.match(/(بائع|Seller):\s*([^|<]+)/i) : null;
+            let extractedSeller = oldSellerMatch ? oldSellerMatch[2].trim() : 'عنصر محفوظ';
+            sellerSales[extractedSeller] = (sellerSales[extractedSeller] || 0) + (inv.totalEGP || 0);
+
             (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
                 const namePart = raw.split(' | ')[0] || raw;
                 const cleanName = namePart.replace(/صنف:/g, '').replace(/<[^>]*>?/gm, '').trim();
@@ -1720,7 +1765,7 @@ function buildInvoiceTally(filteredInvoices) {
     });
 
     const sortedTop = Object.keys(productStats).map(name => ({ name, qty: productStats[name] })).sort((a, b) => b.qty - a.qty);
-    return { sumUSD, sumEUR, sumGBP, sumEGP, sumVISA, grandTotalSell, grandNetProfit, sortedTop, perInvoice };
+    return { sumUSD, sumEUR, sumGBP, sumEGP, sumVISA, grandTotalSell, grandNetProfit, sortedTop, perInvoice, monthlySales, sellerSales };
 }
 
 function filteredInvoicesByRange(fromD, toD) {
@@ -1733,7 +1778,7 @@ function generateReport() {
     const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
 
     if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
         if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
         if (document.getElementById('chartsArea')) document.getElementById('chartsArea').style.display = 'none';
         return;
@@ -1742,7 +1787,13 @@ function generateReport() {
     const tally = buildInvoiceTally(filteredInvoices);
 
     tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        const payBreakdown = `$ ${u} | € ${eu} | £ ${g} <br> ${eg} ج.م | 💳 ${v}`;
+        let payStr = ``;
+        if(u > 0) payStr += `$ ${u} | `;
+        if(eu > 0) payStr += `€ ${eu} | `;
+        if(g > 0) payStr += `£ ${g} | `;
+        if(v > 0) payStr += `💳 ${v} | `;
+        payStr += `${eg} ج.م`;
+
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
@@ -1750,15 +1801,15 @@ function generateReport() {
             <td style="font-weight:bold; font-size:1.05rem; color:#e67e22;">#${inv.id}</td>
             <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
             <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
-            <td style="font-weight:bold; direction:rtl;">${payBreakdown}</td>
+            <td style="font-weight:bold; direction:rtl;">${payStr}</td>
             <td style="color:#2c3e50; font-weight:bold; font-size:1.1rem;">${(inv.totalComm || 0).toFixed(2)}</td>
             <td style="color:#e67e22; font-weight:bold; font-size:1.1rem;">${inv.discount || 0}%</td>
             <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
             <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
             <td class="no-pdf">
-                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.9rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
-                <button class="btn btn-blue" style="padding:4px 8px; font-size:0.9rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
-                <button class="btn btn-red" style="padding:4px 8px; font-size:0.9rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
+                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
+                <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
+                <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
             </td>
         </tr>`;
     }).join('');
@@ -1783,6 +1834,56 @@ function generateReport() {
                 <div style="font-size:1.4rem; font-weight:900; color:#8e44ad;">${tally.grandNetProfit.toFixed(2)}</div>
             </div>
         `;
+    }
+
+    // --- الرسوم البيانية المتقدمة ---
+    const chartContainer = document.getElementById('advancedChartsArea');
+    if (chartContainer) {
+        chartContainer.style.display = 'flex';
+        
+        // 1. رسم مبيعات الشهور
+        const monthKeys = Object.keys(tally.monthlySales).sort();
+        let monthlyChartTitle = 'مبيعات الشهور';
+        if (monthKeys.length === 2) monthlyChartTitle = 'مقارنة المبيعات (الشهر الحالي والسابق)';
+        else if (monthKeys.length > 2) monthlyChartTitle = 'تحليل مبيعات الشهور';
+
+        if(window.monthlyChartInst) window.monthlyChartInst.destroy();
+        window.monthlyChartInst = new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: monthKeys,
+                datasets: [{
+                    label: 'إجمالي المبيعات (ج.م)',
+                    data: monthKeys.map(k => tally.monthlySales[k]),
+                    backgroundColor: '#3498db',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                animation: false, responsive: true, maintainAspectRatio: false,
+                plugins: { title: { display: true, text: monthlyChartTitle, font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
+            }
+        });
+
+        // 2. رسم مبيعات البائعين
+        const selKeys = Object.keys(tally.sellerSales).sort((a,b)=> tally.sellerSales[b] - tally.sellerSales[a]);
+        if(window.sellerChartInst) window.sellerChartInst.destroy();
+        window.sellerChartInst = new Chart(document.getElementById('sellerChart'), {
+            type: 'bar',
+            data: {
+                labels: selKeys,
+                datasets: [{
+                    label: 'مبيعات البائع (ج.م)',
+                    data: selKeys.map(k => tally.sellerSales[k]),
+                    backgroundColor: '#8e44ad',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                animation: false, responsive: true, maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'أداء البائعين والمبيعات', font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
+            }
+        });
     }
 }
 
