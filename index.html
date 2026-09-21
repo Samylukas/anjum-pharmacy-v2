@@ -29,32 +29,32 @@
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease-in-out; direction: ltr;
+            transition: opacity 0.6s ease-in-out; direction: ltr;
         }
         .splash-title {
             font-size: 2.8rem; font-weight: 800; margin-top: 20px;
             opacity: 0; transform: translateY(20px);
-            animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards 1.2s;
             text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .splash-anjum { color: #1e3c72; }
         .splash-green { color: #27ae60; }
         
         .branch-container { position: relative; width: 220px; height: 220px; }
-        .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
+        .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.2s ease-out forwards 0.1s; }
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
         .anim-leaf { opacity: 0; transform-origin: center; }
-        .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-top { animation: flyFromTop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-bottom { animation: flyFromBottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-tip { animation: flyFromRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes flyFromTop { 0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes flyFromBottom { 0% { opacity: 0; transform: translateY(40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes flyFromRight { 0% { opacity: 0; transform: translateX(40px) scale(0.3); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
-        .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; }
-        .d-4 { animation-delay: 1.2s; } .d-5 { animation-delay: 1.4s; } .d-6 { animation-delay: 1.6s; }
-        .d-7 { animation-delay: 2.0s; }
+        .d-1 { animation-delay: 0.6s; } .d-2 { animation-delay: 0.7s; } .d-3 { animation-delay: 0.8s; }
+        .d-4 { animation-delay: 0.6s; } .d-5 { animation-delay: 0.7s; } .d-6 { animation-delay: 0.8s; }
+        .d-7 { animation-delay: 1.0s; }
 
         /* --- Base UI Styles --- */
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; padding: 6px; border-radius: 8px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -100,6 +100,9 @@
         .btn-orange { background: #f39c12; } 
         .btn-gray { background: #7f8c8d; }
         .btn-dark { background: #34495e; }
+        
+        .btn-outline { background: #fff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-outline:hover { background: #1e3c72; color: #fff; }
 
         .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
@@ -114,7 +117,7 @@
         table { width: 100%; min-width: 750px; border-collapse: collapse; text-align: center; }
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; font-weight: 600; }
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
-        
+
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
@@ -133,7 +136,7 @@
         .scroll-btn { width: 45px; height: 45px; border-radius: 50%; background: #f39c12; color: #fff; border: 2px solid #fff; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0.85; transition: 0.3s;}
         .scroll-btn:hover { opacity: 1; transform: scale(1.1); background: #1e3c72; }
 
-        /* حل مشكلة ألوان الإشعارات */
+        /* ألوان الإشعارات الواضحة بخصائص إضافية للحماية من التداخل */
         #toastStack { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
         .toast { color: white !important; padding: 15px; border-radius: 8px; font-size: 1.05rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; animation: toastIn 0.3s ease-out; background: #34495e; }
         .toast.success { background: #27ae60 !important; } 
@@ -191,7 +194,7 @@
             body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             #reportLoader { display: none !important; }
-            #profitBox { display: none !important; } /* لا يظهر الكارت العلوي في الطباعة */
+            #profitBox { display: none !important; }
         }
     </style>
 </head>
@@ -207,7 +210,6 @@
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
-            <!-- الساق باللون البني -->
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
             <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
@@ -220,7 +222,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum" style="color:#1e3c72;">Anjum</span> <br> <span class="splash-green" style="color:#27ae60;">Green Pharmacy</span>
+        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
     </div>
 </div>
 
@@ -291,7 +293,6 @@
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📄 رقم: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <!-- أزرار النافيجيشن الجديدة (أسهم دائرية) -->
         <div class="nav-controls">
             <button class="nav-icon-btn" onclick="navigateInvoice('first')" title="الأولى">⏭️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('prev')" title="السابقة">▶️</button>
@@ -525,7 +526,7 @@
                 </div>
             </div>
 
-            <!-- الكارت العلوي المنفصل لصافي الربح (الماستر بيس) -->
+            <!-- الكارت العلوي المنفصل لصافي الربح -->
             <div id="profitBox" class="card" style="display:none; background:#1e3c72; color:white; margin-top:20px; position:relative; padding:25px; box-shadow:0 10px 25px rgba(0,0,0,0.15);">
                 <button class="btn btn-red close-summary-btn" style="position:absolute; top:10px; left:10px; padding:6px 12px; font-size:0.9rem;" onclick="document.getElementById('profitBox').style.display='none'">إغلاق ❌</button>
                 <h3 style="text-align:center; margin-bottom:15px; font-size:1.5rem; font-weight:800; color:#fff;">📊 الملخص المالي الشامل (مفصل)</h3>
@@ -664,7 +665,6 @@ async function sha256Hex(text) {
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// دالة الإشعارات الجديدة بألوان واضحة وتصميم قوي
 async function handleFileExport(blob, fileName, fileType) {
     const file = new File([blob], fileName, { type: fileType });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -738,7 +738,7 @@ function formatDateDisplay(dateStr) {
     if (clean.length > 10 && !clean.includes(' ')) {
         let timePart = clean.slice(0, 5);
         let datePart = clean.slice(5);
-        return `${datePart} ${timePart}`;
+        return `${datePart}${timePart}`;
     }
     return clean;
 }
@@ -1599,7 +1599,6 @@ function exportFinanceExcel() {
         if (!f.date) return true; const fD = f.date.slice(0, 10); if (fromD && fD < fromD) return false; if (toD && fD > toD) return false; return true;
     });
     
-    // استخدام طريقة Blob + Web Share لنجاح تحميل الإكسيل على الأندرويد
     const excelData = filtered.map((f, i) => ({ "#": i + 1, "التاريخ": f.date, "النوع": f.type === 'Revenue'?'إيراد':'مصروف', "التصنيف": f.category, "المبلغ (EGP)": f.amount, "ملاحظات": f.notes || "" }));
     const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المالية"); 
     const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
@@ -1825,7 +1824,6 @@ function updateTopProfitBox() {
             }
         });
         finalNetProfit -= totalExpensesInPeriod;
-        // إشعار باللون الأزرق المريح لمعلومات الخصم
         toast(`تم خصم إجمالي المصروفات (${totalExpensesInPeriod.toFixed(2)} ج.م)`, 'info', 3000);
     }
 
@@ -1894,7 +1892,7 @@ function generateReport() {
 
     tbody.innerHTML = rowsHtml;
 
-    // البطاقات السفلية للتقرير
+    // تحديث البطاقات السفلية لتكون ملخص سريع
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
         cardsContainer.innerHTML = `
@@ -2031,7 +2029,7 @@ function searchSingleProductReport() {
 
     if (matchedProds.length > 0 && query.length < 3) {
         list.innerHTML = matchedProds.map(p => `<div class="result-item" data-name="${escapeHtml(p.n)}"><span style="font-weight:bold; color:#1e3c72;">${escapeHtml(p.n)}</span></div>`).join('');
-        list.querySelectorAll('.result-item').forEach(el => { el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
+        list.querySelectorAll('.result-item').forEach(el => el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
         list.style.display = 'block';
     } else { if(list) list.style.display = 'none'; generateSingleProductDetailsReport(query); }
 }
@@ -2087,18 +2085,33 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-/* ---------- Application Entry Point ---------- */
+/* ---------- Application Entry Point (إخفاء حتمي ومستقل للـ Splash Screen) ---------- */
 
 window.addEventListener('DOMContentLoaded', async () => {
+    // إخفاء الـ Splash Screen فوراً بعد 3 ثوانٍ بغض النظر عن حالة الإنترنت
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
-        if (splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; }, 800); }
-    }, 4000);
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                if(!currentUser) {
+                    document.getElementById('loginOverlay').style.display = 'flex';
+                }
+            }, 600);
+        }
+    }, 3000);
 
-    await loadLocalUsers(); fetchInitialUsersOnly();
-    const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus();
+    // تحميل المستخدمين والاتصال بالسحاب في الخلفية
+    await loadLocalUsers();
+    fetchInitialUsersOnly();
+    
+    const userEl = document.getElementById('entryUserSelect'); 
+    if (userEl) userEl.focus();
 
-    window.addEventListener('online', updateOnlineStatus); window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener('online', updateOnlineStatus); 
+    window.addEventListener('offline', updateOnlineStatus);
+    
     window.addEventListener('keydown', (e) => {
         if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
         else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
