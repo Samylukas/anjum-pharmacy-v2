@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anjum Green Pharmacy 2026</title>
     
-    <!-- خطوط جوجل المودرن (Cairo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -16,23 +15,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- مكتبة الرسوم البيانية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        * { box-sizing: border-box; font-family: 'Cairo', system-ui, -apple-system, sans-serif !important; margin: 0; padding: 0; }
-        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; }
-        .app-container { width: 100%; max-width: 1050px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
-        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.5rem; word-break: break-word; font-weight: 800; }
+        * { box-sizing: border-box; font-family: 'Cairo', system-ui, sans-serif; margin: 0; padding: 0; }
+        html, body { width: 100%; overflow-x: hidden; background-color: #f0f2f5; padding: 8px; color: #333; direction: rtl; scroll-behavior: smooth; font-size: 14px; }
+        .app-container { width: 100%; max-width: 1050px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; min-height: 95vh; padding-bottom: 40px; }
+        h1 { text-align: center; color: #1e3c72; margin-bottom: 8px; font-size: 1.3rem; word-break: break-word; font-weight: 800; }
 
-        /* --- ✨ Splash Screen Animations ✨ --- */
+        /* --- ✨ Splash Screen ✨ --- */
         #splashScreen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 2147483647;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.8s ease-in-out; direction: ltr;
         }
         .splash-title {
-            font-size: 2.8rem; font-weight: 800; margin-top: 20px;
+            font-size: 2.4rem; font-weight: 800; margin-top: 20px;
             opacity: 0; transform: translateY(20px);
             animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s;
             text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -45,7 +44,6 @@
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
         @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
 
-        /* تصميم الورقة الموحد */
         .anim-leaf { opacity: 0; transform-origin: center; }
         .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -58,106 +56,105 @@
         .d-7 { animation-delay: 2.0s; }
 
         /* --- Base UI Styles --- */
-        .sync-status { text-align: center; font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; padding: 6px; border-radius: 6px; }
+        .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; padding: 4px; border-radius: 6px; }
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
-        .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.9rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+        .alerts-bar { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
         
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.95rem; flex-shrink: 0; transition: 0.3s; }
-        .tab-btn.active { background: #1e3c72; color: #fff; box-shadow: 0 4px 10px rgba(30,60,114,0.3); }
+        .nav-tabs { display: flex; gap: 6px; margin-bottom: 12px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: #e9ecef; color: #2c3e50; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; white-space: nowrap; font-size: 0.85rem; flex-shrink: 0; transition: 0.2s; }
+        .tab-btn.active { background: #1e3c72; color: #fff; }
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
         
-        .section-title { font-weight: 800; margin-top: 15px; margin-bottom: 15px; color: #1e3c72; border-bottom: 2px solid #f39c12; padding-bottom: 8px; font-size: 1.1rem; text-align: right; line-height: 1.4; }
-        .search-box { width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #3498db; border-radius: 8px; outline: none; margin-bottom: 8px; box-sizing: border-box; font-weight: 600; }
-        .large-search-box { width: 100%; padding: 14px; font-size: 1.1rem; font-weight: bold; border: 2px solid #1e3c72; border-radius: 8px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
-        .results-list { max-height: 250px; overflow-y: auto; border: 2px solid #3498db; border-radius: 8px; margin-bottom: 12px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        .result-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 1rem; font-weight: 600; }
-        .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; flex-wrap: wrap; gap: 6px; }
+        .section-title { font-weight: 800; margin-top: 12px; margin-bottom: 10px; color: #1e3c72; border-bottom: 2px solid #f39c12; padding-bottom: 5px; font-size: 1rem; text-align: right; }
+        .search-box { width: 100%; padding: 8px; font-size: 0.9rem; border: 1.5px solid #3498db; border-radius: 6px; outline: none; margin-bottom: 6px; box-sizing: border-box; font-weight: 600; }
+        .large-search-box { width: 100%; padding: 10px; font-size: 0.95rem; font-weight: bold; border: 1.5px solid #1e3c72; border-radius: 6px; outline: none; box-sizing: border-box; background: #fff; color: #1e3c72; }
+        .results-list { max-height: 200px; overflow-y: auto; border: 1.5px solid #3498db; border-radius: 6px; margin-bottom: 10px; display: none; background: #ffffff; position: relative; z-index: 99999; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .result-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; }
+        
+        .card { background: #f8f9fa; border: 1px solid #e0e0e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; width: 100%; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; flex-wrap: wrap; gap: 6px; }
         .info-row span { font-weight: bold; }
         
-        .payment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+        .payment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; width: 100%; box-sizing: border-box; }
         .pay-box { display: flex; flex-direction: column; width: 100%; }
-        .pay-box label { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #2c3e50; }
-        .pay-box input, .pay-box select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1rem; box-sizing: border-box; font-weight: 600; }
+        .pay-box label { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #2c3e50; }
+        .pay-box input, .pay-box select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 0.9rem; box-sizing: border-box; font-weight: 600; }
         @media (max-width: 550px) { .payment-grid { grid-template-columns: 1fr; } .pay-box { grid-column: span 1 !important; } }
         
-        .warning-box { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; margin-top: 10px; text-align: center; display: none; }
+        .warning-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; margin-top: 8px; text-align: center; display: none; }
         
-        /* أزرار محسنة ومكبرة */
-        .btn { background: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+        .btn { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.85rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s; }
         .btn:hover { background: #219653; transform: scale(1.02); }
         .btn-blue { background: #1e3c72; } .btn-blue:hover { background: #152b52; }
         .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #e67e22; }
         
-        .nav-controls { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
-        .toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-        .toolbar-row .btn { flex: 1; min-width: 120px; white-space: nowrap; }
+        .nav-controls { display: flex; gap: 6px; justify-content: center; margin-top: 8px; }
+        .toolbar-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+        .toolbar-row .btn { flex: 1; min-width: 100px; white-space: nowrap; }
         
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; background: #fff; }
-        table { width: 100%; min-width: 800px; border-collapse: collapse; table-layout: auto; }
-        th, td { padding: 10px 8px; border: 1px solid #ddd; text-align: center; font-size: 0.9rem; vertical-align: middle; white-space: nowrap; }
-        th { background: #1e3c72; color: white; font-size: 0.95rem; font-weight: 800; }
-        
-        /* تم إزالة العروض الثابتة لحل مشكلة التداخل في التقارير */
-        .col-items { white-space: normal; min-width: 200px; text-align: right !important; line-height: 1.4 !important; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
+        table { width: 100%; min-width: 700px; border-collapse: collapse; table-layout: auto; }
+        th, td { padding: 8px 6px; border: 1px solid #ddd; text-align: center; font-size: 0.8rem; vertical-align: middle; word-wrap: break-word; white-space: normal; }
+        th { background: #1e3c72; color: white; font-weight: 800; white-space: nowrap; }
         
         .low-stock-row { background-color: #ffe6e6 !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fff9db !important; color: #856404; font-weight: bold; }
         .exp-expired-row { background-color: #f8d7da !important; color: #721c24; font-weight: bold; }
         
         .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(30, 60, 114, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999999; }
-        .login-card { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .pass-container { position: relative; width: 100%; margin-bottom: 15px; }
-        .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.2rem; }
+        .login-card { background: white; padding: 25px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .pass-container { position: relative; width: 100%; margin-bottom: 12px; }
+        .pass-toggle-btn { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; background: none; border: none; font-size: 1.1rem; }
         
-        .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-top: 15px; padding: 12px; background: #ffffff; border: 1px solid #1e3c72; border-radius: 8px; font-weight: bold; font-size: 0.95rem; color: #1e3c72; }
-        .discount-bar input { width: 80px; padding: 8px; text-align: center; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; }
+        .discount-bar { display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 10px; padding: 10px; background: #ffffff; border: 1px solid #1e3c72; border-radius: 6px; font-weight: bold; font-size: 0.85rem; color: #1e3c72; }
+        .discount-bar input { width: 70px; padding: 6px; text-align: center; border-radius: 4px; border: 1.5px solid #3498db; font-weight: bold; outline: none; }
         
-        .pos-header-card { background: #ffffff; border: 1.5px solid #1e3c72; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .pos-header-card div { font-size: 1rem; font-weight: bold; color: #1e3c72; display: flex; align-items: center; gap: 8px; }
-        .pos-header-card input { padding: 8px; border-radius: 6px; border: 1.5px solid #3498db; font-weight: bold; outline: none; font-size: 0.95rem; }
+        .pos-header-card { background: #ffffff; border: 1.5px solid #1e3c72; padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .pos-header-card div { font-size: 0.9rem; font-weight: bold; color: #1e3c72; display: flex; align-items: center; gap: 6px; }
+        .pos-header-card input { padding: 6px; border-radius: 4px; border: 1px solid #3498db; font-weight: bold; outline: none; font-size: 0.85rem; }
         
-        .date-filter-box { display: flex; flex-direction: column; gap: 12px; }
-        .date-inputs-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        .date-inputs-row div { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: bold; color: #1e3c72; }
-        .date-inputs-row input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; }
+        .date-filter-box { display: flex; flex-direction: column; gap: 10px; }
+        .date-inputs-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .date-inputs-row div { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: bold; color: #1e3c72; }
+        .date-inputs-row input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; outline: none; }
         
-        .live-invoice-summary { background: #ffffff; color: #1e3c72; border: 2px solid #1e3c72; border-radius: 10px; padding: 15px; margin-top: 15px; }
-        .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; text-align: center; font-size: 0.9rem; font-weight: bold; }
-        .live-summary-item { background: #f8f9fa; border: 1px solid #cbd5e1; padding: 10px 5px; border-radius: 8px; }
-        .live-summary-item span { display: block; color: #27ae60; font-weight: 800; font-size: 1.1rem; margin-top: 5px; }
+        .live-invoice-summary { background: #ffffff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 8px; padding: 10px; margin-top: 12px; }
+        .live-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; text-align: center; font-size: 0.8rem; font-weight: bold; }
+        .live-summary-item { background: #f8f9fa; border: 1px solid #cbd5e1; padding: 8px 4px; border-radius: 6px; }
+        .live-summary-item span { display: block; color: #27ae60; font-weight: 800; font-size: 1rem; margin-top: 4px; }
         
-        .footer-signature { text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #e0e0e0; font-size: 0.85rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .footer-signature { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.75rem; color: #7f8c8d; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 4px; }
         
-        .scanner-box { display: none; background: #000; border-radius: 10px; overflow: hidden; margin-bottom: 15px; position: relative; text-align: center; }
-        .camera-div { width: 100%; max-width: 450px; margin: 0 auto; min-height: 250px; }
+        .scanner-box { display: none; background: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; position: relative; text-align: center; }
+        .camera-div { width: 100%; max-width: 400px; margin: 0 auto; min-height: 200px; }
         
-        .btn-scroll-top { position: fixed; bottom: 20px; left: 20px; background: #f39c12; color: #fff; border: 2px solid #fff; border-radius: 50%; width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 99999; display: flex; align-items: center; justify-content: center; }
-        
-        #toastStack { position: fixed; top: 20px; right: 50%; transform: translateX(50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { background: #1e3c72; color: #fff; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.25); text-align: center; animation: toastIn 0.3s ease-out; }
+        /* أزرار التمرير (فوق وتحت) */
+        .scroll-btn-group { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
+        .scroll-btn { width: 40px; height: 40px; border-radius: 50%; background: #f39c12; color: #fff; border: 2px solid #fff; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0.85; transition: 0.3s;}
+        .scroll-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        #toastStack { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 350px; }
+        .toast { background: #1e3c72; color: #fff; padding: 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: center; animation: toastIn 0.3s ease-out; }
         .toast.success { background: #27ae60; } .toast.error { background: #e74c3c; } .toast.warn { background: #f39c12; }
         
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 12px; }
         .modal-overlay.open { display: flex; }
-        .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
+        .modal-box { background: #fff; border-radius: 10px; padding: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- 🖨️ CSS الطباعة المخصص والاحترافي --- */
+        /* --- 🖨️ CSS الطباعة المخصص --- */
         #receiptPrintSection { display: none; }
         .barcode-print-container { display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start; width: 100%; }
         
-        .report-print-container { background: #fff; padding: 15px; border-radius: 8px; width: 100%; overflow-x: auto; } 
-        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.5rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
+        .report-print-container { background: #fff; padding: 10px; border-radius: 6px; width: 100%; overflow-x: auto; } 
+        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 12px; font-size: 1.3rem; display: none; border-bottom: 2px solid #f39c12; padding-bottom: 6px; font-weight: 800; }
         
-        .pdf-compact table { font-size: 12px !important; line-height: 1.4 !important; }
-        .pdf-compact th, .pdf-compact td { padding: 8px 6px !important; height: auto !important; white-space: normal !important; }
-        .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 12px !important; padding-bottom: 6px !important; }
-        .page-break-row { page-break-after: always !important; break-after: page !important; }
+        .pdf-compact table { font-size: 9px !important; line-height: 1.2 !important; width: 100% !important; table-layout: auto !important; }
+        .pdf-compact th, .pdf-compact td { padding: 4px !important; white-space: normal !important; word-break: break-word !important; }
+        .pdf-compact .report-title-header { font-size: 1.1rem !important; margin-bottom: 8px !important; padding-bottom: 4px !important; }
         
-        .chart-page { width: 100%; height: 400px; margin-bottom: 30px; display: flex; justify-content: center; align-items: center; padding: 15px; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .chart-page { width: 100%; height: 350px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 8px; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
 
         @media print {
@@ -187,7 +184,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">صيدلية أنجم</span> <br> <span class="splash-green">الخضراء</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
     </div>
 </div>
 
@@ -199,25 +196,25 @@
 
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
-        <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.6rem; font-weight:800;">
+        <h2 style="color:#1e3c72; margin-bottom:12px; font-size:1.3rem; font-weight:800;">
             🔐 <span class="animated-leaf">🌿</span> صيدلية أنجم الخضراء
         </h2>
-        <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:15px; font-weight:bold; font-size:1.1rem;">
+        <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:12px; font-weight:bold;">
             <option value="">⏳ جاري تحميل المستخدمين...</option>
         </select>
         <div class="pass-container">
-            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; font-size:1.1rem;" placeholder="كلمة المرور..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0;" placeholder="كلمة المرور..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
             <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
-        <button class="btn btn-blue" style="width: 100%; font-size:1.2rem; padding:12px;" onclick="validateEntryPassword()">تسجيل الدخول 🚀</button>
-        <div class="footer-signature" style="margin-top:20px; font-size:0.8rem;">✨ برمجة وتصميم Samy Lukas , Powered By Gemini</div>
+        <button class="btn btn-blue" style="width: 100%; padding:10px;" onclick="validateEntryPassword()">تسجيل الدخول 🚀</button>
+        <div class="footer-signature" style="margin-top:15px; font-size:0.75rem;">✨ برمجة وتصميم Samy Lukas , Powered By Gemini</div>
     </div>
 </div>
 
 <div class="app-container" id="mainContainer" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:10px; margin-bottom:15px;">
-        <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:1rem;">👤 المستخدم: -</span>
-        <button class="btn btn-red" style="width:auto; margin:0; padding:8px 15px; font-size:0.9rem;" onclick="logout()">تسجيل الخروج 🚪</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:12px;">
+        <span id="userGreeting" style="font-weight:bold; color:#1e3c72; font-size:0.9rem;">👤 المستخدم: -</span>
+        <button class="btn btn-red" style="width:auto; margin:0; padding:6px 12px; font-size:0.8rem;" onclick="logout()">تسجيل الخروج 🚪</button>
     </div>
 
     <h1><span class="animated-leaf">🌿</span> نظام إدارة صيدلية أنجم الخضراء 2026</h1>
@@ -225,7 +222,7 @@
 
     <div id="alertsContainer" class="alerts-bar">
         <div>🔔 ملخص الحالة: <span id="lowStockCountVal" style="color:#c0392b;">0 نواقص</span> | <span id="expiringCountVal" style="color:#e67e22;">0 صلاحية قريبة</span></div>
-        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:6px 12px; font-size:0.85rem;" onclick="showTab('stockTab'); filterLowStock();">عرض النواقص 📦</button>
+        <button class="btn btn-purple manager-only" style="width:auto; margin:0; padding:4px 10px; font-size:0.8rem;" onclick="showTab('stockTab'); filterLowStock();">عرض النواقص 📦</button>
     </div>
 
     <div class="nav-tabs">
@@ -241,50 +238,50 @@
     <div id="salesTab" class="tab-content active">
         <div class="section-title">🛒 إنشاء / تعديل فاتورة مبيعات</div>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-            <button class="btn btn-blue" style="flex:1; padding:12px; font-size:1rem;" onclick="fetchCloudInvoicesData()">تحديث البيانات 🔄</button>
-            <button class="btn btn-orange" style="flex:1; padding:12px; font-size:1rem;" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
-            <button class="btn btn-purple" style="flex:1; padding:12px; font-size:1rem;" onclick="holdCurrentInvoice()">تعليق ⏸️</button>
-            <button class="btn btn-purple" id="resumeHoldBtn" style="flex:1; padding:12px; font-size:1rem; display:none;" onclick="resumeHoldInvoice()">استرجاع ⏯️</button>
-            <button class="btn btn-red" style="flex:1; padding:12px; font-size:1rem;" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <button class="btn btn-blue" style="flex:1; padding:10px;" onclick="fetchCloudInvoicesData()">تحديث البيانات 🔄</button>
+            <button class="btn btn-orange" style="flex:1; padding:10px;" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
+            <button class="btn btn-purple" style="flex:1; padding:10px;" onclick="holdCurrentInvoice()">تعليق ⏸️</button>
+            <button class="btn btn-purple" id="resumeHoldBtn" style="flex:1; padding:10px; display:none;" onclick="resumeHoldInvoice()">استرجاع ⏯️</button>
+            <button class="btn btn-red" style="flex:1; padding:10px;" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
         </div>
 
         <div class="pos-header-card">
             <div>📅 تاريخ الفاتورة: <input type="datetime-local" id="invoiceDate"></div>
-            <div>📄 رقم الفاتورة: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
+            <div>📄 رقم الفاتورة: <span id="invNum" style="color: #27ae60; font-size: 1.2rem; font-weight: 800;">1001</span></div>
         </div>
 
-        <div class="nav-controls" style="margin-bottom: 15px;">
+        <div class="nav-controls" style="margin-bottom: 12px;">
             <button class="btn btn-blue" onclick="navigateInvoice('first')">الأولى ⏮️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('prev')">السابقة ◀️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('next')">التالية ▶️</button>
             <button class="btn btn-blue" onclick="navigateInvoice('last')">الأخيرة ⏭️</button>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:10px;">
+        <div style="display:flex; gap:8px; margin-top:8px;">
             <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="ابحث باسم المنتج أو الباركود... (F4)" oninput="searchProduct()">
-            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
+            <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 15px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
         </div>
 
-        <div id="salesScannerContainer" class="scanner-box" style="margin-top:12px;">
+        <div id="salesScannerContainer" class="scanner-box" style="margin-top:10px;">
             <div id="salesCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
+            <button class="btn btn-red" style="margin:8px auto; width:90%; padding:8px;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
         </div>
 
         <div id="searchResults" class="results-list"></div>
 
-        <div id="productCard" class="card" style="display:none; margin-top: 15px; border: 2px solid #3498db; background: #ffffff;">
-            <h3 id="prodName" style="color: #1e3c72; margin-bottom: 12px; font-size: 1.2rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;"></h3>
-            <div class="info-row" style="background:#eef7fe; padding:10px; border-radius:8px; margin-bottom:12px;">
-                <div>المخزون المتاح: <span id="stockQty" style="color:#27ae60; font-size:1.1rem;">0</span> وحدة</div>
+        <div id="productCard" class="card" style="display:none; margin-top: 12px; border: 1.5px solid #3498db; background: #ffffff;">
+            <h3 id="prodName" style="color: #1e3c72; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;"></h3>
+            <div class="info-row" style="background:#eef7fe; padding:8px; border-radius:6px; margin-bottom:10px;">
+                <div>المخزون المتاح: <span id="stockQty" style="color:#27ae60; font-size:1rem;">0</span> وحدة</div>
                 <div>سعر الجملة: <span id="commPrice" style="color:#2c3e50;">0</span> ج.م</div>
                 <div>الحد الأدنى للبيع: <span id="guidePrice" style="color:#e67e22;">0</span> ج.م</div>
             </div>
-            <div class="info-row" style="align-items: center; justify-content:flex-start; gap:15px;">
-                <label style="font-weight:bold; color:#1e3c72; font-size:1.1rem;">الكمية المباعة:</label>
-                <input type="number" id="sellQty" value="1" min="1" style="width: 100px; padding: 8px; text-align: center; border-radius: 8px; border: 2px solid #3498db; font-weight:bold; font-size:1.1rem;" oninput="checkPriceAlert()">
+            <div class="info-row" style="align-items: center; justify-content:flex-start; gap:10px;">
+                <label style="font-weight:bold; color:#1e3c72; font-size:0.95rem;">الكمية المباعة:</label>
+                <input type="number" id="sellQty" value="1" min="1" style="width: 80px; padding: 6px; text-align: center; border-radius: 6px; border: 1.5px solid #3498db; font-weight:bold;" oninput="checkPriceAlert()">
             </div>
-            <p style="font-size: 1rem; font-weight: bold; margin-top: 15px; color:#1e3c72; border-top: 1px dashed #ccc; padding-top: 10px;">إدخال المدفوعات يدوياً:</p>
+            <p style="font-size: 0.9rem; font-weight: bold; margin-top: 10px; color:#1e3c72; border-top: 1px dashed #ccc; padding-top: 8px;">إدخال المدفوعات يدوياً:</p>
             <div class="payment-grid">
                 <div class="pay-box"><label id="lblUSD">دولار ($ × 50)</label><input type="number" id="pUSD" value="0" oninput="checkPriceAlert()"></div>
                 <div class="pay-box"><label id="lblEUR">يورو (€ × 60)</label><input type="number" id="pEUR" value="0" oninput="checkPriceAlert()"></div>
@@ -293,12 +290,12 @@
                 <div class="pay-box" style="grid-column: span 2;"><label id="lblVISA">فيزا (VISA)</label><input type="number" id="pVISA" value="0" oninput="checkPriceAlert()"></div>
             </div>
             <div id="priceWarningBox" class="warning-box">⚠️ تحذير: إجمالي المبلغ المدخل (<span id="enteredTotalVal">0</span> ج.م) أقل من الحد الأدنى للبيع (<span id="requiredMinVal">0</span> ج.م)!</div>
-            <button class="btn btn-green" style="width: 100%; margin-top: 15px; font-size:1.1rem; padding:12px;" onclick="addToInvoice()">خصم من المخزون وإضافة للفاتورة 🛒</button>
+            <button class="btn btn-green" style="width: 100%; margin-top: 12px; padding:10px;" onclick="addToInvoice()">خصم من المخزون وإضافة للفاتورة 🛒</button>
         </div>
 
-        <div class="section-title" style="margin-top: 25px;">📄 عناصر الفاتورة الحالية</div>
+        <div class="section-title" style="margin-top: 20px;">📄 عناصر الفاتورة الحالية</div>
         <div class="table-responsive"><table>
-            <thead><tr><th style="width:40px;">#</th><th>اسم المنتج</th><th>الكمية</th><th>إجمالي الجملة</th><th>تفاصيل الدفع</th><th>إجمالي البيع</th><th>البائع</th><th style="width:80px;">إجراء</th></tr></thead>
+            <thead><tr><th style="width:30px;">#</th><th>اسم المنتج</th><th>الكمية</th><th>إجمالي الجملة</th><th>تفاصيل الدفع</th><th>إجمالي البيع</th><th>البائع</th><th style="width:60px;">إجراء</th></tr></thead>
             <tbody id="invoiceTableBody"><tr><td colspan="8" style="color: #7f8c8d;">لم يتم إضافة عناصر بعد</td></tr></tbody>
         </table></div>
 
@@ -308,45 +305,44 @@
         </div>
 
         <div class="live-invoice-summary">
-            <h4 style="text-align:center; font-size:1.1rem; margin-bottom:12px; color:#1e3c72; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; font-weight:800;">💵 إجمالي الفاتورة</h4>
+            <h4 style="text-align:center; font-size:1rem; margin-bottom:8px; color:#1e3c72; border-bottom: 1.5px solid #e2e8f0; padding-bottom: 6px; font-weight:800;">💵 إجمالي الفاتورة</h4>
             <div class="live-summary-grid">
                 <div class="live-summary-item">دولار ($)<span id="liveUSD">$0</span></div>
                 <div class="live-summary-item">يورو (€)<span id="liveEUR">€0</span></div>
                 <div class="live-summary-item">استرليني (£)<span id="liveGBP">£0</span></div>
                 <div class="live-summary-item">جنيه<span id="liveEGP">0 ج.م</span></div>
                 <div class="live-summary-item">فيزا<span id="liveVISA">0 ج.م</span></div>
-                <div class="live-summary-item" style="background:#eafaf1; border:2px solid #27ae60;">الإجمالي النهائي<span id="liveTotalEGP" style="color:#27ae60; font-size:1.2rem;">0.00 ج.م</span></div>
+                <div class="live-summary-item" style="background:#eafaf1; border:1.5px solid #27ae60;">الإجمالي النهائي<span id="liveTotalEGP" style="color:#27ae60;">0.00 ج.م</span></div>
             </div>
         </div>
 
-        <button class="btn btn-blue" style="margin-top: 20px; font-size: 1.2rem; padding: 15px; width:100%;" onclick="saveInvoice()">حفظ ومزامنة الفاتورة (Ctrl+S) 💾</button>
+        <button class="btn btn-blue" style="margin-top: 15px; font-size: 1rem; padding: 12px; width:100%;" onclick="saveInvoice()">حفظ ومزامنة الفاتورة (Ctrl+S) 💾</button>
     </div>
 
-    <!-- 2. Stock Tab (تم تكبير الأزرار هنا بناء على طلبك) -->
+    <!-- 2. Stock Tab (تم توفير أزرار واضحة وبارزة) -->
     <div id="stockTab" class="tab-content manager-only">
-        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <span>📦 تفاصيل المخزون</span>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <!-- أزرار الأوامر المكبرة -->
-                <button class="btn btn-red" style="padding:10px 15px; font-size:1rem; border-radius:8px;" onclick="filterLowStock()">النواقص ⚠️</button>
-                <button class="btn btn-orange" style="padding:10px 15px; font-size:1rem; border-radius:8px;" onclick="filterNearExpiryOneMonth()">صلاحية قريبة ⚠️</button>
-                <button class="btn btn-purple" style="padding:10px 15px; font-size:1rem; border-radius:8px;" onclick="printStockTable()">طباعة / PDF 📄</button>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-red" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="filterLowStock()">النواقص ⚠️</button>
+                <button class="btn btn-orange" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="filterNearExpiryOneMonth()">صلاحية قريبة ⚠️</button>
+                <button class="btn btn-purple" style="padding:10px 15px; font-size:0.95rem; border-radius:6px;" onclick="printStockTable()">طباعة / PDF 📄</button>
             </div>
         </div>
-        <input type="text" id="stockFilterInput" class="search-box" style="padding:15px; font-size:1.1rem;" placeholder="تصفية المخزون بالاسم أو الباركود..." oninput="filterStockTable(this.value)">
+        <input type="text" id="stockFilterInput" class="search-box" style="padding:10px; font-size:0.95rem;" placeholder="تصفية المخزون بالاسم أو الباركود..." oninput="filterStockTable(this.value)">
 
-        <div id="stockScannerContainer" class="scanner-box" style="margin-top:10px;">
+        <div id="stockScannerContainer" class="scanner-box" style="margin-top:8px;">
             <div id="stockCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
+            <button class="btn btn-red" style="margin:8px auto; width:90%; padding:8px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
         </div>
 
         <div id="stockPrintArea">
-            <div style="text-align:center; margin-bottom:15px;" class="report-title-header" id="stockPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
-                <h3 style="color:#333; margin:5px 0; font-size:1.3rem;">تقرير المخزون الحالي</h3>
+            <div style="text-align:center; margin-bottom:12px;" class="report-title-header" id="stockPrintHeader">
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem; font-weight:800;">صيدلية أنجم الخضراء</h2>
+                <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المخزون الحالي</h3>
             </div>
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:40px;">#</th><th>اسم المنتج</th><th>الكمية المتوفرة</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>تاريخ الصلاحية</th><th class="no-pdf" style="width:250px;">الإجراءات</th></tr></thead>
+                <thead><tr><th style="width:30px;">#</th><th>اسم المنتج</th><th>الكمية المتوفرة</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>تاريخ الصلاحية</th><th class="no-pdf" style="width:200px;">الإجراءات</th></tr></thead>
                 <tbody id="stockTableBody"></tbody>
             </table></div>
         </div>
@@ -362,36 +358,36 @@
                 <div class="pay-box"><label>الكمية المتاحة:</label><input type="number" id="newProdQty" value="10"></div>
                 <div class="pay-box">
                     <label>الباركود (اختياري):</label>
-                    <div style="display:flex; gap:8px;">
+                    <div style="display:flex; gap:6px;">
                         <input type="text" id="newProdBarcode" placeholder="مسح الباركود...">
-                        <button class="btn btn-purple" style="width:auto; margin:0; padding:0 15px;" onclick="toggleCameraScanner('addNew')">📷 مسح</button>
+                        <button class="btn btn-purple" style="width:auto; margin:0; padding:0 12px;" onclick="toggleCameraScanner('addNew')">📷 مسح</button>
                     </div>
                 </div>
                 <div class="pay-box" style="grid-column: span 2;"><label>تاريخ الصلاحية:</label><input type="date" id="newProdExpiry"></div>
             </div>
-            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:12px;">
+            <div id="addNewScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="addNewCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
+                <button class="btn btn-red" style="margin:8px auto; width:90%; padding:8px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
             </div>
-            <button class="btn btn-green" style="margin-top: 15px; width: 100%; font-size:1.1rem; padding:12px;" onclick="addNewProductToSystem()">حفظ ومزامنة المنتج 📦</button>
+            <button class="btn btn-green" style="margin-top: 12px; width: 100%; padding:10px;" onclick="addNewProductToSystem()">حفظ ومزامنة المنتج 📦</button>
         </div>
 
-        <div class="section-title" style="margin-top:25px;">➕ تزويد كمية لمنتج موجود</div>
+        <div class="section-title" style="margin-top:20px;">➕ تزويد كمية لمنتج موجود</div>
         <div class="card">
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:8px;">
                 <input type="text" id="addStockSearch" class="search-box" style="margin-bottom:0;" placeholder="ابحث بالاسم أو الباركود..." oninput="searchAddStockProduct()">
-                <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
+                <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 15px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
             </div>
-            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:12px;">
+            <div id="rechargeScannerContainer" class="scanner-box" style="margin-top:10px;">
                 <div id="rechargeCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
+                <button class="btn btn-red" style="margin:8px auto; width:90%; padding:8px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
             </div>
             <div id="addStockResults" class="results-list"></div>
-            <div id="addStockCard" style="display: none; margin-top: 15px; padding:15px; border:2px solid #27ae60; border-radius:10px;">
-                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 10px; font-size:1.2rem;"></h4>
-                <div class="info-row"><div>المخزون الحالي: <span id="currentStockVal" style="color:#27ae60; font-size:1.2rem;">0</span> وحدة</div></div>
-                <div class="pay-box" style="margin-top: 10px;"><label>الكمية المراد إضافتها:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 10px; border-radius: 8px; border: 2px solid #ccc; text-align: center; font-size:1.2rem;"></div>
-                <button class="btn btn-blue" style="margin-top: 15px; width: 100%; font-size:1.1rem; padding:12px;" onclick="saveStockAddition()">تأكيد الإضافة 📥</button>
+            <div id="addStockCard" style="display: none; margin-top: 12px; padding:12px; border:1.5px solid #27ae60; border-radius:8px;">
+                <h4 id="addStockName" style="color: #1e3c72; margin-bottom: 8px; font-size:1rem;"></h4>
+                <div class="info-row"><div>المخزون الحالي: <span id="currentStockVal" style="color:#27ae60; font-size:1rem;">0</span> وحدة</div></div>
+                <div class="pay-box" style="margin-top: 8px;"><label>الكمية المراد إضافتها:</label><input type="number" id="newStockQty" value="10" min="1" style="padding: 8px; border-radius: 6px; border: 1.5px solid #ccc; text-align: center;"></div>
+                <button class="btn btn-blue" style="margin-top: 12px; width: 100%; padding:10px;" onclick="saveStockAddition()">تأكيد الإضافة 📥</button>
             </div>
         </div>
     </div>
@@ -407,49 +403,49 @@
                 <div class="pay-box"><label>التاريخ والوقت:</label><input type="datetime-local" id="finDate"></div>
                 <div class="pay-box" style="grid-column: span 2;"><label>ملاحظات إضافية:</label><input type="text" id="finNotes" placeholder="أضف ملاحظات..."></div>
             </div>
-            <button class="btn btn-purple" style="margin-top: 15px; width: 100%; font-size:1.1rem; padding:12px;" onclick="saveFinanceEntry()">حفظ المعاملة 💾</button>
+            <button class="btn btn-purple" style="margin-top: 12px; width: 100%; padding:10px;" onclick="saveFinanceEntry()">حفظ المعاملة 💾</button>
         </div>
 
-        <div class="date-filter card" style="margin-top: 15px;">
+        <div class="date-filter card" style="margin-top: 12px;">
             <div class="date-inputs-row">
                 <div>من: <input type="date" id="finFromDate"></div>
                 <div>إلى: <input type="date" id="finToDate"></div>
                 <button class="btn btn-blue" onclick="renderFinanceTable()">تصفية 📈</button>
             </div>
-            <div style="width:100%; margin-top:12px; display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:20px; height:20px;">
-                <label for="includeSalesIncomeToggle" style="font-size:1rem; font-weight:bold; color:#1e3c72; cursor:pointer;">💡 تضمين أرباح المبيعات (EGP) في الملخص المالي</label>
+            <div style="width:100%; margin-top:10px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="includeSalesIncomeToggle" onchange="renderFinanceTable()" style="width:18px; height:18px;">
+                <label for="includeSalesIncomeToggle" style="font-size:0.9rem; font-weight:bold; color:#1e3c72; cursor:pointer;">💡 تضمين أرباح المبيعات (EGP) في الملخص المالي</label>
             </div>
-            <div style="display:flex; gap:10px; margin-top:15px; width:100%;">
-                <button class="btn btn-purple" style="flex:1; padding:12px; font-size:1rem;" onclick="printFinanceReportPDF()">طباعة / PDF 📄</button>
-                <button class="btn btn-orange" style="flex:1; padding:12px; font-size:1rem;" onclick="exportFinanceExcel()">تصدير إكسيل 📊</button>
+            <div style="display:flex; gap:8px; margin-top:12px; width:100%;">
+                <button class="btn btn-purple" style="flex:1; padding:10px;" onclick="printFinanceReportPDF()">طباعة / PDF 📄</button>
+                <button class="btn btn-orange" style="flex:1; padding:10px;" onclick="exportFinanceExcel()">تصدير إكسيل 📊</button>
             </div>
         </div>
 
         <div id="financePrintArea" class="report-print-container">
             <div class="report-title-header" id="financePrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem;">صيدلية أنجم الخضراء</h2>
-                <h3 style="color:#333; margin:5px 0; font-size:1.2rem;">التقرير المالي (المصروفات والإيرادات)</h3>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">التقرير المالي (المصروفات والإيرادات)</h3>
             </div>
 
-            <div class="report-summary-cards" style="display:flex; width:100%; gap:12px; margin-bottom:15px; justify-content:space-between;">
-                <div class="report-card" style="flex:1; background:#fff; border:2px solid #1e3c72; border-radius:8px; padding:12px; text-align:center;">
-                    <div style="font-size:1rem; color:#333; font-weight:bold; margin-bottom:5px;">إجمالي الإيرادات</div>
-                    <div id="sumRevenues" style="color:#27ae60; font-size:1.3rem; font-weight:900;">0.00 EGP</div>
+            <div class="report-summary-cards" style="display:flex; width:100%; gap:8px; margin-bottom:12px; justify-content:space-between;">
+                <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #1e3c72; border-radius:6px; padding:10px; text-align:center;">
+                    <div style="font-size:0.85rem; color:#333; font-weight:bold; margin-bottom:4px;">إجمالي الإيرادات</div>
+                    <div id="sumRevenues" style="color:#27ae60; font-size:1.1rem; font-weight:900;">0.00 EGP</div>
                 </div>
-                <div class="report-card" style="flex:1; background:#fff; border:2px solid #1e3c72; border-radius:8px; padding:12px; text-align:center;">
-                    <div style="font-size:1rem; color:#333; font-weight:bold; margin-bottom:5px;">إجمالي المصروفات</div>
-                    <div id="sumExpenses" style="color:#c0392b; font-size:1.3rem; font-weight:900;">0.00 EGP</div>
+                <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #1e3c72; border-radius:6px; padding:10px; text-align:center;">
+                    <div style="font-size:0.85rem; color:#333; font-weight:bold; margin-bottom:4px;">إجمالي المصروفات</div>
+                    <div id="sumExpenses" style="color:#c0392b; font-size:1.1rem; font-weight:900;">0.00 EGP</div>
                 </div>
-                <div class="report-card" style="flex:1; background:#fff; border:2px solid #27ae60; border-radius:8px; padding:12px; text-align:center;">
-                    <div style="font-size:1rem; color:#333; font-weight:bold; margin-bottom:5px;">صافي الحركة المالية</div>
-                    <div id="netBalance" style="color:#27ae60; font-size:1.3rem; font-weight:900;">0.00 EGP</div>
+                <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #27ae60; border-radius:6px; padding:10px; text-align:center;">
+                    <div style="font-size:0.85rem; color:#333; font-weight:bold; margin-bottom:4px;">صافي الحركة المالية</div>
+                    <div id="netBalance" style="color:#27ae60; font-size:1.1rem; font-weight:900;">0.00 EGP</div>
                 </div>
             </div>
 
             <div class="section-title">📝 سجل الحركات المالية التفصيلية:</div>
             <div class="table-responsive"><table>
-                <thead><tr><th style="width:40px;">#</th><th>التاريخ والوقت</th><th>النوع</th><th>الوصف / البيان</th><th>المبلغ (EGP)</th><th>ملاحظات</th><th class="no-pdf" style="width:80px;">إجراء</th></tr></thead>
+                <thead><tr><th style="width:30px;">#</th><th>التاريخ والوقت</th><th>النوع</th><th>الوصف / البيان</th><th>المبلغ (EGP)</th><th>ملاحظات</th><th class="no-pdf" style="width:60px;">إجراء</th></tr></thead>
                 <tbody id="financeTableBody"><tr><td colspan="7" style="color:#7f8c8d;">لا توجد سجلات مالية</td></tr></tbody>
             </table></div>
         </div>
@@ -473,25 +469,25 @@
                 </div>
             </div>
 
-            <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:15px; padding:15px;">
-                <div style="font-size:1rem; font-weight:bold; color:#1e3c72; margin-bottom:10px;">🔍 بحث عن تاريخ مبيعات منتج معين:</div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-                    <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:250px; margin-bottom:0;" placeholder="ابحث باسم المنتج..." oninput="searchSingleProductReport()">
-                    <button class="btn btn-red" style="width:auto; padding:14px 20px;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
-                    <button class="btn btn-blue" style="width:auto; padding:14px 20px;" onclick="searchSingleProductReport()">توليد التقرير 📋</button>
+            <div class="card" style="background:#eef7fe; border-color:#1e3c72; margin-top:12px; padding:12px;">
+                <div style="font-size:0.9rem; font-weight:bold; color:#1e3c72; margin-bottom:8px;">🔍 بحث عن تاريخ مبيعات منتج معين:</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" id="singleProdSearchInput" class="large-search-box" style="flex:1; min-width:200px; margin-bottom:0;" placeholder="ابحث باسم المنتج..." oninput="searchSingleProductReport()">
+                    <button class="btn btn-red" style="width:auto; padding:10px 15px;" onclick="clearSingleProductReportSearch()">مسح 🧹</button>
+                    <button class="btn btn-blue" style="width:auto; padding:10px 15px;" onclick="searchSingleProductReport()">توليد التقرير 📋</button>
                 </div>
-                <div id="singleProductReportResults" class="results-list" style="margin-top:10px;"></div>
-                <div id="singleProdReportDisplay" style="display:none; margin-top:15px; background:#fff; padding:15px; border-radius:10px; border:2px solid #3498db;"></div>
+                <div id="singleProductReportResults" class="results-list" style="margin-top:8px;"></div>
+                <div id="singleProdReportDisplay" style="display:none; margin-top:12px; background:#fff; padding:12px; border-radius:8px; border:1.5px solid #3498db;"></div>
             </div>
 
-            <div id="profitBox" class="card" style="display:none; background:#1e3c72; color:white; margin-bottom:15px; position:relative; padding-top:40px;">
-                <button class="btn btn-red close-summary-btn" style="position:absolute; top:10px; left:10px; padding:5px 10px;" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
-                <h3 style="text-align:center; margin-bottom:12px; font-weight:800;">💵 التقرير الشامل للمبيعات</h3>
-                <div style="text-align:center; margin-bottom:15px; background:rgba(255,255,255,0.15); padding:10px; border-radius:8px;">
-                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:18px; height:18px; cursor:pointer; vertical-align:middle;">
-                    <label for="deductExpensesToggle" style="font-size:1rem; font-weight:bold; color:#f1c40f; cursor:pointer; margin-right:8px;">💡 خصم المصروفات الخارجية للوصول لصافي الربح الحقيقي</label>
+            <div id="profitBox" class="card" style="display:none; background:#1e3c72; color:white; margin-bottom:12px; position:relative; padding-top:30px;">
+                <button class="btn btn-red close-summary-btn" style="position:absolute; top:8px; left:8px; padding:4px 8px;" onclick="document.getElementById('profitBox').style.display='none'">❌ إغلاق</button>
+                <h3 style="text-align:center; margin-bottom:10px; font-weight:800;">💵 التقرير الشامل للمبيعات</h3>
+                <div style="text-align:center; margin-bottom:12px; background:rgba(255,255,255,0.15); padding:8px; border-radius:6px;">
+                    <input type="checkbox" id="deductExpensesToggle" onchange="handleNetProfitAction()" style="width:16px; height:16px; cursor:pointer; vertical-align:middle;">
+                    <label for="deductExpensesToggle" style="font-size:0.9rem; font-weight:bold; color:#f1c40f; cursor:pointer; margin-right:6px;">💡 خصم المصروفات الخارجية للوصول لصافي الربح الحقيقي</label>
                 </div>
-                <div class="live-summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                <div class="live-summary-grid" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي ($) <span id="repTotalUSD" style="color:#f1c40f;">$0.00</span></div>
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي (€) <span id="repTotalEUR" style="color:#f1c40f;">€0.00</span></div>
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي (£) <span id="repTotalGBP" style="color:#f1c40f;">£0.00</span></div>
@@ -499,21 +495,21 @@
                     <div class="live-summary-item" style="background:rgba(255,255,255,0.1); border:none; color:white;">إجمالي (فيزا) <span id="repTotalVISA" style="color:#f1c40f;">0.00 EGP</span></div>
                     <div class="live-summary-item" style="background:rgba(46,204,113,0.3); border:none; color:white;">المبيعات الكلية <span id="repTotalSell" style="color:#fff;">0.00 EGP</span></div>
                     <div class="live-summary-item" style="background:rgba(231,76,60,0.3); border:none; color:white;">إجمالي الجملة <span id="repTotalComm" style="color:#fff;">0.00 EGP</span></div>
-                    <div class="live-summary-item" style="background:#27ae60; border:none; color:white; grid-column: span 2;">صافي الربح 💰 <span id="repNetProfit" style="font-size:1.3rem; color:#fff;">0.00 EGP</span></div>
+                    <div class="live-summary-item" style="background:#27ae60; border:none; color:white; grid-column: span 2;">صافي الربح 💰 <span id="repNetProfit" style="font-size:1.1rem; color:#fff;">0.00 EGP</span></div>
                 </div>
             </div>
         </div>
 
         <div id="reportsPrintArea" class="report-print-container">
             <div class="report-title-header" id="salesPrintHeader">
-                <h2 style="color:#1e3c72; margin:0; font-size:1.8rem;">صيدلية أنجم الخضراء</h2>
-                <h3 style="color:#333; margin:5px 0; font-size:1.2rem;">تقرير المبيعات الشامل</h3>
+                <h2 style="color:#1e3c72; margin:0; font-size:1.5rem;">صيدلية أنجم الخضراء</h2>
+                <h3 style="color:#333; margin:4px 0; font-size:1.1rem;">تقرير المبيعات الشامل</h3>
             </div>
             
             <div class="table-responsive"><table>
                 <thead><tr>
                     <th>#</th>
-                    <th>رقم الفاتورة</th>
+                    <th>الفاتورة</th>
                     <th>التاريخ والوقت</th>
                     <th>تفاصيل الأصناف</th>
                     <th>تفاصيل الدفع</th>
@@ -526,10 +522,9 @@
                 <tbody id="savedInvoicesBody"><tr><td colspan="10" style="color:#7f8c8d;">لا توجد فواتير محفوظة</td></tr></tbody>
             </table></div>
 
-            <div class="print-summary-wrapper" style="margin-top:20px;">
-                <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:12px; margin-bottom:20px; justify-content:space-between; flex-wrap:wrap;"></div>
+            <div class="print-summary-wrapper" style="margin-top:15px;">
+                <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:8px; margin-bottom:15px; justify-content:space-between; flex-wrap:wrap;"></div>
                 
-                <!-- الرسوم البيانية باستخدام Chart.js -->
                 <div id="chartsArea" style="display:none; flex-direction:column; width:100%;">
                     <div class="chart-page" style="page-break-inside: avoid;">
                         <canvas id="topProductsChart"></canvas>
@@ -543,35 +538,38 @@
     <div id="usersTab" class="tab-content admin-only">
         <div class="section-title">🔑 إدارة الحسابات والصلاحيات</div>
         
-        <div class="card" style="max-width:500px; margin:0 auto 15px auto; background:#fdfefe;">
-            <h3 style="color:#1e3c72; text-align:center; margin-bottom:15px; font-weight:800;">➕ إضافة مستخدم جديد</h3>
-            <div class="pay-box" style="margin-bottom:10px;"><label>اسم المستخدم:</label><input type="text" id="addUserName" placeholder="أدخل الاسم..."></div>
-            <div class="pay-box" style="margin-bottom:10px;"><label>كلمة المرور:</label><input type="password" id="addUserPass" placeholder="أدخل الرقم السري..."></div>
-            <div class="pay-box" style="margin-bottom:15px;"><label>الصلاحية:</label>
+        <div class="card" style="max-width:400px; margin:0 auto 12px auto; background:#fdfefe;">
+            <h3 style="color:#1e3c72; text-align:center; margin-bottom:12px; font-weight:800;">➕ إضافة مستخدم جديد</h3>
+            <div class="pay-box" style="margin-bottom:8px;"><label>اسم المستخدم:</label><input type="text" id="addUserName" placeholder="أدخل الاسم..."></div>
+            <div class="pay-box" style="margin-bottom:8px;"><label>كلمة المرور:</label><input type="password" id="addUserPass" placeholder="أدخل الرقم السري..."></div>
+            <div class="pay-box" style="margin-bottom:12px;"><label>الصلاحية:</label>
                 <select id="addUserRole">
                     <option value="Cashier">كاشير (مبيعات فقط)</option>
                     <option value="User">مستخدم (مبيعات ومخزون)</option>
                     <option value="Admin">أدمن (صلاحيات كاملة)</option>
                 </select>
             </div>
-            <button class="btn btn-blue" style="width:100%; font-size:1.1rem; padding:12px;" onclick="createNewUserSystem()">إنشاء الحساب 🚀</button>
+            <button class="btn btn-blue" style="width:100%; font-size:1rem; padding:10px;" onclick="createNewUserSystem()">إنشاء الحساب 🚀</button>
         </div>
 
-        <div class="card" style="max-width:500px; margin:0 auto; background:#fdfefe;">
-            <h3 style="color:#1e3c72; text-align:center; margin-bottom:15px; font-weight:800;">✏️ تغيير كلمة المرور لحساب موجود</h3>
-            <div class="pay-box" style="margin-bottom:10px;"><label>اختر المستخدم:</label><select id="userSelectPass"></select></div>
-            <div class="pay-box" style="margin-bottom:15px;"><label>كلمة المرور الجديدة:</label><input type="password" id="newAccountPass" placeholder="الرقم السري الجديد..."></div>
-            <button class="btn btn-purple" style="width:100%; font-size:1.1rem; padding:12px;" onclick="changeUserPasswordSystem()">تحديث كلمة المرور 💾</button>
+        <div class="card" style="max-width:400px; margin:0 auto; background:#fdfefe;">
+            <h3 style="color:#1e3c72; text-align:center; margin-bottom:12px; font-weight:800;">✏️ تغيير كلمة المرور لحساب موجود</h3>
+            <div class="pay-box" style="margin-bottom:8px;"><label>اختر المستخدم:</label><select id="userSelectPass"></select></div>
+            <div class="pay-box" style="margin-bottom:12px;"><label>كلمة المرور الجديدة:</label><input type="password" id="newAccountPass" placeholder="الرقم السري الجديد..."></div>
+            <button class="btn btn-purple" style="width:100%; font-size:1rem; padding:10px;" onclick="changeUserPasswordSystem()">تحديث كلمة المرور 💾</button>
         </div>
     </div>
 
-    <button class="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">⬆️</button>
+    <!-- أزرار التمرير الصعود والهبوط -->
+    <div class="scroll-btn-group">
+        <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">⬆️</button>
+        <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});">⬇️</button>
+    </div>
 </div>
 
 <div id="receiptPrintSection"></div>
 
 <script>
-// إعدادات الخط الافتراضي لمكتبة Chart.js ليتوافق مع التصميم
 Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
 Chart.defaults.color = '#333';
 
@@ -600,7 +598,7 @@ function toast(message, type = 'info', ms = 3500) {
     if (!stack) return;
     const el = document.createElement('div');
     el.className = 'toast ' + (type === 'success' || type === 'error' || type === 'warn' ? type : '');
-    el.innerHTML = message; // السماح بعلامات HTML
+    el.innerHTML = message; 
     stack.appendChild(el);
     setTimeout(() => el.remove(), ms);
 }
@@ -620,11 +618,11 @@ function closeModal() {
 
 function confirmModal(message, onYes) {
     openModal(`
-        <h3 style="text-align:center; color:#c0392b; margin-bottom:15px;">⚠️ تأكيد الإجراء</h3>
-        <p style="text-align:center; font-size:1.1rem; font-weight:bold; margin-bottom:20px;">${escapeHtml(message)}</p>
-        <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn btn-red" id="modalYesBtn" style="padding:10px 20px;">نعم، استمر</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px;" onclick="closeModal()">إلغاء</button>
+        <h3 style="text-align:center; color:#c0392b; margin-bottom:12px;">⚠️ تأكيد الإجراء</h3>
+        <p style="text-align:center; font-size:1rem; font-weight:bold; margin-bottom:15px;">${escapeHtml(message)}</p>
+        <div style="display:flex; justify-content:center; gap:8px;">
+            <button class="btn btn-red" id="modalYesBtn" style="padding:8px 15px;">نعم، استمر</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:8px 15px;" onclick="closeModal()">إلغاء</button>
         </div>
     `);
     const btn = document.getElementById('modalYesBtn');
@@ -642,21 +640,25 @@ function formatDateDisplay(dateStr) {
     return clean;
 }
 
-/* ---------- 🖨️ Master Print / PDF Export Method (Professional as Fleet App) ---------- */
+/* ---------- 🖨️ Master Print / PDF Export Method ---------- */
 
 async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscape = false) {
     const element = document.getElementById(elementId);
     if (!element) return;
     
+    // إخفاء الأزرار يدوياً لتجنب ظهورها في الـ PDF (الحل المباشر للمشكلة)[cite: 1]
+    const noPdfElements = element.querySelectorAll('.no-pdf');
+    noPdfElements.forEach(el => el.style.display = 'none');
+
     // إظهار الهيدر المخصص للطباعة
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
-    // تفعيل وضع PDF المصغر للجدول
+    // تفعيل وضع PDF المصغر للجدول وتقليل الخط لتجنب التداخل
     element.classList.add('pdf-compact');
 
     // توزيع الصفحات للجداول الطويلة
-    const rowsPerPage = 35;
+    const rowsPerPage = 40;
     const rows = element.querySelectorAll('tbody tr');
     rows.forEach((row, index) => {
         row.classList.remove('page-break-row');
@@ -681,13 +683,14 @@ async function exportElementToPDF(elementId, fileName = 'Report.pdf', isLandscap
     } catch (err) {
         console.error('PDF Error:', err);
         toast('❌ حدث خطأ أثناء التصدير', 'error');
-        // Fallback للطباعة العادية
         document.body.classList.add('printing-report');
         window.print();
         document.body.classList.remove('printing-report');
     } finally {
         element.classList.remove('pdf-compact');
         headers.forEach(h => h.style.display = 'none');
+        // استرجاع الأزرار بعد الطباعة
+        noPdfElements.forEach(el => el.style.display = '');
     }
 }
 
@@ -712,7 +715,7 @@ let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
 let invoiceCounter = 1001; let activeInvoiceId = 1001;
-let topProductsChartInstance = null; // للمتغير الخاص بالرسم البياني
+let topProductsChartInstance = null;
 
 /* ---------- User & Auth Management ---------- */
 
@@ -873,7 +876,7 @@ function updateRateLabels() {
 function openRatesModal() {
     if (currentUser?.role !== 'Admin') { toast('❌ متاح للأدمن فقط!', 'error'); return; }
     openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px;">⚙️ إعدادات أسعار الصرف والمضاعف</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:12px;">⚙️ إعدادات أسعار الصرف والمضاعف</h3>
         <div class="payment-grid">
             <div class="pay-box"><label>💵 سعر الدولار (USD)</label><input type="number" id="rateUSD" value="${RATES.USD}"></div>
             <div class="pay-box"><label>💶 سعر اليورو (EUR)</label><input type="number" id="rateEUR" value="${RATES.EUR}"></div>
@@ -881,9 +884,9 @@ function openRatesModal() {
             <div class="pay-box"><label>💳 عمولة الفيزا</label><input type="number" id="rateVISA" value="${RATES.VISA}"></div>
             <div class="pay-box" style="grid-column:span 2;"><label>📈 معامل الحد الأدنى للسعر (مضاعف الجملة)</label><input type="number" id="rateGuideMult" value="${RATES.GUIDE_MULT || 3}"></div>
         </div>
-        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-            <button class="btn btn-green" style="padding:10px 20px;" onclick="saveRatesFromModal()">حفظ الإعدادات ✅</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px;" onclick="closeModal()">إلغاء</button>
+        <div style="display:flex; justify-content:center; gap:8px; margin-top:15px;">
+            <button class="btn btn-green" style="padding:8px 15px;" onclick="saveRatesFromModal()">حفظ الإعدادات ✅</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:8px 15px;" onclick="closeModal()">إلغاء</button>
         </div>
     `);
 }
@@ -1093,19 +1096,19 @@ function promptPrintBarcodeLabel(prodId) {
 
     openModal(`
         <h3 style="color:#1e3c72; margin-bottom:10px; text-align:center;">🏷️ خيارات طباعة الباركود</h3>
-        <p style="font-size:1.1rem; font-weight:bold; margin-bottom:15px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
+        <p style="font-size:1rem; font-weight:bold; margin-bottom:12px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
         
-        <div class="payment-grid" style="margin-bottom:15px;">
+        <div class="payment-grid" style="margin-bottom:12px;">
             <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1"></div>
             <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="6" min="4" max="14"></div>
             <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="35.56" step="0.01"></div>
             <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01"></div>
         </div>
 
-        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:12px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:5px;"> اسم المنتج</label>
-            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:5px;"> السعر</label>
-            <div class="pay-box" style="width:100%; margin-top:8px;">
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:10px; border-radius:6px; border:1px solid #ccc; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <label style="font-weight:bold; font-size:0.9rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:5px;"> اسم المنتج</label>
+            <label style="font-weight:bold; font-size:0.9rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:5px;"> السعر</label>
+            <div class="pay-box" style="width:100%; margin-top:6px;">
                 <label>العملة الظاهرة:</label>
                 <select id="lblCurrency" style="font-weight:bold; color:#27ae60;">
                     <option value="EGP">جنيه (EGP)</option>
@@ -1114,12 +1117,12 @@ function promptPrintBarcodeLabel(prodId) {
                     <option value="GBP">استرليني (£)</option>
                 </select>
             </div>
-            <label style="font-weight:bold; font-size:0.9rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:8px;">
+            <label style="font-weight:bold; font-size:0.85rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:6px;">
                 <input type="checkbox" id="lblRotatePrint" style="margin-left:5px;"> 🔄 عكس أبعاد الورقة (دوران 90 درجة)
             </label>
         </div>
 
-        <div class="pay-box" style="margin-bottom:20px;">
+        <div class="pay-box" style="margin-bottom:15px;">
             <label>التطبيق الهدف للطباعة:</label>
             <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72;">
                 <option value="direct">الطباعة المباشرة من المتصفح</option>
@@ -1127,9 +1130,9 @@ function promptPrintBarcodeLabel(prodId) {
             </select>
         </div>
 
-        <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn btn-purple" style="padding:10px 20px;" onclick="executeAdvancedPrint('${prodId}')">تنفيذ الطباعة 🖨️</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px;" onclick="closeModal()">إلغاء</button>
+        <div style="display:flex; justify-content:center; gap:8px;">
+            <button class="btn btn-purple" style="padding:8px 15px;" onclick="executeAdvancedPrint('${prodId}')">تنفيذ الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:8px 15px;" onclick="closeModal()">إلغاء</button>
         </div>
     `);
 }
@@ -1216,7 +1219,7 @@ function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) 
         listEl.innerHTML = matched.map(p => `
             <div class="result-item" data-pid="${escapeHtml(p.id)}">
                 <span style="color:#1e3c72; font-weight:bold;">${escapeHtml(p.n)}</span>
-                <span style="color:${p.q > 3 ? '#27ae60' : '#e74c3c'}; font-size:0.9rem;">(المخزون: ${p.q})</span>
+                <span style="color:${p.q > 3 ? '#27ae60' : '#e74c3c'}; font-size:0.85rem;">(المخزون: ${p.q})</span>
             </div>
         `).join('');
         listEl.querySelectorAll('.result-item').forEach(el => { el.addEventListener('click', () => onPick(findProductById(el.getAttribute('data-pid')))); });
@@ -1373,7 +1376,7 @@ function renderInvoice() {
                 <td style="direction:ltr;">$:${item.usd||0} | €:${item.eur||0} | £:${item.gbp||0} | EGP:${item.egp||0} | V:${item.visa||0}</td>
                 <td style="color:#27ae60; font-weight:bold;">${(item.sellTotal || 0).toFixed(2)}</td>
                 <td style="font-weight:bold; color:#1e3c72;">${escapeHtml(item.seller || 'Unknown')}</td>
-                <td><button class="btn btn-red" style="padding:6px 12px; font-size:0.85rem; margin:0;" onclick="removeInvoiceItem(${index})">حذف 🗑️</button></td>
+                <td><button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:0;" onclick="removeInvoiceItem(${index})">حذف 🗑️</button></td>
             </tr>`;
         }).join('');
     }
@@ -1458,7 +1461,7 @@ function renderFinanceTable() {
                 <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category)}</td>
                 <td style="font-weight:bold;">${f.amount.toFixed(2)} EGP</td>
                 <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
-                <td class="no-pdf"><button class="btn btn-red" style="padding:6px 12px; font-size:0.85rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">حذف 🗑️</button></td>
+                <td class="no-pdf"><button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:0;" onclick="deleteFinanceEntry(${f.id})">حذف 🗑️</button></td>
             </tr>`;
         }).join('');
     }
@@ -1522,7 +1525,7 @@ function editProductSystem(prodId) {
     const prod = findProductById(prodId); if (!prod) return;
 
     openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px;">✏️ تعديل بيانات المنتج</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:12px;">✏️ تعديل بيانات المنتج</h3>
         <div class="payment-grid">
             <div class="pay-box" style="grid-column:span 2;"><label>اسم المنتج</label><input type="text" id="editName" value="${escapeHtml(prod.n)}"></div>
             <div class="pay-box"><label>سعر الجملة (EGP)</label><input type="number" id="editPrice" value="${prod.p}"></div>
@@ -1530,9 +1533,9 @@ function editProductSystem(prodId) {
             <div class="pay-box"><label>الباركود</label><input type="text" id="editBarcode" value="${escapeHtml(prod.barcode || '')}"></div>
             <div class="pay-box"><label>تاريخ الصلاحية</label><input type="date" id="editExpiry" value="${escapeHtml(prod.expiry || '')}"></div>
         </div>
-        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-            <button class="btn btn-green" style="padding:10px 20px;" onclick="saveProductEdit('${prodId}')">حفظ التعديل ✅</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px;" onclick="closeModal()">إلغاء</button>
+        <div style="display:flex; justify-content:center; gap:8px; margin-top:15px;">
+            <button class="btn btn-green" style="padding:8px 15px;" onclick="saveProductEdit('${prodId}')">حفظ التعديل ✅</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:8px 15px;" onclick="closeModal()">إلغاء</button>
         </div>
     `);
 }
@@ -1568,16 +1571,16 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
     <tr class="${rowClass}">
         <td style="font-weight:bold;">${index + 1}</td>
         <td style="text-align:right; font-weight:bold; white-space:normal;">${escapeHtml(p.n)}${statusSuffix}</td>
-        <td style="font-weight:bold; font-size:1.1rem;">${p.q}</td>
+        <td style="font-weight:bold; font-size:1rem;">${p.q}</td>
         <td>${p.p.toFixed(2)}</td>
         <td style="color:#27ae60; font-weight:bold;">${(p.p * guideMult).toFixed(2)}</td>
         <td style="font-family:monospace; font-weight:bold; color:#1e3c72; direction:ltr;">${escapeHtml(p.barcode || '-')}</td>
         <td style="direction:ltr;">${escapeHtml(p.expiry || '-')}</td>
         <td class="no-pdf">
-            <button class="btn btn-blue" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
-            <button class="btn btn-purple" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="scanAndEditProductBarcode('${p.id}')">باركود 📷</button>
-            <button class="btn btn-purple" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px; background:#8e44ad;" onclick="promptPrintBarcodeLabel('${p.id}')">ملصق 🏷️</button>
-            <button class="btn btn-red" style="padding: 8px 12px; font-size: 0.95rem; margin: 2px;" onclick="deleteProductSystem('${p.id}')">حذف 🗑️</button>
+            <button class="btn btn-blue" style="padding: 6px 10px; font-size: 0.85rem; margin: 2px;" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
+            <button class="btn btn-purple" style="padding: 6px 10px; font-size: 0.85rem; margin: 2px;" onclick="scanAndEditProductBarcode('${p.id}')">باركود 📷</button>
+            <button class="btn btn-purple" style="padding: 6px 10px; font-size: 0.85rem; margin: 2px; background:#8e44ad;" onclick="promptPrintBarcodeLabel('${p.id}')">ملصق 🏷️</button>
+            <button class="btn btn-red" style="padding: 6px 10px; font-size: 0.85rem; margin: 2px;" onclick="deleteProductSystem('${p.id}')">حذف 🗑️</button>
         </td>
     </tr>`;
 }
@@ -1634,16 +1637,16 @@ function printSingleReceipt(invId) {
             <h2 style="margin-bottom:5px;">صيدلية أنجم الخضراء 🌿</h2>
             <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
             <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
-            <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                <thead><tr><th style="text-align:right; border-bottom:1px solid #000; padding-bottom:5px;">الصنف</th><th style="text-align:left; border-bottom:1px solid #000; padding-bottom:5px;">الإجمالي</th></tr></thead>
+            <hr style="border-top:1.5px dashed #000; margin:8px 0;">
+            <table style="width:100%; border-collapse:collapse; font-size:11px;">
+                <thead><tr><th style="text-align:right; border-bottom:1px solid #000; padding-bottom:4px;">الصنف</th><th style="text-align:left; border-bottom:1px solid #000; padding-bottom:4px;">الإجمالي</th></tr></thead>
                 <tbody>${itemsHtml}</tbody>
             </table>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
+            <hr style="border-top:1.5px dashed #000; margin:8px 0;">
             <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
             <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
-            <p style="font-size:12px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ برمجة Samy Lukas , Powered By Gemini</div>
+            <p style="font-size:10px; margin-top:12px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
+            <div style="font-size:9px; color:#555; margin-top:8px;">✨ برمجة Samy Lukas , Powered By Gemini</div>
         </div>
     `;
 
@@ -1706,7 +1709,7 @@ function generateReport() {
     const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
 
     if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1rem; padding:15px;">لا توجد فواتير في هذه الفترة</td></tr>';
         if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
         if (document.getElementById('chartsArea')) document.getElementById('chartsArea').style.display = 'none';
         return;
@@ -1715,23 +1718,23 @@ function generateReport() {
     const tally = buildInvoiceTally(filteredInvoices);
 
     tbody.innerHTML = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        const payBreakdown = `<div style="direction:ltr; font-size:0.85rem; font-weight:bold;">$:${u} | €:${eu} | £:${g}<br>EGP:${eg} | VISA:${v}</div>`;
+        const payBreakdown = `<div style="direction:ltr; font-size:0.8rem; font-weight:bold;">$:${u} | €:${eu} | £:${g}<br>EGP:${eg} | VISA:${v}</div>`;
         const cleanDateStr = formatDateDisplay(inv.date);
         return `
         <tr>
             <td style="font-weight:bold;">${index + 1}</td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#e67e22;">#${inv.id}</td>
-            <td style="white-space:nowrap; direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
+            <td style="font-weight:bold; color:#e67e22;">#${inv.id}</td>
+            <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
             <td class="col-items">${itemsListHtml}</td>
             <td>${payBreakdown}</td>
             <td style="color:#2c3e50; font-weight:bold;">${(inv.totalComm || 0).toFixed(2)}</td>
             <td style="color:#e67e22; font-weight:bold;">${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold; font-size:1.1rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
-            <td style="color:#8e44ad; font-weight:bold; font-size:1.1rem;">${(inv.netProfit || 0).toFixed(2)}</td>
+            <td style="color:#27ae60; font-weight:bold;">${(inv.totalEGP || 0).toFixed(2)}</td>
+            <td style="color:#8e44ad; font-weight:bold;">${(inv.netProfit || 0).toFixed(2)}</td>
             <td class="no-pdf">
-                <button class="btn btn-purple" style="padding:6px 10px; font-size:0.85rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
-                <button class="btn btn-blue" style="padding:6px 10px; font-size:0.85rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
-                <button class="btn btn-red" style="padding:6px 10px; font-size:0.85rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
+                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
+                <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
+                <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
             </td>
         </tr>`;
     }).join('');
@@ -1739,32 +1742,30 @@ function generateReport() {
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
         cardsContainer.innerHTML = `
-            <div class="report-card" style="flex:1; background:#fff; border:2px solid #3498db; border-radius:8px; padding:12px; text-align:center;">
-                <div style="font-weight:bold; color:#1e3c72; margin-bottom:5px;">💵 النقد الأجنبي</div>
-                <div style="font-size:1.1rem; font-weight:bold; direction:ltr;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)} | £: ${tally.sumGBP.toFixed(2)}</div>
+            <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #3498db; border-radius:6px; padding:10px; text-align:center;">
+                <div style="font-weight:bold; color:#1e3c72; margin-bottom:4px; font-size:0.85rem;">💵 النقد الأجنبي</div>
+                <div style="font-size:1rem; font-weight:bold; direction:ltr;">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)} | £: ${tally.sumGBP.toFixed(2)}</div>
             </div>
-            <div class="report-card" style="flex:1; background:#fff; border:2px solid #e67e22; border-radius:8px; padding:12px; text-align:center;">
-                <div style="font-weight:bold; color:#e67e22; margin-bottom:5px;">💳 إجمالي الفيزا والمحلي</div>
-                <div style="font-size:1.1rem; font-weight:bold; direction:ltr;">VISA: ${tally.sumVISA.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div>
+            <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #e67e22; border-radius:6px; padding:10px; text-align:center;">
+                <div style="font-weight:bold; color:#e67e22; margin-bottom:4px; font-size:0.85rem;">💳 إجمالي الفيزا والمحلي</div>
+                <div style="font-size:1rem; font-weight:bold; direction:ltr;">VISA: ${tally.sumVISA.toFixed(2)} | EGP: ${tally.sumEGP.toFixed(2)}</div>
             </div>
-            <div class="report-card" style="flex:1; background:#fff; border:2px solid #27ae60; border-radius:8px; padding:12px; text-align:center;">
-                <div style="font-weight:bold; color:#27ae60; margin-bottom:5px;">🛒 المبيعات الكلية</div>
-                <div style="font-size:1.3rem; font-weight:900; color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div>
+            <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #27ae60; border-radius:6px; padding:10px; text-align:center;">
+                <div style="font-weight:bold; color:#27ae60; margin-bottom:4px; font-size:0.85rem;">🛒 المبيعات الكلية</div>
+                <div style="font-size:1.1rem; font-weight:900; color:#27ae60;">${tally.grandTotalSell.toFixed(2)} EGP</div>
             </div>
-            <div class="report-card" style="flex:1; background:#fff; border:2px solid #8e44ad; border-radius:8px; padding:12px; text-align:center;">
-                <div style="font-weight:bold; color:#8e44ad; margin-bottom:5px;">💰 صافي الأرباح</div>
-                <div style="font-size:1.3rem; font-weight:900; color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div>
+            <div class="report-card" style="flex:1; background:#fff; border:1.5px solid #8e44ad; border-radius:6px; padding:10px; text-align:center;">
+                <div style="font-weight:bold; color:#8e44ad; margin-bottom:4px; font-size:0.85rem;">💰 صافي الأرباح</div>
+                <div style="font-size:1.1rem; font-weight:900; color:#8e44ad;">${tally.grandNetProfit.toFixed(2)} EGP</div>
             </div>
         `;
     }
 
-    // تفعيل Chart.js لأكثر 10 منتجات مبيعاً
     const chartContainer = document.getElementById('chartsArea');
     const top10 = tally.sortedTop.slice(0, 10);
     
     if (chartContainer && top10.length > 0) {
         chartContainer.style.display = 'flex';
-        
         if (topProductsChartInstance) { topProductsChartInstance.destroy(); }
         
         const niceColors = ['#3498db', '#9b59b6', '#e67e22', '#1abc9c', '#f1c40f', '#e74c3c', '#34495e', '#16a085', '#27ae60', '#2980b9'];
@@ -1779,13 +1780,13 @@ function generateReport() {
                     data: top10.map(p => p.qty),
                     backgroundColor: niceColors.slice(0, top10.length),
                     borderWidth: 1,
-                    borderRadius: 6
+                    borderRadius: 4
                 }]
             },
             options: {
                 animation: false, responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 18, family: 'Cairo' } },
+                    title: { display: true, text: '📊 أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Cairo' } },
                     legend: { display: false }
                 },
                 scales: {
@@ -1899,7 +1900,7 @@ function generateSingleProductDetailsReport(productName) {
 
     if (!display) return;
     if (salesHistory.length === 0) {
-        display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; font-size:1.1rem; padding:15px;">⚠️ لا توجد مبيعات للمنتج [${escapeHtml(productName)}] في الفترة المحددة!</div>`; display.style.display = 'block'; return;
+        display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; font-size:1rem; padding:10px;">⚠️ لا توجد مبيعات للمنتج [${escapeHtml(productName)}] في الفترة المحددة!</div>`; display.style.display = 'block'; return;
     }
 
     const rows = salesHistory.map((h, idx) => `
@@ -1907,16 +1908,16 @@ function generateSingleProductDetailsReport(productName) {
             <td>${idx + 1}</td>
             <td style="font-weight:bold; color:#e67e22;">#${h.invId}</td>
             <td style="direction:ltr; font-weight:bold;">${escapeHtml(formatDateDisplay(h.date))}</td>
-            <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${h.qty}</td>
+            <td style="font-weight:bold; font-size:1rem; color:#1e3c72;">${h.qty}</td>
             <td style="font-weight:bold; color:#27ae60;">${parseFloat(h.sellTotal).toFixed(2)}</td>
             <td style="font-weight:bold;">${escapeHtml(h.seller)}</td>
         </tr>`).join('');
 
     display.innerHTML = `
-        <h3 style="color:#1e3c72; text-align:center; margin-bottom:12px; font-weight:800;">📦 تقرير مبيعات المنتج: <span style="color:#27ae60;">${escapeHtml(productName)}</span></h3>
-        <div class="info-row" style="background:#eef7fe; padding:12px; border-radius:8px; margin-bottom:15px;">
-            <div style="font-size:1.1rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.3rem;">${totalQtySold}</span></div>
-            <div style="font-size:1.1rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.3rem;">${totalRevenue.toFixed(2)} ج.م</span></div>
+        <h3 style="color:#1e3c72; text-align:center; margin-bottom:10px; font-weight:800;">📦 تقرير مبيعات المنتج: <span style="color:#27ae60;">${escapeHtml(productName)}</span></h3>
+        <div class="info-row" style="background:#eef7fe; padding:10px; border-radius:6px; margin-bottom:12px;">
+            <div style="font-size:0.95rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.1rem;">${totalQtySold}</span></div>
+            <div style="font-size:0.95rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.1rem;">${totalRevenue.toFixed(2)} ج.م</span></div>
         </div>
         <div class="table-responsive"><table>
             <thead><tr><th>#</th><th>رقم الفاتورة</th><th>التاريخ والوقت</th><th>الكمية</th><th>المبلغ الإجمالي</th><th>البائع</th></tr></thead>
