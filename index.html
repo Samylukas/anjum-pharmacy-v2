@@ -24,6 +24,7 @@
         .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: transparent; padding: 10px; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
+        /* --- ✨ Splash Screen ✨ --- */
         #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
         .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; opacity: 0; transform: translateY(20px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .splash-anjum { color: #1e3c72; } .splash-green { color: #27ae60; }
@@ -70,25 +71,18 @@
         .pay-box { display: flex; flex-direction: column; width: 100%; }
         .pay-box label { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #2c3e50; }
         .pay-box input, .pay-box select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-size: 1rem; box-sizing: border-box; font-weight: 700; background: #f8f9fa; }
-        @media (max-width: 550px) { .payment-grid { grid-template-columns: 1fr; } .pay-box { grid-column: span 1 !important; } }
-        
-        .warning-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; margin-top: 10px; text-align: center; display: none; }
         
         .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; color: white; }
         .btn:hover { opacity: 0.9; transform: scale(1.02); }
         .btn-green { background: #27ae60; } .btn-blue { background: #2980b9; } .btn-darkblue { background: #1e3c72; } .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #f39c12; } .btn-gray { background: #7f8c8d; }
-        .btn-outline { background: #fff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-outline:hover { background: #1e3c72; color: #fff; }
-
+        
         .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
-
-        .btn-large-stock { padding: 12px 20px !important; font-size: 1.05rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; }
-        
-        .table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; border-radius: 8px; border: 1px solid #eee; background: #fff; -webkit-overflow-scrolling: touch; }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 12px; border-radius: 8px; border: 1px solid #eee; background: #fff; }
         table { width: 100%; min-width: 750px; border-collapse: collapse; text-align: center; }
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; font-weight: 600; }
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
@@ -119,13 +113,30 @@
         .scroll-btn:hover { opacity: 1; transform: scale(1.1); background: #1e3c72; }
 
         #toastStack { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; animation: toastIn 0.3s ease-out; }
+        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: toastIn 0.3s ease-out; }
         .toast.success { background: #27ae60; } .toast.error { background: #e74c3c; } .toast.warn { background: #f39c12; }
         
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
 
+        /* الكاميرا العائمة */
+        #globalCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .camera-modal { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .camera-div { width:100%; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; }
+
+        #reportLoader { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999999999; }
+        .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid #f39c12; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .report-print-container { background: #fff; padding: 15px; border-radius: 10px; width: 100%; overflow-x: auto; margin-top: 15px; } 
+        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.5rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
+        
+        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
+        .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
+        .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
+        .page-break-row { page-break-after: always !important; break-after: page !important; }
+        
         .chart-page { width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
         .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
 
@@ -134,25 +145,31 @@
         .modern-date-row label { font-weight: bold; color: #1e3c72; font-size: 1rem; }
         .modern-date-row input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; font-family: inherit; }
 
-        .scanner-box { display:none; margin-top:10px; border-radius:10px; overflow:hidden; border:2px solid #1e3c72; background:#fff; }
-        .camera-div { width:100%; }
-
         @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
             html, body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
             body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
+            #reportLoader { display: none !important; }
         }
-
-        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
-        .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
-        .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
-        .page-break-row { page-break-after: always !important; break-after: page !important; }
     </style>
 </head>
 <body>
 
-<!-- ✨ Splash Screen ✨ -->
+<div id="reportLoader">
+    <div class="spinner"></div>
+    <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
+</div>
+
+<!-- ✨ كاميرا الباركود العائمة (المركزية لكل البرنامج) ✨ -->
+<div id="globalCameraOverlay">
+    <div class="camera-modal">
+        <h3 style="color:#1e3c72; margin-bottom:15px; font-weight:800;">📷 مسح الباركود</h3>
+        <div id="globalCameraReader" class="camera-div"></div>
+        <button class="btn btn-red" style="width:100%; font-size:1.1rem; padding:12px;" onclick="closeGlobalCamera()">إغلاق الكاميرا ❌</button>
+    </div>
+</div>
+
 <div id="splashScreen">
     <div class="branch-container">
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
@@ -168,14 +185,13 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
+        <span class="splash-anjum" style="color:#1e3c72;">Anjum</span> <br> <span class="splash-green" style="color:#27ae60;">Green Pharmacy</span>
     </div>
 </div>
 
 <div id="toastStack"></div>
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalBox"></div></div>
 
-<!-- ✨ شاشة الدخول الأصلية الأنيقة ✨ -->
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.6rem; font-weight:800;">
@@ -224,7 +240,9 @@
 
     <!-- 1. POS Tab -->
     <div id="salesTab" class="tab-content active">
-        <div class="section-title"><span style="font-size:1.4rem;">📝 فاتورة مبيعات</span></div>
+        <div class="section-title">
+            <span style="font-size:1.4rem;">📝 فاتورة مبيعات</span>
+        </div>
 
         <div class="toolbar-row" style="margin-bottom: 15px;">
             <button class="btn btn-darkblue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
@@ -246,12 +264,7 @@
 
         <div style="display:flex; gap:10px; margin-top:15px;">
             <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="ابحث بالاسم أو الباركود... (F4)" oninput="searchProduct()">
-            <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
-        </div>
-
-        <div id="salesScannerContainer" class="scanner-box">
-            <div id="salesCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:10px auto; width:90%;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
+            <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="openGlobalCamera('sales')">📷 كاميرا (F2)</button>
         </div>
 
         <div id="searchResults" class="results-list"></div>
@@ -322,12 +335,7 @@
         
         <div style="display:flex; gap:10px; margin-top:15px;">
             <input type="text" id="stockFilterInput" class="search-box" style="margin-bottom:0;" placeholder="ابحث في المخزون بالاسم أو الباركود..." oninput="filterStockTable(this.value)">
-            <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('stock')">📷 كاميرا (F2)</button>
-        </div>
-
-        <div id="stockScannerContainer" class="scanner-box">
-            <div id="stockCameraReader" class="camera-div"></div>
-            <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
+            <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="openGlobalCamera('stock')">📷 كاميرا (F2)</button>
         </div>
 
         <div class="card" id="stockPrintArea" style="padding:0; overflow:hidden; margin-top:15px;">
@@ -356,18 +364,11 @@
                     <label>الباركود (اختياري):</label>
                     <div style="display:flex; gap:10px;">
                         <input type="text" id="newProdBarcode" placeholder="مسح الباركود...">
-                        <button class="btn btn-purple" style="width:auto; margin:0; padding:0 20px;" onclick="toggleCameraScanner('addNew')">📷 مسح</button>
+                        <button class="btn btn-purple" style="width:auto; margin:0; padding:0 20px;" onclick="openGlobalCamera('addNew')">📷 مسح</button>
                     </div>
                 </div>
-                <!-- مساحة فتح الكاميرا لإضافة منتج -->
-                <div id="addNewScannerContainer" class="scanner-box" style="grid-column: span 2;">
-                    <div id="addNewCameraReader" class="camera-div"></div>
-                    <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
-                </div>
-                
                 <div class="pay-box" style="grid-column: span 2;"><label>تاريخ الصلاحية:</label><input type="date" id="newProdExpiry" style="padding:10px; font-size:1.1rem;"></div>
             </div>
-            
             <button class="btn btn-green" style="margin-top: 20px; width: 100%; font-size:1.1rem; padding:12px;" onclick="addNewProductToSystem()">حفظ المنتج الجديد 📦</button>
         </div>
 
@@ -375,15 +376,9 @@
         <div class="card" style="background:#fff3cd; border:1px solid #ffeeba;">
             <div style="display:flex; gap:10px;">
                 <input type="text" id="addStockSearch" class="search-box" style="margin-bottom:0; background:#fff; border-color:#f39c12;" placeholder="ابحث بالاسم أو الباركود..." oninput="searchAddStockProduct()">
-                <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
+                <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="openGlobalCamera('recharge')">📷 باركود</button>
             </div>
             
-            <!-- مساحة فتح الكاميرا للتزويد -->
-            <div id="rechargeScannerContainer" class="scanner-box">
-                <div id="rechargeCameraReader" class="camera-div"></div>
-                <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
-            </div>
-
             <div id="addStockResults" class="results-list"></div>
             
             <div id="addStockCard" style="display: none; margin-top: 15px; padding:20px; background:#fff; border:2px solid #f39c12; border-radius:10px;">
@@ -484,7 +479,7 @@
                 
                 <div style="flex:2; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start;">
                     <button class="btn btn-orange" style="padding:12px 20px; font-size:1.05rem;" onclick="exportSalesReportExcel()">إكسيل 📊</button>
-                    <button class="btn btn-red" style="padding:12px 20px; font-size:1.05rem;" onclick="exportSalesReportPDF()">طباعة / PDF 📄</button>
+                    <button class="btn btn-red" style="padding:12px 20px; font-size:1.05rem;" onclick="printSalesReportPDF()">طباعة / PDF 📄</button>
                     <button class="btn btn-dark" style="padding:12px 20px; font-size:1.05rem;" onclick="openRatesModal()">إعدادات العملات ⚙️</button>
                     <button class="btn btn-purple" style="padding:12px 20px; font-size:1.05rem;" onclick="handleNetProfitAction()">صافي الربح 💵</button>
                     <button class="btn btn-darkblue" style="padding:12px 25px; font-size:1.05rem;" onclick="generateReport()">بحث واستخراج 📈</button>
@@ -653,17 +648,18 @@ function formatDateDisplay(dateStr) {
     if (clean.length > 10 && !clean.includes(' ')) {
         let timePart = clean.slice(0, 5);
         let datePart = clean.slice(5);
-        return `${datePart}${timePart}`;
+        return `${datePart} ${timePart}`;
     }
     return clean;
 }
 
 /* ---------- 🖨️ PDF Export Method (Integrated with Capacitor Support) ---------- */
 
-async function exportElementToPDF(elementId, titleText, isLandscape = false) {
+async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const element = document.getElementById(elementId);
-    if (!element || element.innerText.trim() === '') return toast('⚠️ لا توجد بيانات للطباعة', 'warn');
+    if (!element || element.innerText.trim() === '') return toast('⚠️ استخرج التقرير أولاً', 'warn');
 
+    document.getElementById('reportLoader').style.display = 'flex';
     window.scrollTo({ top: 0, behavior: 'instant' });
 
     const noPdfElements = element.querySelectorAll('.no-pdf');
@@ -722,26 +718,27 @@ async function exportElementToPDF(elementId, titleText, isLandscape = false) {
         if (!isLandscape) element.classList.remove('pdf-compact');
         headers.forEach(h => h.style.display = 'none');
         noPdfElements.forEach(el => el.style.display = '');
+        document.getElementById('reportLoader').style.display = 'none';
     }
 }
 
 function printSalesReportPDF() {
-    exportElementToPDF('reportsPrintArea', 'Sales_Report', true);
+    downloadDirectPDF('reportsPrintArea', 'Sales_Report', true);
 }
 
 function printFinanceReportPDF() {
-    exportElementToPDF('financePrintArea', 'Financial_Report', false);
+    downloadDirectPDF('financePrintArea', 'Financial_Report', false);
 }
 
 function printStockTable() {
-    exportElementToPDF('stockPrintArea', 'Stock_Report', true);
+    downloadDirectPDF('stockPrintArea', 'Stock_Report', true);
 }
 
 /* ---------- State Variables ---------- */
 
 let currentUser = null; let cloudUsers = []; let currentNavIndex = -1;
-let scanners = { sales: null, addNew: null, recharge: null, stock: null };
-let activeScannerKey = null; let invoiceDiscountPercent = 0;
+let scanners = { floating: null };
+let activeFloatingAction = null; let invoiceDiscountPercent = 0;
 let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
@@ -829,7 +826,7 @@ async function validateEntryPassword() {
 
 function logout() {
     if (currentUser) syncToCloud("updateUserActivity", { username: currentUser.username, isOnline: false, lastLogin: new Date().toLocaleString() });
-    currentUser = null; stopAllScanners();
+    currentUser = null; closeGlobalCamera();
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('loginOverlay').style.display = 'flex';
     if (document.getElementById('entryPassInput')) document.getElementById('entryPassInput').value = '';
@@ -1043,10 +1040,10 @@ function saveInvoicesToStorage() { localStorage.setItem('anjum_invoices', JSON.s
 function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
 function findProductById(id) { return products.find(p => p.id === id); }
 
-/* ---------- Tabs & Scanners ---------- */
+/* ---------- Tabs & FLOATING Scanner ---------- */
 
 function showTab(tabId, evt) {
-    stopAllScanners();
+    closeGlobalCamera();
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
 
@@ -1060,49 +1057,43 @@ function showTab(tabId, evt) {
     if (tabId === 'financeTab') renderFinanceTable();
 }
 
-function toggleCameraScanner(key) {
-    if (activeScannerKey === key) stopCameraScanner(key); else { stopAllScanners(); startCameraScanner(key); }
+function openGlobalCamera(actionKey) {
+    activeFloatingAction = actionKey;
+    document.getElementById('globalCameraOverlay').style.display = 'flex';
+    
+    if (scanners['floating']) {
+        scanners['floating'].stop().then(() => startFloatingCamera()).catch(() => startFloatingCamera());
+    } else { startFloatingCamera(); }
 }
 
-function startCameraScanner(key) {
-    const containerId = key + 'ScannerContainer'; const readerId = key + 'CameraReader';
-    const container = document.getElementById(containerId);
-    if(container) container.style.display = 'block';
-
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(stream => { stream.getTracks().forEach(t => t.stop()); initHtml5Scanner(key, readerId, containerId); })
-            .catch(() => initHtml5Scanner(key, readerId, containerId));
-    } else { initHtml5Scanner(key, readerId, containerId); }
-}
-
-function initHtml5Scanner(key, readerId, containerId) {
+function startFloatingCamera() {
     try {
-        scanners[key] = new Html5Qrcode(readerId);
+        scanners['floating'] = new Html5Qrcode('globalCameraReader');
         const config = { fps: 15, qrbox: { width: 250, height: 150 } };
-        scanners[key].start(
+        scanners['floating'].start(
             { facingMode: "environment" }, config,
-            (decodedText) => onBarcodeScanned(key, decodedText), () => {}
-        ).then(() => { activeScannerKey = key; })
-         .catch(err => { toast("❌ فشل الوصول للكاميرا: " + err, 'error'); document.getElementById(containerId).style.display = 'none'; });
+            (decodedText) => onBarcodeScanned(activeFloatingAction, decodedText),
+            () => {}
+        ).catch(err => { toast("❌ فشل الوصول للكاميرا: " + err, 'error'); closeGlobalCamera(); });
     } catch (e) {
-        toast("❌ خطأ في تهيئة الماسح: " + e.message, 'error'); document.getElementById(containerId).style.display = 'none';
+        toast("❌ خطأ في تهيئة الماسح: " + e.message, 'error'); closeGlobalCamera();
     }
 }
 
-function stopCameraScanner(key) {
-    const containerId = key + 'ScannerContainer';
-    if (scanners[key] && activeScannerKey === key) {
-        scanners[key].stop().then(() => { activeScannerKey = null; document.getElementById(containerId).style.display = 'none'; }).catch(() => { document.getElementById(containerId).style.display = 'none'; });
-    } else { const el = document.getElementById(containerId); if(el) el.style.display = 'none'; }
+function closeGlobalCamera() {
+    document.getElementById('globalCameraOverlay').style.display = 'none';
+    if (scanners['floating']) {
+        scanners['floating'].stop().catch(() => {});
+    }
+    activeFloatingAction = null;
 }
-
-function stopAllScanners() { ['sales', 'addNew', 'recharge', 'stock'].forEach(stopCameraScanner); }
 
 let selectedStockEditProductId = null;
 
 function onBarcodeScanned(key, decodedText) {
     playBeepSound(); const barcodeQuery = decodedText.trim();
+    closeGlobalCamera();
+
     if (key === 'sales') {
         document.getElementById('searchInput').value = barcodeQuery;
         const matched = products.find(p => p.barcode && p.barcode.toString().trim() === barcodeQuery);
@@ -1122,7 +1113,6 @@ function onBarcodeScanned(key, decodedText) {
             toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); selectedStockEditProductId = null; renderStockTable();
         }
     }
-    stopCameraScanner(key);
 }
 
 /* ---------- 🖨️ Professional Dynamic Barcode Print Options (Mobile & Web) ---------- */
@@ -1146,6 +1136,7 @@ function promptPrintBarcodeLabel(prodId) {
         <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:8px; transform:scale(1.2);"> اسم المنتج</label>
             <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:8px; transform:scale(1.2);"> السعر</label>
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPharmacy" checked style="margin-left:8px; transform:scale(1.2);"> الصيدلية</label>
             <div class="pay-box" style="width:100%; margin-top:10px;">
                 <label style="font-size:1rem;">العملة الظاهرة:</label>
                 <select id="lblCurrency" style="font-weight:bold; color:#27ae60; padding:10px;">
@@ -1185,6 +1176,7 @@ function executeAdvancedPrint(prodId) {
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
     const showName = document.getElementById('lblShowName')?.checked;
     const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
     const isRotated = document.getElementById('lblRotatePrint')?.checked;
     const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
     closeModal();
@@ -1206,7 +1198,7 @@ function executeAdvancedPrint(prodId) {
         labelsHtml += `
             <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    <div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>` : ''}
                     ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
                     <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
                     ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
@@ -1231,12 +1223,11 @@ function executeAdvancedPrint(prodId) {
                 const fileName = `Barcode_${prod.barcode}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
                 
-                // دمج كود الـ Capacitor السحري للموبايل
                 if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
                     try {
                         let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
                         const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
-                        await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى 4Barcode' });
+                        await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
                         toast("✅ تم الإرسال بنجاح!", "success");
                     } catch (err) { console.error('Share Plugin Failed:', err); }
                 } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1624,7 +1615,9 @@ function saveProductEdit(prodId) {
 }
 
 function scanAndEditProductBarcode(prodId) {
-    if (!findProductById(prodId)) return; selectedStockEditProductId = prodId; toggleCameraScanner('stock');
+    if (!findProductById(prodId)) return; 
+    selectedStockEditProductId = prodId; 
+    openGlobalCamera('stock');
 }
 
 function deleteProductSystem(prodId) {
@@ -2052,7 +2045,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('online', updateOnlineStatus); window.addEventListener('offline', updateOnlineStatus);
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+        if (e.key === 'F2') { e.preventDefault(); openGlobalCamera('sales'); }
         else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
         else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
