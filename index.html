@@ -24,6 +24,7 @@
         .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: transparent; padding: 10px; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
+        /* --- ✨ Splash Screen ✨ --- */
         #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
         .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; opacity: 0; transform: translateY(20px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .splash-anjum { color: #1e3c72; } .splash-green { color: #27ae60; }
@@ -258,7 +259,7 @@
 
         <div class="toolbar-row" style="margin-bottom: 15px;">
             <button class="btn btn-darkblue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
-            <button class="btn btn-orange" onclick="prepareNewInvoice()">جديدة ➕</button>
+            <button class="btn btn-orange" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
             <button class="btn btn-gray" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
         </div>
 
@@ -686,7 +687,7 @@ function formatDateDisplay(dateStr) {
     if (clean.length > 10 && !clean.includes(' ')) {
         let timePart = clean.slice(0, 5);
         let datePart = clean.slice(5);
-        return `${datePart} ${timePart}`;
+        return `${datePart}${timePart}`;
     }
     return clean;
 }
@@ -767,7 +768,6 @@ function printStockTable() { downloadDirectPDF('stockPrintArea', 'Stock_Report',
 /* ---------- State Variables ---------- */
 
 let currentUser = null; let cloudUsers = []; let currentNavIndex = -1;
-// أضفنا مفتاح floating للتحكم في الكاميرا العائمة
 let scanners = { sales: null, addNew: null, recharge: null, stock: null, floating: null };
 let activeScannerKey = null; let invoiceDiscountPercent = 0;
 let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
@@ -1037,7 +1037,7 @@ function syncToCloud(actionType, data) {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: actionType, data: data })
     })
     .then(res => { if (!res.ok) throw new Error("HTTP error " + res.status); return res.json(); })
-    .catch(() => { queueOffline(actionType, data); toast('⚠️ تم وضع التحديث في ط طابور الانتظار لعدم توفر شبكة', 'warn'); });
+    .catch(() => { queueOffline(actionType, data); toast('⚠️ تم وضع التحديث في طابور الانتظار لعدم توفر شبكة', 'warn'); });
 }
 
 function queueOffline(actionType, data) {
@@ -1174,7 +1174,6 @@ function closeFloatingCamera() {
     }
 }
 
-
 let selectedStockEditProductId = null;
 
 function onBarcodeScanned(key, decodedText) {
@@ -1277,13 +1276,13 @@ function executeAdvancedPrint(prodId) {
     else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
     else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
 
-    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)} ${currencySymbol}` : '';
+    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
     let printW = isRotated ? hMM : wMM; let printH = isRotated ? wMM : hMM;
     let labelsHtml = '';
 
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+            <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
                 <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
                     ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>` : ''}
                     ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
@@ -1704,7 +1703,7 @@ function saveProductEdit(prodId) {
 function scanAndEditProductBarcode(prodId) {
     if (!findProductById(prodId)) return; 
     selectedStockEditProductId = prodId; 
-    openGlobalCamera('stock'); // يفتح الكاميرا العائمة النظيفة فقط للجدول
+    openFloatingCamera(); // <- فتح الكاميرا العائمة النظيفة والمخصصة للجدول فقط!
 }
 
 function deleteProductSystem(prodId) {
