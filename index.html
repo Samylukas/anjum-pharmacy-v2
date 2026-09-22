@@ -127,10 +127,10 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- الكاميرا العائمة لجدول المخزون --- */
-        #floatingCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
+        /* --- الكاميرا العائمة لجدول المخزون (بأولوية عرض قصوى) --- */
+        #floatingCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
         .camera-modal { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .camera-div-float { width:100%; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; }
+        .camera-div-float { width:100%; min-height: 250px; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; background: #000; }
 
         /* الكاميرات المدمجة (البيع والبحث) */
         .scanner-box { display:none; margin-top:10px; border-radius:10px; overflow:hidden; border:2px solid #1e3c72; background:#fff; }
@@ -173,7 +173,7 @@
     <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
 </div>
 
-<!-- ✨ كاميرا الباركود العائمة (خاصة بجدول المخزون فقط) ✨ -->
+<!-- ✨ الكاميرا العائمة النظيفة (للمخزون فقط) ✨ -->
 <div id="floatingCameraOverlay">
     <div class="camera-modal">
         <h3 style="color:#1e3c72; margin-bottom:15px; font-weight:800;">📷 مسح الباركود للمنتج</h3>
@@ -280,6 +280,7 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
         </div>
 
+        <!-- الكاميرا المدمجة للبيع -->
         <div id="salesScannerContainer" class="scanner-box">
             <div id="salesCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
@@ -356,6 +357,7 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('stock')">📷 كاميرا (F2)</button>
         </div>
 
+        <!-- الكاميرا المدمجة للبحث في المخزون (أعلى الجدول) -->
         <div id="stockScannerContainer" class="scanner-box">
             <div id="stockCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
@@ -391,6 +393,7 @@
                     </div>
                 </div>
                 
+                <!-- الكاميرا المدمجة للإضافة -->
                 <div id="addNewScannerContainer" class="scanner-box" style="grid-column: span 2;">
                     <div id="addNewCameraReader" class="camera-div"></div>
                     <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
@@ -409,6 +412,7 @@
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
             </div>
             
+            <!-- الكاميرا المدمجة للتزويد -->
             <div id="rechargeScannerContainer" class="scanner-box">
                 <div id="rechargeCameraReader" class="camera-div"></div>
                 <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
@@ -567,6 +571,7 @@
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px;">
                 <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:center; flex-wrap:wrap;"></div>
                 
+                <!-- الرسوم البيانية المتراصة عمودياً -->
                 <div id="advancedChartsArea" style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
                     <div class="chart-page" style="page-break-inside: avoid; width: 100%;">
                         <canvas id="monthlyChart"></canvas>
@@ -763,8 +768,9 @@ function printStockTable() { downloadDirectPDF('stockPrintArea', 'Stock_Report',
 /* ---------- State Variables ---------- */
 
 let currentUser = null; let cloudUsers = []; let currentNavIndex = -1;
-let scanners = { sales: null, addNew: null, recharge: null, stock: null, floating: null };
+let scanners = { sales: null, addNew: null, recharge: null, stock: null };
 let activeScannerKey = null; let invoiceDiscountPercent = 0;
+let floatingScannerInstance = null; // التحكم المباشر بالكاميرا العائمة
 let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
@@ -1064,7 +1070,7 @@ function loadDataFromStorage() {
 function saveProductsToStorage() { localStorage.setItem('anjum_products', JSON.stringify(products)); }
 function saveInvoicesToStorage() { localStorage.setItem('anjum_invoices', JSON.stringify(savedInvoices)); localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
 function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
-function findProductById(id) { return products.find(p => p.id === id); }
+function findProductById(id) { return products.find(p => String(p.id) === String(id)); }
 
 /* ---------- Tabs & Inline Scanners ---------- */
 
@@ -1125,70 +1131,72 @@ function stopAllScanners() {
     closeFloatingCamera();
 }
 
-/* ---------- 🌟 Floating Camera for Stock Table Edit (Memory Leak Fixed) 🌟 ---------- */
+/* ---------- 🌟 Floating Camera for Stock Table Edit (Memory Leak & Typo Fixed 100%) 🌟 ---------- */
 
 function openFloatingCamera() {
-    document.getElementById('floatingCameraOverlay').style.display = 'flex';
-    // التأخير لضمان رسم الـ Modal قبل استدعاء الكاميرا لتجنب الشاشة البيضاء
+    const overlay = document.getElementById('floatingCameraOverlay');
+    if (!overlay) return;
+    
+    overlay.style.display = 'flex';
+    
+    // تأخير لضمان رسم الـ DOM للنافذة
     setTimeout(() => {
-        if (scanners['floating']) {
-            scanners['floating'].stop().then(() => {
-                scanners['floating'].clear();
-                startFloatingCamera();
-            }).catch(() => startFloatingCamera());
-        } else { 
-            startFloatingCamera(); 
+        try {
+            // تفريغ يدوي وإجباري للـ HTML لمنع مشكلة الشاشة البيضاء والتعارض
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            
+            floatingScannerInstance = new Html5Qrcode('floatingCameraReader');
+            floatingScannerInstance.start(
+                { facingMode: "environment" },
+                { fps: 15, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    playBeepSound(); 
+                    const barcodeQuery = decodedText.trim();
+                    closeFloatingCamera(); // إغلاق فوري فور لقط الباركود
+                    
+                    const existingBarcode = products.find(p => String(p.id) !== String(selectedStockEditProductId) && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+                    if (existingBarcode) { 
+                        toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); 
+                        return; 
+                    }
+                    
+                    const prod = findProductById(selectedStockEditProductId);
+                    if (prod) {
+                        prod.barcode = barcodeQuery; 
+                        saveProductsToStorage(); 
+                        syncToCloud("updateSingleProduct", prod);
+                        toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); 
+                        selectedStockEditProductId = null; 
+                        renderStockTable();
+                    }
+                }, 
+                (err) => { /* تجاهل أخطاء القراءة العادية */ }
+            ).catch(err => {
+                toast("❌ فشل تشغيل الكاميرا: تأكد من الصلاحيات", 'error');
+                closeFloatingCamera();
+            });
+        } catch (e) {
+            toast("❌ خطأ غير متوقع: " + e.message, 'error');
+            closeFloatingCamera();
         }
-    }, 100);
-}
-
-function startFloatingCamera() {
-    try {
-        scanners['floating'] = new Html5Qrcode('floatingCameraReader');
-        const config = { fps: 15, qrbox: { width: 250, height: 150 } };
-        scanners['floating'].start(
-            { facingMode: "environment" }, config,
-            (decodedText) => {
-                playBeepSound(); 
-                const barcodeQuery = decodedText.trim();
-                
-                const existingBarcode = products.find(p => p.id !== selectedStockEditProductId && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
-                if (existingBarcode) { 
-                    toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); 
-                    closeFloatingCamera();
-                    return; 
-                }
-                const prod = findProductById(selectedStockEditProductId);
-                if (prod) {
-                    prod.barcode = barcodeQuery; 
-                    saveProductsToStorage(); 
-                    syncToCloud("updateSingleProduct", prod);
-                    toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); 
-                    selectedStockEditProductId = null; 
-                    renderStockTable();
-                }
-                closeFloatingCamera(); // إغلاق مباشر بعد الالتقاط الناجح
-            }, 
-            () => {} // تجاهل أخطاء القراءة المستمرة
-        ).catch(err => { 
-            toast("❌ فشل الوصول للكاميرا: " + err, 'error'); 
-            closeFloatingCamera(); 
-        });
-    } catch (e) {
-        toast("❌ خطأ في تهيئة الماسح: " + e.message, 'error'); 
-        closeFloatingCamera();
-    }
+    }, 300); // 300 ملي ثانية لضمان الاستقرار
 }
 
 function closeFloatingCamera() {
-    document.getElementById('floatingCameraOverlay').style.display = 'none';
-    if (scanners['floating']) {
-        scanners['floating'].stop().then(() => {
-            scanners['floating'].clear();
-            scanners['floating'] = null; // تفريغ الذاكرة
+    const overlay = document.getElementById('floatingCameraOverlay');
+    if (overlay) overlay.style.display = 'none';
+    
+    if (floatingScannerInstance) {
+        floatingScannerInstance.stop().then(() => {
+            floatingScannerInstance.clear();
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            floatingScannerInstance = null;
         }).catch(() => {
-            scanners['floating'] = null;
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            floatingScannerInstance = null;
         });
+    } else {
+        document.getElementById('floatingCameraReader').innerHTML = '';
     }
 }
 
@@ -1210,12 +1218,14 @@ function onBarcodeScanned(key, decodedText) {
     } else if (key === 'recharge') {
         document.getElementById('addStockSearch').value = barcodeQuery; searchAddStockProduct();
     } else if (key === 'stock') {
-        const existingBarcode = products.find(p => p.id !== selectedStockEditProductId && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
-        if (existingBarcode) { toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); return; }
-        const prod = findProductById(selectedStockEditProductId);
-        if (prod) {
-            prod.barcode = barcodeQuery; saveProductsToStorage(); syncToCloud("updateSingleProduct", prod);
-            toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); selectedStockEditProductId = null; renderStockTable();
+        // البحث العادي من أعلى جدول المخزون وليس تعديل الباركود لصنف
+        const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+        if (existingBarcode) {
+            document.getElementById('stockFilterInput').value = barcodeQuery;
+            filterStockTable(barcodeQuery);
+            toast(`✅ تم العثور على: ${existingBarcode.n}`, 'success');
+        } else {
+            toast("⚠️ لم يتم العثور على منتج!", 'warn');
         }
     }
 }
@@ -1719,6 +1729,12 @@ function saveProductEdit(prodId) {
     toast(`✅ تم التحديث (${prod.n})!`, 'success'); renderStockTable();
 }
 
+function scanAndEditProductBarcode(prodId) {
+    if (!findProductById(prodId)) return; 
+    selectedStockEditProductId = prodId; 
+    openFloatingCamera(); // <- فتح الكاميرا العائمة النظيفة والمخصصة للجدول فقط
+}
+
 function deleteProductSystem(prodId) {
     if (!isManagerUser()) { toast("❌ متاح للمديرين فقط!", 'error'); return; }
     const prod = findProductById(prodId); if (!prod) return;
@@ -1928,7 +1944,17 @@ function generateReport() {
         </tr>`;
     }).join('');
 
-    tbody.innerHTML = rowsHtml;
+    const totalRowHtml = `
+    <tr class="total-row">
+        <td colspan="5" style="text-align: right; color: #1e3c72; padding: 12px;">الإجماليات الكلية للفترة المحددة:</td>
+        <td style="color: #2c3e50;">${tally.grandTotalComm.toFixed(2)}</td>
+        <td>-</td>
+        <td style="color: #27ae60;">${tally.grandTotalSell.toFixed(2)}</td>
+        <td style="color: #8e44ad;">${tally.grandNetProfit.toFixed(2)}</td>
+        <td class="no-pdf"></td>
+    </tr>`;
+
+    tbody.innerHTML = rowsHtml + totalRowHtml;
 
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
