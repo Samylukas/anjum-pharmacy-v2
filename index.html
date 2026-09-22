@@ -280,7 +280,6 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
         </div>
 
-        <!-- الكاميرا المدمجة للبيع -->
         <div id="salesScannerContainer" class="scanner-box">
             <div id="salesCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
@@ -357,7 +356,6 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('stock')">📷 كاميرا (F2)</button>
         </div>
 
-        <!-- الكاميرا المدمجة للبحث في المخزون (أعلى الجدول) -->
         <div id="stockScannerContainer" class="scanner-box">
             <div id="stockCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
@@ -393,7 +391,6 @@
                     </div>
                 </div>
                 
-                <!-- الكاميرا المدمجة للإضافة -->
                 <div id="addNewScannerContainer" class="scanner-box" style="grid-column: span 2;">
                     <div id="addNewCameraReader" class="camera-div"></div>
                     <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
@@ -412,7 +409,6 @@
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
             </div>
             
-            <!-- الكاميرا المدمجة للتزويد -->
             <div id="rechargeScannerContainer" class="scanner-box">
                 <div id="rechargeCameraReader" class="camera-div"></div>
                 <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
@@ -571,7 +567,6 @@
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px;">
                 <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:center; flex-wrap:wrap;"></div>
                 
-                <!-- الرسوم البيانية المتراصة عمودياً -->
                 <div id="advancedChartsArea" style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
                     <div class="chart-page" style="page-break-inside: avoid; width: 100%;">
                         <canvas id="monthlyChart"></canvas>
@@ -1130,15 +1125,21 @@ function stopAllScanners() {
     closeFloatingCamera();
 }
 
-/* ---------- 🌟 Floating Camera for Stock Table Edit 🌟 ---------- */
+/* ---------- 🌟 Floating Camera for Stock Table Edit (Memory Leak Fixed) 🌟 ---------- */
 
 function openFloatingCamera() {
     document.getElementById('floatingCameraOverlay').style.display = 'flex';
-    if (scanners['floating']) {
-        scanners['floating'].stop().then(() => startFloatingCamera()).catch(() => startFloatingCamera());
-    } else { 
-        startFloatingCamera(); 
-    }
+    // التأخير لضمان رسم الـ Modal قبل استدعاء الكاميرا لتجنب الشاشة البيضاء
+    setTimeout(() => {
+        if (scanners['floating']) {
+            scanners['floating'].stop().then(() => {
+                scanners['floating'].clear();
+                startFloatingCamera();
+            }).catch(() => startFloatingCamera());
+        } else { 
+            startFloatingCamera(); 
+        }
+    }, 100);
 }
 
 function startFloatingCamera() {
@@ -1150,29 +1151,47 @@ function startFloatingCamera() {
             (decodedText) => {
                 playBeepSound(); 
                 const barcodeQuery = decodedText.trim();
-                closeFloatingCamera();
                 
                 const existingBarcode = products.find(p => p.id !== selectedStockEditProductId && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
-                if (existingBarcode) { toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); return; }
+                if (existingBarcode) { 
+                    toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); 
+                    closeFloatingCamera();
+                    return; 
+                }
                 const prod = findProductById(selectedStockEditProductId);
                 if (prod) {
-                    prod.barcode = barcodeQuery; saveProductsToStorage(); syncToCloud("updateSingleProduct", prod);
-                    toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); selectedStockEditProductId = null; renderStockTable();
+                    prod.barcode = barcodeQuery; 
+                    saveProductsToStorage(); 
+                    syncToCloud("updateSingleProduct", prod);
+                    toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); 
+                    selectedStockEditProductId = null; 
+                    renderStockTable();
                 }
+                closeFloatingCamera(); // إغلاق مباشر بعد الالتقاط الناجح
             }, 
-            () => {}
-        ).catch(err => { toast("❌ فشل الوصول للكاميرا: " + err, 'error'); closeFloatingCamera(); });
+            () => {} // تجاهل أخطاء القراءة المستمرة
+        ).catch(err => { 
+            toast("❌ فشل الوصول للكاميرا: " + err, 'error'); 
+            closeFloatingCamera(); 
+        });
     } catch (e) {
-        toast("❌ خطأ في تهيئة الماسح: " + e.message, 'error'); closeFloatingCamera();
+        toast("❌ خطأ في تهيئة الماسح: " + e.message, 'error'); 
+        closeFloatingCamera();
     }
 }
 
 function closeFloatingCamera() {
     document.getElementById('floatingCameraOverlay').style.display = 'none';
     if (scanners['floating']) {
-        scanners['floating'].stop().catch(() => {});
+        scanners['floating'].stop().then(() => {
+            scanners['floating'].clear();
+            scanners['floating'] = null; // تفريغ الذاكرة
+        }).catch(() => {
+            scanners['floating'] = null;
+        });
     }
 }
+
 
 let selectedStockEditProductId = null;
 
@@ -1700,12 +1719,6 @@ function saveProductEdit(prodId) {
     toast(`✅ تم التحديث (${prod.n})!`, 'success'); renderStockTable();
 }
 
-function scanAndEditProductBarcode(prodId) {
-    if (!findProductById(prodId)) return; 
-    selectedStockEditProductId = prodId; 
-    openFloatingCamera(); // <- فتح الكاميرا العائمة النظيفة والمخصصة للجدول فقط!
-}
-
 function deleteProductSystem(prodId) {
     if (!isManagerUser()) { toast("❌ متاح للمديرين فقط!", 'error'); return; }
     const prod = findProductById(prodId); if (!prod) return;
@@ -1915,17 +1928,7 @@ function generateReport() {
         </tr>`;
     }).join('');
 
-    const totalRowHtml = `
-    <tr class="total-row">
-        <td colspan="5" style="text-align: right; color: #1e3c72; padding: 12px;">الإجماليات الكلية للفترة المحددة:</td>
-        <td style="color: #2c3e50;">${tally.grandTotalComm.toFixed(2)}</td>
-        <td>-</td>
-        <td style="color: #27ae60;">${tally.grandTotalSell.toFixed(2)}</td>
-        <td style="color: #8e44ad;">${tally.grandNetProfit.toFixed(2)}</td>
-        <td class="no-pdf"></td>
-    </tr>`;
-
-    tbody.innerHTML = rowsHtml + totalRowHtml;
+    tbody.innerHTML = rowsHtml;
 
     const cardsContainer = document.getElementById('reportSummaryCardsContainer');
     if (cardsContainer) {
