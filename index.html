@@ -79,8 +79,13 @@
         .btn:hover { opacity: 0.9; transform: scale(1.02); }
         .btn-green { background: #27ae60; } .btn-blue { background: #2980b9; } .btn-darkblue { background: #1e3c72; } .btn-red { background: #e74c3c; } .btn-purple { background: #8e44ad; } .btn-orange { background: #f39c12; } .btn-gray { background: #7f8c8d; }
         
+        .btn-outline { background: #fff; color: #1e3c72; border: 1.5px solid #1e3c72; border-radius: 6px; padding: 6px 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-outline:hover { background: #1e3c72; color: #fff; }
+
         .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
+
+        .btn-large-stock { padding: 12px 20px !important; font-size: 1.05rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; }
@@ -89,7 +94,9 @@
         table { width: 100%; min-width: 750px; border-collapse: collapse; text-align: center; }
         th, td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: center; font-size: 0.9rem; font-weight: 600; }
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
+        
         .total-row td { background-color: #eafaf1 !important; border-top: 2px solid #27ae60 !important; font-weight: 900 !important; font-size: 1.1rem !important; color: #2c3e50; }
+
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
@@ -123,7 +130,7 @@
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- ✨ الكاميرا العائمة لجدول المخزون (Fixed) ✨ --- */
+        /* --- ✨ الكاميرا العائمة لجدول المخزون ✨ --- */
         #floatingCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
         .camera-modal { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .camera-div-float { width:100%; min-height: 250px; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; background: #000; }
@@ -131,6 +138,7 @@
         .scanner-box { display:none; margin-top:10px; border-radius:10px; overflow:hidden; border:2px solid #1e3c72; background:#fff; }
         .camera-div { width:100%; }
 
+        /* --- شاشة التحميل للتقارير --- */
         #reportLoader { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999999999; }
         .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid #f39c12; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -167,7 +175,7 @@
     <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
 </div>
 
-<!-- ✨ كاميرا الباركود العائمة (خاصة بجدول المخزون فقط وتفتح في المنتصف) ✨ -->
+<!-- ✨ كاميرا الباركود العائمة (خاصة بجدول المخزون فقط) ✨ -->
 <div id="floatingCameraOverlay">
     <div class="camera-modal">
         <h3 style="color:#1e3c72; margin-bottom:15px; font-weight:800;">📷 مسح الباركود للمنتج</h3>
@@ -247,22 +255,28 @@
 
     <!-- 1. POS Tab -->
     <div id="salesTab" class="tab-content active">
-        <div class="section-title"><span style="font-size:1.4rem;">📝 فاتورة مبيعات</span></div>
+        <div class="section-title">
+            <span style="font-size:1.4rem;">📝 فاتورة مبيعات</span>
+        </div>
+
         <div class="toolbar-row" style="margin-bottom: 15px;">
             <button class="btn btn-darkblue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
             <button class="btn btn-orange" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
             <button class="btn btn-gray" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
         </div>
+
         <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 التاريخ: <input type="datetime-local" id="invoiceDate" style="padding:6px; border-radius:6px; border:1px solid #ccc; font-family:inherit; outline:none;"></div>
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📄 رقم: <span id="invNum" style="color: #27ae60; font-size: 1.4rem; font-weight: 800;">1001</span></div>
         </div>
+
         <div class="nav-controls">
             <button class="nav-icon-btn" onclick="navigateInvoice('first')" title="الأولى">⏭️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('prev')" title="السابقة">▶️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('next')" title="التالية">◀️</button>
             <button class="nav-icon-btn" onclick="navigateInvoice('last')" title="الأخيرة">⏮️</button>
         </div>
+
         <div style="display:flex; gap:10px; margin-top:15px;">
             <input type="text" id="searchInput" class="search-box" style="margin-bottom:0;" placeholder="ابحث بالاسم أو الباركود... (F4)" oninput="searchProduct()">
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
@@ -680,6 +694,9 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     if (!element || element.innerText.trim() === '') return toast('⚠️ استخرج التقرير أولاً', 'warn');
 
     document.getElementById('reportLoader').style.display = 'flex';
+    // Give UI time to show loader before blocking thread
+    await new Promise(r => setTimeout(r, 100));
+
     window.scrollTo({ top: 0, behavior: 'instant' });
 
     const noPdfElements = element.querySelectorAll('.no-pdf');
@@ -689,6 +706,13 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
 
     if (!isLandscape) {
         let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (أدخل رقم من 1 إلى 50)", "50");
+        if (rowInput === null) {
+            // User cancelled
+            noPdfElements.forEach(el => el.style.display = '');
+            headers.forEach(h => h.style.display = 'none');
+            document.getElementById('reportLoader').style.display = 'none';
+            return;
+        }
         let rowsPerPage = parseInt(rowInput);
         if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 50;
         if (rowsPerPage > 50) rowsPerPage = 50;
@@ -696,8 +720,9 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
         document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
         
         let tableId = elementId === 'reportsPrintArea' ? 'reportsTable' : (elementId === 'financePrintArea' ? 'financeTable' : 'stockTable');
-        if (tableId) {
-            const rows = element.querySelectorAll(`#${tableId} tbody tr`);
+        const tableElem = element.querySelector(`#${tableId} tbody`);
+        if (tableElem) {
+            const rows = tableElem.querySelectorAll('tr');
             rows.forEach((row, index) => {
                 if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row');
             });
@@ -706,7 +731,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     }
 
     toast('⏳ جاري تجهيز التقرير...', 'info');
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(r => setTimeout(r, 500));
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
@@ -715,32 +740,48 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.totals-box'] }
     };
 
-    try {
-        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-            try {
-                let pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-                let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
-                const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
-                await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ التقرير 📄' });
-                toast('✅ تم فتح شاشة المشاركة!', 'success');
-            } catch (shareErr) { console.error('Share Plugin Failed:', shareErr); window.print(); }
-        } else {
-            const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
-            const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = opt.filename;
-            document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove();
-            toast('✅ تم التنزيل!', 'success');
-        }
-    } catch (err) {
-        console.error('PDF Error:', err); window.print();
-    } finally {
+    const cleanupAndHideLoader = () => {
         if (!isLandscape) element.classList.remove('pdf-compact');
         headers.forEach(h => h.style.display = 'none');
         noPdfElements.forEach(el => el.style.display = '');
         document.getElementById('reportLoader').style.display = 'none';
+    };
+
+    try {
+        let isNative = false;
+        if (window.Capacitor && window.Capacitor.isNativePlatform) {
+            isNative = typeof window.Capacitor.isNativePlatform === 'function' ? window.Capacitor.isNativePlatform() : window.Capacitor.isNativePlatform;
+        }
+
+        if (isNative) {
+            try {
+                let pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+                let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
+                const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
+                
+                cleanupAndHideLoader(); // MUST execute before share overlay
+                
+                await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ التقرير 📄' });
+                toast('✅ تم فتح شاشة المشاركة!', 'success');
+            } catch (shareErr) { 
+                console.error('Share Plugin Failed:', shareErr); 
+                cleanupAndHideLoader();
+                toast('⚠️ تعذر المشاركة، سيتم فتح نافذة الطباعة', 'warn');
+                setTimeout(() => window.print(), 500);
+            }
+        } else {
+            await html2pdf().set(opt).from(element).save();
+            cleanupAndHideLoader();
+            toast('✅ تم التنزيل بنجاح!', 'success');
+        }
+    } catch (err) {
+        console.error('PDF Error:', err); 
+        cleanupAndHideLoader();
+        toast('⚠️ جاري فتح الطباعة البديلة...', 'warn');
+        setTimeout(() => window.print(), 500);
     }
 }
 
@@ -1122,7 +1163,6 @@ function openFloatingCamera() {
     
     overlay.style.display = 'flex';
     
-    // تأخير لضمان رسم الـ DOM للنافذة
     setTimeout(() => {
         try {
             document.getElementById('floatingCameraReader').innerHTML = '';
@@ -1181,6 +1221,8 @@ function closeFloatingCamera() {
         document.getElementById('floatingCameraReader').innerHTML = '';
     }
 }
+
+let selectedStockEditProductId = null;
 
 function onBarcodeScanned(key, decodedText) {
     playBeepSound(); const barcodeQuery = decodedText.trim();
