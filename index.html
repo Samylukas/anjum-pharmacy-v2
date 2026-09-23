@@ -24,13 +24,24 @@
         .app-container { width: 100%; max-width: 1100px; margin: 0 auto; background: transparent; padding: 10px; min-height: 95vh; padding-bottom: 60px; }
         h1 { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.4rem; font-weight: 800; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.6s ease-in-out; direction: ltr; }
-        .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* --- ✨ Splash Screen ✨ --- */
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
+        .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; opacity: 0; transform: translateY(20px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .splash-anjum { color: #1e3c72; } .splash-green { color: #27ae60; }
         
         .branch-container { position: relative; width: 220px; height: 220px; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
         @keyframes drawBranch { to { stroke-dashoffset: 0; } }
+        @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+
+        .anim-leaf { opacity: 0; transform-origin: center; }
+        .swoop-top { animation: flyFromTop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-bottom { animation: flyFromBottom 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .swoop-tip { animation: flyFromRight 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes flyFromTop { 0% { opacity: 0; transform: translateY(-40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromBottom { 0% { opacity: 0; transform: translateY(40px) scale(0.3); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes flyFromRight { 0% { opacity: 0; transform: translateX(40px) scale(0.3); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
+        .d-1 { animation-delay: 1.2s; } .d-2 { animation-delay: 1.4s; } .d-3 { animation-delay: 1.6s; } .d-4 { animation-delay: 1.2s; } .d-5 { animation-delay: 1.4s; } .d-6 { animation-delay: 1.6s; } .d-7 { animation-delay: 2.0s; }
 
         .sync-status { text-align: center; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; padding: 6px; border-radius: 8px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .status-online { color: #27ae60; } .status-offline { color: #c0392b; }
@@ -69,6 +80,9 @@
         .btn-outline:hover { background: #1e3c72; color: #fff; }
 
         .nav-icon-btn { background: #f8f9fa; color: #1e3c72; border: 1.5px solid #dcdde1; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .nav-icon-btn:hover { background: #1e3c72; color: #fff; transform: scale(1.1); border-color: #1e3c72; }
+
+        .btn-large-stock { padding: 12px 20px !important; font-size: 1.05rem !important; border-radius: 8px !important; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .nav-controls { display: flex; gap: 15px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
         .toolbar-row .btn { flex: 1; min-width: 110px; white-space: nowrap; }
@@ -79,6 +93,7 @@
         th { background: #f39c12; color: white; font-weight: 800; white-space: nowrap; }
         
         .total-row td { background-color: #eafaf1 !important; border-top: 2px solid #27ae60 !important; font-weight: 900 !important; font-size: 1.1rem !important; color: #2c3e50; }
+
         .low-stock-row { background-color: #fdedec !important; color: #c0392b; font-weight: bold; }
         .exp-warning-row { background-color: #fef9e7 !important; color: #d35400; font-weight: bold; }
         .exp-expired-row { background-color: #fadbd8 !important; color: #900C3F; font-weight: bold; }
@@ -102,23 +117,26 @@
         
         .scroll-btn-group { position: fixed; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; }
         .scroll-btn { width: 45px; height: 45px; border-radius: 50%; background: #f39c12; color: #fff; border: 2px solid #fff; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; opacity: 0.85; transition: 0.3s;}
-        
+        .scroll-btn:hover { opacity: 1; transform: scale(1.1); background: #1e3c72; }
+
         #toastStack { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: toastIn 0.3s ease-out; }
         .toast.success { background: #27ae60; } .toast.error { background: #e74c3c; } .toast.warn { background: #f39c12; }
         
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
         .modal-overlay.open { display: flex; }
         .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
 
-        /* --- ✨ الكاميرا العائمة لجدول المخزون ✨ --- */
+        /* --- الكاميرا العائمة لجدول المخزون (بأولوية عرض قصوى) --- */
         #floatingCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
         .camera-modal { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .camera-div-float { width:100%; min-height: 250px; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; background: #000; }
 
+        /* الكاميرات المدمجة (البيع والبحث) */
         .scanner-box { display:none; margin-top:10px; border-radius:10px; overflow:hidden; border:2px solid #1e3c72; background:#fff; }
         .camera-div { width:100%; }
 
+        /* --- شاشة التحميل للتقارير --- */
         #reportLoader { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999999999; }
         .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid #f39c12; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -155,7 +173,7 @@
     <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
 </div>
 
-<!-- ✨ كاميرا الباركود العائمة للمخزون ✨ -->
+<!-- ✨ الكاميرا العائمة النظيفة (للمخزون فقط) ✨ -->
 <div id="floatingCameraOverlay">
     <div class="camera-modal">
         <h3 style="color:#1e3c72; margin-bottom:15px; font-weight:800;">📷 مسح الباركود للمنتج</h3>
@@ -170,13 +188,13 @@
         <svg viewBox="-10 -10 120 120" width="100%" height="100%">
             <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
             <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
-            <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top"/></g>
-            <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top"/></g>
-            <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top"/></g>
-            <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom"/></g>
-            <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom"/></g>
-            <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom"/></g>
-            <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip"/></g>
+            <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
+            <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
+            <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
+            <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
+            <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+            <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
+            <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
         </svg>
     </div>
     <div class="splash-title">
@@ -187,7 +205,6 @@
 <div id="toastStack"></div>
 <div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalBox"></div></div>
 
-<!-- شاشة الدخول - تم تثبيت ADMIN في HTML لضمان التحميل الفوري بدون انتظار JS -->
 <div id="loginOverlay" class="login-overlay" style="display:none;">
     <div class="login-card">
         <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.6rem; font-weight:800;">
@@ -196,8 +213,7 @@
         <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1.1rem;">Anjum Green Pharmacy</p>
         
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:15px; font-weight:bold; font-size:1.1rem; padding:10px;">
-            <option value="admin">ADMIN</option>
-            <option value="cashier">CASHIER</option>
+            <option value="">⏳ جاري تحميل المستخدمين...</option>
         </select>
         
         <div class="pass-wrapper" style="margin-bottom:20px;">
@@ -264,6 +280,7 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('sales')">📷 كاميرا (F2)</button>
         </div>
 
+        <!-- الكاميرا المدمجة للبيع -->
         <div id="salesScannerContainer" class="scanner-box">
             <div id="salesCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('sales')">إغلاق الكاميرا ❌</button>
@@ -340,6 +357,7 @@
             <button class="btn btn-purple" style="white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('stock')">📷 كاميرا (F2)</button>
         </div>
 
+        <!-- الكاميرا المدمجة للبحث في المخزون (أعلى الجدول) -->
         <div id="stockScannerContainer" class="scanner-box">
             <div id="stockCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
@@ -375,6 +393,7 @@
                     </div>
                 </div>
                 
+                <!-- الكاميرا المدمجة للإضافة -->
                 <div id="addNewScannerContainer" class="scanner-box" style="grid-column: span 2;">
                     <div id="addNewCameraReader" class="camera-div"></div>
                     <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('addNew')">إغلاق الكاميرا ❌</button>
@@ -382,6 +401,7 @@
                 
                 <div class="pay-box" style="grid-column: span 2;"><label>تاريخ الصلاحية:</label><input type="date" id="newProdExpiry" style="padding:10px; font-size:1.1rem;"></div>
             </div>
+            
             <button class="btn btn-green" style="margin-top: 20px; width: 100%; font-size:1.1rem; padding:12px;" onclick="addNewProductToSystem()">حفظ المنتج الجديد 📦</button>
         </div>
 
@@ -392,6 +412,7 @@
                 <button class="btn btn-purple" style="width:auto; margin-top:0; white-space:nowrap; padding: 0 20px;" onclick="toggleCameraScanner('recharge')">📷 باركود</button>
             </div>
             
+            <!-- الكاميرا المدمجة للتزويد -->
             <div id="rechargeScannerContainer" class="scanner-box">
                 <div id="rechargeCameraReader" class="camera-div"></div>
                 <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('recharge')">إغلاق الكاميرا ❌</button>
@@ -550,6 +571,7 @@
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px;">
                 <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:center; flex-wrap:wrap;"></div>
                 
+                <!-- الرسوم البيانية المتراصة عمودياً -->
                 <div id="advancedChartsArea" style="display:flex; flex-direction:column; gap:20px; margin-top:20px;">
                     <div class="chart-page" style="page-break-inside: avoid; width: 100%;">
                         <canvas id="monthlyChart"></canvas>
@@ -590,7 +612,7 @@
         </div>
     </div>
 
-    <!-- أزرار التمرير السريعة -->
+    <!-- أزرار التمرير السريعة المستقلة للطلوع والنزول -->
     <div class="scroll-btn-group">
         <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" title="أعلى الصفحة">⬆️</button>
         <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});" title="أسفل الصفحة">⬇️</button>
@@ -600,13 +622,8 @@
 <div id="receiptPrintSection"></div>
 
 <script>
-// تأمين المكتبات لعدم تعليق البرنامج لو النت فيه مشكلة
-try {
-    if (typeof Chart !== 'undefined') {
-        Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-        Chart.defaults.color = '#333';
-    }
-} catch (e) {}
+Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+Chart.defaults.color = '#333';
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
@@ -620,6 +637,12 @@ function escapeHtml(str) {
 function uid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
     return 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+}
+
+async function sha256Hex(text) {
+    if (!(window.crypto && crypto.subtle)) return text;
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function toast(message, type = 'info', ms = 3500) {
@@ -669,15 +692,13 @@ function formatDateDisplay(dateStr) {
     return clean;
 }
 
-/* ---------- 🖨️ PDF Export Method (Integrated with Capacitor Support from El Sayeh) ---------- */
+/* ---------- 🖨️ PDF Export Method (Integrated with Capacitor Support) ---------- */
 
 async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const element = document.getElementById(elementId);
     if (!element || element.innerText.trim() === '') return toast('⚠️ استخرج التقرير أولاً', 'warn');
 
     document.getElementById('reportLoader').style.display = 'flex';
-    await new Promise(r => setTimeout(r, 100));
-
     window.scrollTo({ top: 0, behavior: 'instant' });
 
     const noPdfElements = element.querySelectorAll('.no-pdf');
@@ -687,12 +708,6 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
 
     if (!isLandscape) {
         let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (أدخل رقم من 1 إلى 50)", "50");
-        if (rowInput === null) {
-            noPdfElements.forEach(el => el.style.display = '');
-            headers.forEach(h => h.style.display = 'none');
-            document.getElementById('reportLoader').style.display = 'none';
-            return;
-        }
         let rowsPerPage = parseInt(rowInput);
         if (isNaN(rowsPerPage) || rowsPerPage < 1) rowsPerPage = 50;
         if (rowsPerPage > 50) rowsPerPage = 50;
@@ -700,18 +715,15 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
         document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
         
         let tableId = elementId === 'reportsPrintArea' ? 'reportsTable' : (elementId === 'financePrintArea' ? 'financeTable' : 'stockTable');
-        const tableElem = element.querySelector(`#${tableId} tbody`);
-        if (tableElem) {
-            const rows = tableElem.querySelectorAll('tr');
-            rows.forEach((row, index) => {
-                if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row');
-            });
-        }
+        const rows = element.querySelectorAll(`#${tableId} tbody tr`);
+        rows.forEach((row, index) => {
+            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row');
+        });
         element.classList.add('pdf-compact');
     }
 
     toast('⏳ جاري تجهيز التقرير...', 'info');
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 400));
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
@@ -720,48 +732,32 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.totals-box'] }
-    };
-
-    const cleanupAndHideLoader = () => {
-        if (!isLandscape) element.classList.remove('pdf-compact');
-        headers.forEach(h => h.style.display = 'none');
-        noPdfElements.forEach(el => el.style.display = '');
-        document.getElementById('reportLoader').style.display = 'none';
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
     };
 
     try {
-        let isNative = false;
-        if (window.Capacitor && window.Capacitor.isNativePlatform) {
-            isNative = typeof window.Capacitor.isNativePlatform === 'function' ? window.Capacitor.isNativePlatform() : window.Capacitor.isNativePlatform;
-        }
-
-        if (isNative) {
+        if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
             try {
                 let pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
                 let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
                 const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
-                
-                cleanupAndHideLoader();
-                
                 await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ التقرير 📄' });
                 toast('✅ تم فتح شاشة المشاركة!', 'success');
-            } catch (shareErr) { 
-                console.error('Share Plugin Failed:', shareErr); 
-                cleanupAndHideLoader();
-                toast('⚠️ تعذر المشاركة، سيتم فتح نافذة الطباعة', 'warn');
-                setTimeout(() => window.print(), 500);
-            }
+            } catch (shareErr) { console.error('Share Plugin Failed:', shareErr); window.print(); }
         } else {
-            await html2pdf().set(opt).from(element).save();
-            cleanupAndHideLoader();
-            toast('✅ تم التنزيل بنجاح!', 'success');
+            const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = opt.filename;
+            document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove();
+            toast('✅ تم التنزيل!', 'success');
         }
     } catch (err) {
-        console.error('PDF Error:', err); 
-        cleanupAndHideLoader();
-        toast('⚠️ جاري فتح الطباعة البديلة...', 'warn');
-        setTimeout(() => window.print(), 500);
+        console.error('PDF Error:', err); window.print();
+    } finally {
+        if (!isLandscape) element.classList.remove('pdf-compact');
+        headers.forEach(h => h.style.display = 'none');
+        noPdfElements.forEach(el => el.style.display = '');
+        document.getElementById('reportLoader').style.display = 'none';
     }
 }
 
@@ -772,11 +768,11 @@ function printStockTable() { downloadDirectPDF('stockPrintArea', 'Stock_Report',
 /* ---------- State Variables ---------- */
 
 let currentUser = null; let cloudUsers = []; let currentNavIndex = -1;
-let floatingScannerInstance = null;
 let scanners = { sales: null, addNew: null, recharge: null, stock: null };
 let activeScannerKey = null; let invoiceDiscountPercent = 0;
+let floatingScannerInstance = null; // التحكم المباشر بالكاميرا العائمة
 let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
-let products = []; let selectedProdId = null; let selectedStockEditProductId = null;
+let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
 let invoiceCounter = 1001; let activeInvoiceId = 1001;
 
@@ -799,74 +795,50 @@ function playBeepSound() {
     } catch(e) {}
 }
 
-function loadLocalUsers() {
-    try {
-        const savedUsers = localStorage.getItem('anjum_local_users');
-        if (savedUsers) {
-            cloudUsers = JSON.parse(savedUsers);
-            if (!Array.isArray(cloudUsers)) cloudUsers = [];
+async function loadLocalUsers() {
+    const savedUsers = localStorage.getItem('anjum_local_users');
+    if (savedUsers) {
+        cloudUsers = JSON.parse(savedUsers);
+        let changed = false;
+        for (const u of cloudUsers) {
+            if (u.password && !u.passwordHash) {
+                u.passwordHash = await sha256Hex(u.password); delete u.password; changed = true;
+            }
         }
-    } catch (e) {
-        cloudUsers = [];
-    }
-
-    if (!cloudUsers || cloudUsers.length === 0) {
+        if (changed) localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
+    } else {
         cloudUsers = [
-            { username: 'admin', password: '852', role: 'Admin' },
-            { username: 'cashier', password: '123', role: 'Cashier' },
-            { username: 'cs2', password: '456', role: 'User' }
+            { username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' },
+            { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' },
+            { username: 'cs2', passwordHash: await sha256Hex('456'), role: 'User' }
         ];
-        try { localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers)); } catch(e){}
+        localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
     }
     renderUserDropdowns();
 }
 
 function saveLocalUsers(users) {
     if (users && users.length > 0) {
-        cloudUsers = users; 
-        try { localStorage.setItem('anjum_local_users', JSON.stringify(users)); } catch(e){}
-        renderUserDropdowns();
+        cloudUsers = users; localStorage.setItem('anjum_local_users', JSON.stringify(users)); renderUserDropdowns();
     }
 }
 
 function renderUserDropdowns() {
     const selectEl = document.getElementById('entryUserSelect');
     const passSelectEl = document.getElementById('userSelectPass');
-    
-    let opts = '';
-    if (cloudUsers && cloudUsers.length > 0) {
-        opts = cloudUsers.map(u => `<option value="${escapeHtml(u.username.toLowerCase())}">${escapeHtml(u.username.toUpperCase())}</option>`).join('');
-    } else {
-        opts = `<option value="admin">ADMIN</option>`;
-    }
-    
-    if (selectEl) selectEl.innerHTML = opts;
-    if (passSelectEl) passSelectEl.innerHTML = opts;
+    const opts = cloudUsers.map(u => `<option value="${escapeHtml(u.username.toLowerCase())}">${escapeHtml(u.username.toUpperCase())}</option>`).join('');
+    if (selectEl && cloudUsers.length > 0) selectEl.innerHTML = opts;
+    if (passSelectEl && cloudUsers.length > 0) passSelectEl.innerHTML = opts;
 }
 
-function validateEntryPassword() {
-    const userSelect = document.getElementById('entryUserSelect');
-    const usernameInput = userSelect ? userSelect.value.trim().toLowerCase() : 'admin';
-    const passInput = document.getElementById('entryPassInput');
-    const passwordInput = passInput ? passInput.value.trim() : '';
+async function validateEntryPassword() {
+    const usernameInput = document.getElementById('entryUserSelect')?.value.trim().toLowerCase();
+    const passwordInput = document.getElementById('entryPassInput')?.value.trim();
 
-    if (!passwordInput) { toast('يرجى إدخال كلمة المرور!', 'warn'); return; }
+    if (!usernameInput || !passwordInput) { toast('يرجى إدخال كلمة المرور!', 'warn'); return; }
 
-    if (passwordInput === '852' || passwordInput === '123') {
-        currentUser = { username: usernameInput || 'admin', role: passwordInput === '852' ? 'Admin' : 'Cashier' };
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('mainContainer').style.display = 'block';
-        document.getElementById('userGreeting').textContent = `👤 المستخدم: ${currentUser.username.toUpperCase()} (${currentUser.role === 'Admin' ? 'أدمن' : 'كاشير'})`;
-        applyRolePermissions(); 
-        initSystem();
-        toast('✅ تم الدخول بالمفتاح الاحتياطي', 'success');
-        return;
-    }
-
-    let matched = null;
-    if (cloudUsers && cloudUsers.length > 0) {
-        matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && u.password === passwordInput);
-    }
+    const hash = await sha256Hex(passwordInput);
+    let matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && u.passwordHash === hash);
 
     if (matched) {
         currentUser = matched;
@@ -913,7 +885,7 @@ function applyRolePermissions() {
     }
 }
 
-function createNewUserSystem() {
+async function createNewUserSystem() {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
     const uName = document.getElementById('addUserName')?.value.trim().toLowerCase();
     const uPass = document.getElementById('addUserPass')?.value.trim();
@@ -923,16 +895,17 @@ function createNewUserSystem() {
     const exists = cloudUsers.find(u => u.username.toLowerCase() === uName);
     if (exists) { toast(`⚠️ المستخدم [${uName.toUpperCase()}] موجود بالفعل!`, 'error'); return; }
 
-    const newUser = { username: uName, password: uPass, role: uRole, lastLogin: '-', isOnline: 'Offline' };
-    cloudUsers.push(newUser); 
-    saveLocalUsers(cloudUsers);
-    syncToCloud("createUser", { username: uName, password: uPass, role: uRole });
+    const passHash = await sha256Hex(uPass);
+    const newUser = { username: uName, passwordHash: passHash, role: uRole, lastLogin: '-', isOnline: 'Offline' };
+
+    cloudUsers.push(newUser); saveLocalUsers(cloudUsers);
+    syncToCloud("createUser", { username: uName, passwordHash: passHash, role: uRole });
 
     toast(`✅ تم إنشاء الحساب بنجاح!`, 'success');
     document.getElementById('addUserName').value = ''; document.getElementById('addUserPass').value = '';
 }
 
-function changeUserPasswordSystem() {
+async function changeUserPasswordSystem() {
     if (currentUser?.role !== 'Admin') { toast('❌ متاح للأدمن فقط!', 'error'); return; }
     const targetUser = document.getElementById('userSelectPass')?.value;
     const newPass = document.getElementById('newAccountPass')?.value.trim();
@@ -940,9 +913,8 @@ function changeUserPasswordSystem() {
 
     let uObj = cloudUsers.find(u => u.username.toLowerCase() === targetUser.toLowerCase());
     if (uObj) {
-        uObj.password = newPass; 
-        saveLocalUsers(cloudUsers);
-        syncToCloud("updateUserPassword", { username: targetUser, newPassword: newPass });
+        uObj.passwordHash = await sha256Hex(newPass); saveLocalUsers(cloudUsers);
+        syncToCloud("updateUserPassword", { username: targetUser, newPasswordHash: uObj.passwordHash });
         toast(`✅ تم تحديث الرقم السري للمستخدم!`, 'success');
         document.getElementById('newAccountPass').value = '';
     }
@@ -951,10 +923,8 @@ function changeUserPasswordSystem() {
 /* ---------- Exchange Rates ---------- */
 
 function loadRatesFromStorage() {
-    try {
-        const savedRates = localStorage.getItem('anjum_rates');
-        if (savedRates) { RATES = JSON.parse(savedRates); if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3; }
-    } catch(e){}
+    const savedRates = localStorage.getItem('anjum_rates');
+    if (savedRates) { RATES = JSON.parse(savedRates); if (!RATES.GUIDE_MULT) RATES.GUIDE_MULT = 3; }
     updateRateLabels();
 }
 
@@ -992,8 +962,7 @@ function saveRatesFromModal() {
     RATES.VISA = parseFloat(document.getElementById('rateVISA')?.value) || RATES.VISA;
     RATES.GUIDE_MULT = parseFloat(document.getElementById('rateGuideMult')?.value) || RATES.GUIDE_MULT;
 
-    try { localStorage.setItem('anjum_rates', JSON.stringify(RATES)); } catch(e){}
-    updateRateLabels(); closeModal();
+    localStorage.setItem('anjum_rates', JSON.stringify(RATES)); updateRateLabels(); closeModal();
     if (selectedProdId) pickProduct(selectedProdId);
     renderStockTable();
     toast('✅ تم تحديث إعدادات الصرف والمضاعف!', 'success');
@@ -1045,8 +1014,7 @@ function fetchCloudInvoicesData(callbackAfter) {
                 saveProductsToStorage(); renderStockTable(); updateAlertsBar();
             }
             if (resData.nextInvoiceId) {
-                invoiceCounter = resData.nextInvoiceId; 
-                try { localStorage.setItem('anjum_counter', invoiceCounter.toString()); } catch(e){}
+                invoiceCounter = resData.nextInvoiceId; localStorage.setItem('anjum_counter', invoiceCounter.toString());
             }
             if (resData.invoices) {
                 savedInvoices = resData.invoices; saveInvoicesToStorage(); generateReport();
@@ -1074,21 +1042,13 @@ function syncToCloud(actionType, data) {
 }
 
 function queueOffline(actionType, data) {
-    try {
-        let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
-        queue.push({ action: actionType, data: data }); 
-        localStorage.setItem('anjum_offline_queue', JSON.stringify(queue));
-    } catch(e){}
+    let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
+    queue.push({ action: actionType, data: data }); localStorage.setItem('anjum_offline_queue', JSON.stringify(queue));
 }
 
 function processOfflineQueue() {
-    try {
-        let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
-        if (queue.length > 0) { 
-            queue.forEach(item => syncToCloud(item.action, item.data)); 
-            localStorage.removeItem('anjum_offline_queue'); 
-        }
-    } catch(e){}
+    let queue = JSON.parse(localStorage.getItem('anjum_offline_queue') || '[]');
+    if (queue.length > 0) { queue.forEach(item => syncToCloud(item.action, item.data)); localStorage.removeItem('anjum_offline_queue'); }
 }
 
 /* ---------- System Init ---------- */
@@ -1101,17 +1061,15 @@ function initSystem() {
 }
 
 function loadDataFromStorage() {
-    try {
-        const storedProducts = localStorage.getItem('anjum_products'); if (storedProducts) products = JSON.parse(storedProducts).map(p => ({ id: p.id || uid(), ...p }));
-        const storedInvoices = localStorage.getItem('anjum_invoices'); if (storedInvoices) savedInvoices = JSON.parse(storedInvoices);
-        const storedCounter = localStorage.getItem('anjum_counter'); if (storedCounter) invoiceCounter = parseInt(storedCounter);
-        const storedFinances = localStorage.getItem('anjum_finances'); if (storedFinances) savedFinances = JSON.parse(storedFinances);
-    } catch(e){}
+    const storedProducts = localStorage.getItem('anjum_products'); if (storedProducts) products = JSON.parse(storedProducts).map(p => ({ id: p.id || uid(), ...p }));
+    const storedInvoices = localStorage.getItem('anjum_invoices'); if (storedInvoices) savedInvoices = JSON.parse(storedInvoices);
+    const storedCounter = localStorage.getItem('anjum_counter'); if (storedCounter) invoiceCounter = parseInt(storedCounter);
+    const storedFinances = localStorage.getItem('anjum_finances'); if (storedFinances) savedFinances = JSON.parse(storedFinances);
 }
 
-function saveProductsToStorage() { try { localStorage.setItem('anjum_products', JSON.stringify(products)); } catch(e){} }
-function saveInvoicesToStorage() { try { localStorage.setItem('anjum_invoices', JSON.stringify(savedInvoices)); localStorage.setItem('anjum_counter', invoiceCounter.toString()); } catch(e){} }
-function saveFinancesToStorage() { try { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); } catch(e){} }
+function saveProductsToStorage() { localStorage.setItem('anjum_products', JSON.stringify(products)); }
+function saveInvoicesToStorage() { localStorage.setItem('anjum_invoices', JSON.stringify(savedInvoices)); localStorage.setItem('anjum_counter', invoiceCounter.toString()); }
+function saveFinancesToStorage() { localStorage.setItem('anjum_finances', JSON.stringify(savedFinances)); }
 function findProductById(id) { return products.find(p => String(p.id) === String(id)); }
 
 /* ---------- Tabs & Inline Scanners ---------- */
@@ -1173,16 +1131,20 @@ function stopAllScanners() {
     closeFloatingCamera();
 }
 
-/* ---------- 🌟 Floating Camera for Stock Table Edit ---------- */
+/* ---------- 🌟 Floating Camera for Stock Table Edit (Memory Leak & Typo Fixed 100%) 🌟 ---------- */
 
 function openFloatingCamera() {
     const overlay = document.getElementById('floatingCameraOverlay');
     if (!overlay) return;
+    
     overlay.style.display = 'flex';
     
+    // تأخير لضمان رسم الـ DOM للنافذة
     setTimeout(() => {
         try {
+            // تفريغ يدوي وإجباري للـ HTML لمنع مشكلة الشاشة البيضاء والتعارض
             document.getElementById('floatingCameraReader').innerHTML = '';
+            
             floatingScannerInstance = new Html5Qrcode('floatingCameraReader');
             floatingScannerInstance.start(
                 { facingMode: "environment" },
@@ -1190,7 +1152,7 @@ function openFloatingCamera() {
                 (decodedText) => {
                     playBeepSound(); 
                     const barcodeQuery = decodedText.trim();
-                    closeFloatingCamera(); 
+                    closeFloatingCamera(); // إغلاق فوري فور لقط الباركود
                     
                     const existingBarcode = products.find(p => String(p.id) !== String(selectedStockEditProductId) && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
                     if (existingBarcode) { 
@@ -1208,7 +1170,7 @@ function openFloatingCamera() {
                         renderStockTable();
                     }
                 }, 
-                (err) => { /* تجاهل الأخطاء المستمرة */ }
+                (err) => { /* تجاهل أخطاء القراءة العادية */ }
             ).catch(err => {
                 toast("❌ فشل تشغيل الكاميرا: تأكد من الصلاحيات", 'error');
                 closeFloatingCamera();
@@ -1217,7 +1179,7 @@ function openFloatingCamera() {
             toast("❌ خطأ غير متوقع: " + e.message, 'error');
             closeFloatingCamera();
         }
-    }, 300);
+    }, 300); // 300 ملي ثانية لضمان الاستقرار
 }
 
 function closeFloatingCamera() {
@@ -1238,6 +1200,7 @@ function closeFloatingCamera() {
     }
 }
 
+
 let selectedStockEditProductId = null;
 
 function onBarcodeScanned(key, decodedText) {
@@ -1255,6 +1218,7 @@ function onBarcodeScanned(key, decodedText) {
     } else if (key === 'recharge') {
         document.getElementById('addStockSearch').value = barcodeQuery; searchAddStockProduct();
     } else if (key === 'stock') {
+        // البحث العادي من أعلى جدول المخزون وليس تعديل الباركود لصنف
         const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
         if (existingBarcode) {
             document.getElementById('stockFilterInput').value = barcodeQuery;
@@ -1266,7 +1230,7 @@ function onBarcodeScanned(key, decodedText) {
     }
 }
 
-/* ---------- 🖨️ Professional Dynamic Barcode Print Options ---------- */
+/* ---------- 🖨️ Professional Dynamic Barcode Print Options (Mobile & Web) ---------- */
 
 function promptPrintBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
@@ -1757,8 +1721,8 @@ function saveProductEdit(prodId) {
     const prod = findProductById(prodId); if (!prod) return;
     const newName = document.getElementById('editName')?.value.trim(); const newBarcode = document.getElementById('editBarcode')?.value.trim();
 
-    if (newName && newName.toLowerCase() !== prod.n.toLowerCase() && products.find(p => String(p.id) !== String(prodId) && p.n.toLowerCase() === newName.toLowerCase())) { toast(`⚠️ الاسم [${newName}] مكرر!`, 'error'); return; }
-    if (newBarcode && newBarcode.toLowerCase() !== (prod.barcode || '').toLowerCase() && products.find(p => String(p.id) !== String(prodId) && p.barcode && p.barcode.toLowerCase() === newBarcode.toLowerCase())) { toast(`⚠️ الباركود [${newBarcode}] مكرر!`, 'error'); return; }
+    if (newName && newName.toLowerCase() !== prod.n.toLowerCase() && products.find(p => p.id !== prodId && p.n.toLowerCase() === newName.toLowerCase())) { toast(`⚠️ الاسم [${newName}] مكرر!`, 'error'); return; }
+    if (newBarcode && newBarcode.toLowerCase() !== (prod.barcode || '').toLowerCase() && products.find(p => p.id !== prodId && p.barcode && p.barcode.toLowerCase() === newBarcode.toLowerCase())) { toast(`⚠️ الباركود [${newBarcode}] مكرر!`, 'error'); return; }
 
     prod.n = newName || prod.n; prod.p = parseFloat(document.getElementById('editPrice')?.value) || prod.p; prod.q = parseInt(document.getElementById('editQty')?.value); if (isNaN(prod.q)) prod.q = 0; prod.barcode = newBarcode; prod.expiry = document.getElementById('editExpiry')?.value.trim();
     saveProductsToStorage(); syncToCloud("updateSingleProduct", prod); updateAlertsBar(); closeModal();
@@ -1768,7 +1732,7 @@ function saveProductEdit(prodId) {
 function scanAndEditProductBarcode(prodId) {
     if (!findProductById(prodId)) return; 
     selectedStockEditProductId = prodId; 
-    openFloatingCamera(); 
+    openFloatingCamera(); // <- فتح الكاميرا العائمة النظيفة والمخصصة للجدول فقط
 }
 
 function deleteProductSystem(prodId) {
@@ -2195,20 +2159,23 @@ function generateSingleProductDetailsReport(productName) {
 
 /* ---------- Application Entry Point ---------- */
 
-window.addEventListener('DOMContentLoaded', () => {
-    try {
-        // حماية كاملة ومسح أي قيم فارغة تسببت في التعليق
+window.addEventListener('DOMContentLoaded', async () => {
+    setTimeout(() => {
         const splash = document.getElementById('splashScreen');
-        if (splash) { splash.style.display = 'none'; }
-        
-        const login = document.getElementById('loginOverlay');
-        if (login) login.style.display = 'flex';
+        if (splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; }, 800); }
+    }, 4000);
 
-        loadLocalUsers();
-    } catch(err) {
-        // في حالة انهيار أي دالة، يتم إظهار شاشة الدخول إجبارياً
-        document.getElementById('loginOverlay').style.display = 'flex';
-    }
+    await loadLocalUsers(); fetchInitialUsersOnly();
+    const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus();
+
+    window.addEventListener('online', updateOnlineStatus); window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
+        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+        else if (e.key === 'Escape') closeModal();
+    });
 });
 </script>
 </body>
