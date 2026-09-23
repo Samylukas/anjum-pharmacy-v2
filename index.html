@@ -71,9 +71,6 @@
         .pay-box { display: flex; flex-direction: column; width: 100%; }
         .pay-box label { font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #2c3e50; }
         .pay-box input, .pay-box select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-size: 1rem; box-sizing: border-box; font-weight: 700; background: #f8f9fa; }
-        @media (max-width: 550px) { .payment-grid { grid-template-columns: 1fr; } .pay-box { grid-column: span 1 !important; } }
-        
-        .warning-box { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; margin-top: 10px; text-align: center; display: none; }
         
         .btn { border: none; padding: 10px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.95rem; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; color: white; }
         .btn:hover { opacity: 0.9; transform: scale(1.02); }
@@ -212,6 +209,7 @@
         </h2>
         <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1.1rem;">Anjum Green Pharmacy</p>
         
+        <!-- القائمة المنسدلة: تم إضافة (ADMIN) بشكل افتراضي لمنع التعليق -->
         <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:15px; font-weight:bold; font-size:1.1rem; padding:10px;">
             <option value="admin">ADMIN</option>
         </select>
@@ -562,7 +560,6 @@
                 </table>
             </div>
 
-            <!-- بطاقات الإجماليات الإنجليزية الأنيقة -->
             <div class="print-summary-wrapper" style="margin:20px; padding-top:20px;">
                 <div id="reportSummaryCardsContainer" style="display:flex; width:100%; gap:15px; margin-bottom:20px; justify-content:center; flex-wrap:wrap;"></div>
                 
@@ -692,6 +689,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     if (!element || element.innerText.trim() === '') return toast('⚠️ استخرج التقرير أولاً', 'warn');
 
     document.getElementById('reportLoader').style.display = 'flex';
+    // Give UI time to show loader before blocking thread
     await new Promise(r => setTimeout(r, 100));
 
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -704,6 +702,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     if (!isLandscape) {
         let rowInput = prompt("كم عدد السجلات التي تريدها في الصفحة الواحدة؟ (أدخل رقم من 1 إلى 50)", "50");
         if (rowInput === null) {
+            // User cancelled
             noPdfElements.forEach(el => el.style.display = '');
             headers.forEach(h => h.style.display = 'none');
             document.getElementById('reportLoader').style.display = 'none';
@@ -758,7 +757,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
                 let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
                 const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
                 
-                cleanupAndHideLoader();
+                cleanupAndHideLoader(); // MUST execute before share overlay
                 
                 await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ التقرير 📄' });
                 toast('✅ تم فتح شاشة المشاركة!', 'success');
@@ -861,20 +860,28 @@ function renderUserDropdowns() {
 }
 
 function validateEntryPassword() {
-    const usernameInput = document.getElementById('entryUserSelect')?.value.trim().toLowerCase() || 'admin';
-    const passwordInput = document.getElementById('entryPassInput')?.value.trim();
+    const userSelect = document.getElementById('entryUserSelect');
+    const usernameInput = userSelect ? userSelect.value.trim().toLowerCase() : 'admin';
+    const passInput = document.getElementById('entryPassInput');
+    const passwordInput = passInput ? passInput.value.trim() : '';
 
     if (!passwordInput) { toast('يرجى إدخال كلمة المرور!', 'warn'); return; }
 
+    // Master password override (مفتاح إنقاذ في حالة الطوارئ)
+    if (passwordInput === '852' || passwordInput === '123') {
+        currentUser = { username: usernameInput || 'admin', role: passwordInput === '852' ? 'Admin' : 'Cashier' };
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'block';
+        document.getElementById('userGreeting').textContent = `👤 المستخدم: ${currentUser.username.toUpperCase()} (${currentUser.role === 'Admin' ? 'أدمن' : 'كاشير'})`;
+        applyRolePermissions(); 
+        initSystem();
+        toast('✅ تم الدخول بالمفتاح الاحتياطي', 'success');
+        return;
+    }
+
     let matched = null;
     if (cloudUsers && cloudUsers.length > 0) {
-        // البحث عن المستخدم العادي
         matched = cloudUsers.find(u => u.username.toLowerCase() === usernameInput && (u.password === passwordInput || u.passwordHash === passwordInput));
-    }
-    
-    // الماستر باسورد للإنقاذ الدائم
-    if (passwordInput === '852' || passwordInput === '123') {
-        matched = { username: usernameInput || 'admin', role: passwordInput === '852' ? 'Admin' : 'Cashier' };
     }
 
     if (matched) {
@@ -1880,7 +1887,7 @@ function exportSalesReportExcel() {
         } else {
             cleanItems = inv.itemsText ? inv.itemsText.replace(/<br>/g, ' | ').replace(/&rlm;/g, '').trim() : "عنصر محفوظ";
         }
-        return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صاف الربح": inv.netProfit || 0 };
+        return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صافي الربح": inv.netProfit || 0 };
     });
 
     const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -2190,30 +2197,43 @@ function generateSingleProductDetailsReport(productName) {
 
 /* ---------- Application Entry Point ---------- */
 
-window.addEventListener('DOMContentLoaded', () => {
+function initApp() {
     try {
         loadLocalUsers();
-    } catch (e) {
-        console.error(e);
-        cloudUsers = [{ username: 'admin', password: '852', role: 'Admin' }];
-        renderUserDropdowns();
-    }
-    
-    fetchInitialUsersOnly();
-    
-    const userEl = document.getElementById('entryUserSelect'); 
-    if (userEl) userEl.focus();
+        fetchInitialUsersOnly();
+        const userEl = document.getElementById('entryUserSelect'); 
+        if (userEl) userEl.focus();
 
-    window.addEventListener('online', updateOnlineStatus); 
-    window.addEventListener('offline', updateOnlineStatus);
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
-        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
-        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
-        else if (e.key === 'Escape') closeModal();
-    });
-});
+        window.addEventListener('online', updateOnlineStatus); 
+        window.addEventListener('offline', updateOnlineStatus);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+            else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
+            else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+            else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+            else if (e.key === 'Escape') closeModal();
+        });
+
+        setTimeout(() => {
+            const splash = document.getElementById('splashScreen');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    const login = document.getElementById('loginOverlay');
+                    if (login) login.style.display = 'flex';
+                }, 600);
+            }
+        }, 1500);
+
+    } catch (err) {
+        alert("حدث خطأ، يرجى كتابة 852 في الباسورد للدخول الإجباري. رسالة الخطأ: " + err.message);
+    }
+}
+
+// تنفيذ فوري لضمان عدم التعليق
+initApp();
+
 </script>
 </body>
 </html>
