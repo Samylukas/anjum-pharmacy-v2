@@ -1804,36 +1804,35 @@ function filterNearExpiryOneMonth() {
 /* ---------- Sales Reports (With Advanced Charts) ---------- */
 
 function printSingleReceipt(invId) {
-    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
+    const inv = savedInvoices.find(i => i.id === invId); 
+    if (!inv) return;
 
-    let itemsHtml;
+    let textReceipt = "=== Anjum Green Pharmacy ===\n";
+    textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
+    textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
+    textReceipt += "--------------------------\n\n";
+
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty})</td><td style="text-align:left; font-weight:bold; font-family: Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
-    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<br>/g, ' | '))}</td></tr>`; }
-
-    const receiptHTML = `
-        <div style="text-align:center; direction:rtl; padding:10px;">
-            <h2 style="margin-bottom:5px;">Anjum Green Pharmacy 🌿</h2>
-            <p style="font-weight:bold;">رقم الفاتورة: <b>#${inv.id}</b></p>
-            <p>التاريخ: ${escapeHtml(formatDateDisplay(inv.date))}</p>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
-            <table style="width:100%; border-collapse:collapse; font-size:12px;">
-                <thead><tr><th style="text-align:right; border-bottom:1px solid #000; padding-bottom:5px;">الصنف</th><th style="text-align:left; border-bottom:1px solid #000; padding-bottom:5px;">الإجمالي</th></tr></thead>
-                <tbody>${itemsHtml}</tbody>
-            </table>
-            <hr style="border-top:2px dashed #000; margin:10px 0;">
-            <h4 style="text-align:left;">نسبة الخصم: ${inv.discount || 0}%</h4>
-            <h3 style="text-align:left;">الإجمالي النهائي: ${inv.totalEGP.toFixed(2)} ج.م</h3>
-            <p style="font-size:11px; margin-top:15px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء العاجل!</p>
-            <div style="font-size:10px; color:#555; margin-top:10px;">✨ Anjum Green Pharmacy</div>
-        </div>
-    `;
-
-    const printSec = document.getElementById('receiptPrintSection');
-    if (printSec) {
-        printSec.innerHTML = receiptHTML; document.body.classList.add('printing-receipt'); window.print();
-        setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.innerHTML = ''; }, 500);
+        inv.items.forEach(i => {
+            textReceipt += i.name + "\n";
+            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
+        });
+    } else {
+        let oldText = cleanItemSummaryText(inv.itemsText).split("`").join("\n");
+        textReceipt += oldText + "\n\n";
     }
+
+    textReceipt += "--------------------------\n";
+    if (inv.discount > 0) {
+        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
+    }
+    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
+    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
+
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "elsayeh://print?type=receipt&text=" + encodedText;
+    
+    toast("تم إرسال الفاتورة للطابعة بنجاح!", "success");
 }
 
 function exportSalesReportExcel() {
