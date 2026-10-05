@@ -1287,13 +1287,18 @@ function executeAdvancedPrint(prodId) {
 
     const targetApp = document.getElementById('lblTargetApp')?.value;
 
-    // --- الربط المباشر مع تطبيق البريدج للباركود ---
     if (targetApp === 'print_bridge') {
         if (!prod.barcode) {
             toast("⚠️ لا يوجد رقم باركود مسجل لهذا المنتج!", "warn");
             return;
         }
         closeModal();
+        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
+        toast("✅ تم إرسال أمر طباعة الملصق!", "success");
+        return;
+    }
+
+    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
         
         // إرسال رقم الباركود مباشرة للتطبيق
         window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
@@ -1789,33 +1794,36 @@ function filterNearExpiryOneMonth() {
 /* ---------- Sales Reports (With Advanced Charts) ---------- */
 
 function printSingleReceipt(invId) {
-    const inv = savedInvoices.find(i => i.id === invId); 
+    const inv = savedInvoices.find(function(i) { return i.id === invId; }); 
     if (!inv) return;
 
-    // 1. تجميع بيانات الفاتورة كنص عادي منظم
     let textReceipt = "=== Anjum Green Pharmacy ===\n";
     textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
     textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
     textReceipt += "--------------------------\n\n";
 
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        inv.items.forEach(i => {
+        inv.items.forEach(function(i) {
             textReceipt += i.name + "\n";
             textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
         });
     } else {
-        let oldText = cleanItemSummaryText(inv.itemsText).split("
+        let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
+        textReceipt += oldText + "\n\n";
+    }
 
-").join("\n");
-textReceipt += oldText + "\n\n";
-}
+    textReceipt += "--------------------------\n";
+    if (inv.discount > 0) {
+        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
+    }
+    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
+    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
 
-textReceipt += "--------------------------\n";
-if (inv.discount > 0) {
-    textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+    
+    toast("✅ تم إرسال الفاتورة للطابعة!", "success");
 }
-textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
-textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
 
 // 2. تشفير النص وإرساله مباشرة للبريدج
 let encodedText = encodeURIComponent(textReceipt);
