@@ -1282,36 +1282,46 @@ function promptPrintBarcodeLabel(prodId) {
 }
 
 function executeAdvancedPrint(prodId) {
-    const prod = findProductById(prodId); 
-    if (!prod) return;
-
+    const prod = findProductById(prodId); if (!prod) return;
     const targetApp = document.getElementById('lblTargetApp')?.value;
-
-    if (targetApp === 'print_bridge') {
-        if (!prod.barcode) {
-            toast("⚠️ لا يوجد رقم باركود مسجل لهذا المنتج!", "warn");
-            return;
-        }
-        closeModal();
-        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
-        toast("✅ تم إرسال أمر طباعة الملصق!", "success");
-        return;
-    }
-
     const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
-        
-        // إرسال رقم الباركود مباشرة للتطبيق
-        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
-        
-        toast("✅ تم إرسال أمر طباعة الملصق!", "success");
-        return; // إيقاف الدالة هنا لمنع فتح شاشات التحميل أو الطباعة القديمة
-    }
-    // ----------------------------------------------
-
-    // باقي الكود القديم كما هو دون أي تغيير:
-    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
+    
     const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
-    // ...
+    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
+    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
+    const showName = document.getElementById('lblShowName')?.checked;
+    const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
+    const isRotated = document.getElementById('lblRotatePrint')?.checked;
+    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
+    closeModal();
+    
+    const guideMult = RATES.GUIDE_MULT || 3;
+    const safeName = escapeHtml(prod.n);
+    let baseEGP = prod.p * guideMult;
+    let finalPriceVal = baseEGP; let currencySymbol = 'ج.م';
+
+    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
+    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
+    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
+
+    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
+    let printW = isRotated ? hMM : wMM; let printH = isRotated ? wMM : hMM;
+    let labelsHtml = '';
+
+    for (let i = 0; i < count; i++) {
+        labelsHtml += `
+            <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
     const printSec = document.getElementById('receiptPrintSection');
     printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
     printSec.style.display = 'block';
@@ -1794,42 +1804,13 @@ function filterNearExpiryOneMonth() {
 /* ---------- Sales Reports (With Advanced Charts) ---------- */
 
 function printSingleReceipt(invId) {
-    const inv = savedInvoices.find(function(i) { return i.id === invId; }); 
-    if (!inv) return;
+    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
 
-    let textReceipt = "=== Anjum Green Pharmacy ===\n";
-    textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
-    textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
-    textReceipt += "--------------------------\n\n";
-
+    let itemsHtml;
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        inv.items.forEach(function(i) {
-            textReceipt += i.name + "\n";
-            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
-        });
-    } else {
-        let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
-        textReceipt += oldText + "\n\n";
-    }
+        itemsHtml = inv.items.map(i => `<tr><td style="text-align:right; font-weight:bold; font-family: Arial, sans-serif;">${escapeHtml(i.name)} (الكمية: ${i.qty})</td><td style="text-align:left; font-weight:bold; font-family: Arial, sans-serif;">${i.sellTotal.toFixed(2)}</td></tr>`).join('');
+    } else { itemsHtml = `<tr><td colspan="2" style="text-align:right; font-family: Arial, sans-serif;">${escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<br>/g, ' | '))}</td></tr>`; }
 
-    textReceipt += "--------------------------\n";
-    if (inv.discount > 0) {
-        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
-    }
-    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
-    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
-
-    let encodedText = encodeURIComponent(textReceipt);
-    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
-    
-    toast("✅ تم إرسال الفاتورة للطابعة!", "success");
-}
-
-// 2. تشفير النص وإرساله مباشرة للبريدج
-let encodedText = encodeURIComponent(textReceipt);
-window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
-
-toast("✅ تم إرسال الفاتورة للطابعة!", "success");
     const receiptHTML = `
         <div style="text-align:center; direction:rtl; padding:10px;">
             <h2 style="margin-bottom:5px;">Anjum Green Pharmacy 🌿</h2>
