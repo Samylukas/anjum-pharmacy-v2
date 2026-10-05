@@ -2100,7 +2100,6 @@ function cancelInvoiceSystem(invId) {
         toast(`🗑️ تم حذف الفاتورة #${invId}!`, 'success'); fetchCloudInvoicesData();
     });
 }
-
 function handleNetProfitAction() {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
     document.getElementById('profitBox').style.display = 'block';
@@ -2131,8 +2130,7 @@ function handleNetProfitAction() {
             toast(`تم خصم المصروفات الحالية (${totalExpensesInPeriod} EGP)`, 'info', 4000);
         }
     }
-}
-    
+} 
     generateReport();
 
     const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
