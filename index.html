@@ -2103,9 +2103,34 @@ function cancelInvoiceSystem(invId) {
 
 function handleNetProfitAction() {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    document.getElementById('profitBox').style.display = 'block';
     generateReport();
-    document.getElementById('profitBox').style.display = 'block';   // add this line
-    // ...rest unchanged
+
+    const fromD = document.getElementById('fromDate')?.value || '';
+    const toD = document.getElementById('toDate')?.value || '';
+    const deductExp = document.getElementById('deductExpensesToggle')?.checked || false;
+
+    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
+    const tally = buildInvoiceTally(filteredInvoices);
+    let netProfit = tally.grandNetProfit;
+
+    if (deductExp) {
+        let totalExpensesInPeriod = 0;
+        savedFinances.forEach(f => {
+            if (f.type === 'Expense' && f.date) {
+                const fD = f.date.slice(0, 10);
+                if (fromD && fD < fromD) return;
+                if (toD && fD > toD) return;
+                totalExpensesInPeriod += (parseFloat(f.amount) || 0);
+            }
+        });
+        netProfit -= totalExpensesInPeriod;
+        const netCard = document.querySelector('#reportSummaryCardsContainer .english-summary-card.net .value');
+        if (netCard) {
+            netCard.textContent = netProfit.toFixed(2) + ' EGP';
+            toast(`تم خصم المصروفات الحالية (${totalExpensesInPeriod} EGP)`, 'info', 4000);
+        }
+    }
 }
     
     generateReport();
