@@ -1,6 +1,9 @@
-if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-    Chart.defaults.color = '#333';
+try {
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+        Chart.defaults.color = '#333';
+    }
+} catch(e){}
 }
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
@@ -304,7 +307,11 @@ function updateRateLabels() {
     const thHead = document.getElementById('thStockGuideHead');
     if (thHead) thHead.textContent = `الحد الأدنى للبيع (×${RATES.GUIDE_MULT || 3})`;
 }
+// --- دالة فتح نافذة خيارات طباعة الفاتورة ---
+function openReceiptPrintModal(invId = null) {
+    if (!invId && invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة!', 'warn'); return; }
 
+    openModal(`
 function openRatesModal() {
     if (currentUser?.role !== 'Admin') { toast('❌ متاح للأدمن فقط!', 'error'); return; }
     openModal(`
