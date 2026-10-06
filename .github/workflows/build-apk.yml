@@ -29,8 +29,8 @@ jobs:
       - name: Prepare Web Directory
         run: |
           mkdir -p www
-          cp index.html www/
-
+cp index.html www/
+cp app.js www/
       - name: Install Dependencies & Capacitor
         run: |
           npm init -y
