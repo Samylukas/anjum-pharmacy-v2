@@ -249,6 +249,7 @@
             <button class="btn btn-darkblue" onclick="fetchCloudInvoicesData()">تحديث 🔄</button>
             <button class="btn btn-orange" onclick="prepareNewInvoice()">فاتورة جديدة ➕</button>
             <button class="btn btn-gray" onclick="clearCurrentInvoice()">مسح (F8) 🧹</button>
+            <button class="btn btn-purple" onclick="printCurrentInvoice()">طباعة الفاتورة 🖨️</button>
         </div>
         <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div style="font-weight:bold; color:#1e3c72; font-size:1rem;">📅 التاريخ: <input type="datetime-local" id="invoiceDate" style="padding:6px; border-radius:6px; border:1px solid #ccc; font-family:inherit; outline:none;"></div>
@@ -325,6 +326,7 @@
                 <button class="btn btn-red btn-large-stock" onclick="filterLowStock()">النواقص ⚠️</button>
                 <button class="btn btn-orange btn-large-stock" onclick="filterNearExpiryOneMonth()">صلاحية قريبة ⚠️</button>
                 <button class="btn btn-purple btn-large-stock" onclick="printStockTable()">طباعة / PDF 📄</button>
+                <button class="btn btn-green btn-large-stock" onclick="printSelectedLowStockReport()">تقرير النواقص المختارة 📋</button>
             </div>
         </div>
         <div style="display:flex; gap:10px; margin-top:15px;">
@@ -342,9 +344,27 @@
             </div>
             <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
                 <table style="width:100%;" id="stockTable">
-                    <thead><tr><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
+                    <thead><tr><th id="stockSelectHead" class="no-pdf" style="width:55px;display:none;">✓<br><input type="checkbox" id="selectAllLowStock" onchange="toggleSelectAllLowStock(this.checked)" style="transform:scale(1.25);cursor:pointer;" title="تحديد الكل"></th><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
                     <tbody id="stockTableBody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <div id="lowStockSelectedPrintArea" class="card" style="display:none;padding:0;overflow:hidden;margin-top:15px;">
+            <div class="report-title-header" style="text-align:center;margin:20px 0;">
+                <h2 style="color:#1e3c72;margin:0;font-size:1.7rem;font-weight:800;">Anjum Green Pharmacy</h2>
+                <h3 style="color:#333;margin:5px 0;font-size:1.2rem;">تقرير النواقص المختارة</h3>
+                <div style="font-weight:900;color:#c0392b;font-size:1.1rem;">إجمالي الأصناف المختارة: <span id="selectedLowStockCount">0</span></div>
+            </div>
+            <div class="table-responsive" style="margin:0;border:none;border-radius:0;">
+                <table style="width:100%;" id="lowStockSelectedTable">
+                    <thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>الباركود</th><th>الصلاحية</th></tr></thead>
+                    <tbody id="lowStockSelectedBody"></tbody>
+                </table>
+            </div>
+            <div class="no-pdf" style="display:flex;justify-content:center;gap:10px;padding:15px;flex-wrap:wrap;">
+                <button class="btn btn-green" onclick="printSelectedLowStockReport()">طباعة التقرير 📄</button>
+                <button class="btn btn-gray" onclick="clearLowStockSelection()">مسح التحديد 🧹</button>
             </div>
         </div>
     </div>
@@ -560,22 +580,4 @@
 
             <div class="card" style="flex:1; min-width:300px; max-width:500px; background:#fdf2e9; border:1px solid #f39c12;">
                 <h3 style="color:#d35400; text-align:center; margin-bottom:15px; font-size:1.3rem; font-weight:800;">✏️ تغيير كلمة مرور حساب</h3>
-                <div class="pay-box" style="margin-bottom:12px;"><label>اختر المستخدم:</label><select id="userSelectPass" style="padding:12px; font-size:1.1rem; border-color:#f39c12;"></select></div>
-                <div class="pay-box" style="margin-bottom:20px;"><label>كلمة المرور الجديدة:</label><input type="password" id="newAccountPass" placeholder="الرقم السري الجديد..." style="padding:12px; font-size:1.1rem; border-color:#f39c12;"></div>
-                <button class="btn btn-orange" style="width:100%; font-size:1.1rem; padding:12px; color:#fff;" onclick="changeUserPasswordSystem()">تحديث كلمة المرور 💾</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="scroll-btn-group">
-        <button class="scroll-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" title="أعلى الصفحة">⬆️</button>
-        <button class="scroll-btn" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});" title="أسفل الصفحة">⬇️</button>
-    </div>
-</div>
-
-<div id="receiptPrintSection"></div>
-
-<!-- ربط ملف الجافاسكريبت المباشر -->
-<script src="app.js"></script>
-</body>
-</html>
+                <div class="pay-box" style
