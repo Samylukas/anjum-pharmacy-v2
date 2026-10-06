@@ -735,6 +735,169 @@ function executeAdvancedPrint(prodId) {
     }
 }
 
+function promptPrintReceipt(invId) {
+    let title = invId === 'current' ? 'إيصال الفاتورة الحالية' : 'إيصال فاتورة #' + invId;
+    openModal(`
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🖨️ خيارات طباعة الفاتورة</h3>
+        <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${title}</p>
+        
+        <div class="pay-box" style="margin-bottom:20px;">
+            <label style="font-size:1rem;">التطبيق الهدف للطباعة:</label>
+            <select id="receiptTargetApp" style="font-weight:bold; color:#1e3c72; padding:10px;">
+                <option value="print_bridge">🚀 طباعة فورية (Print Bridge - للموبايل)</option>
+                <option value="direct">💻 الطباعة المباشرة (كمبيوتر / متصفح)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeReceiptPrint('${invId}')">تنفيذ الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function executeReceiptPrint(invId) {
+    const targetApp = document.getElementById('receiptTargetApp')?.value;
+    closeModal();
+    
+    let invToPrint = null;
+    let itemsToPrint = [];
+    let isCurrent = false;
+    let invNum = "";
+    let invDate = "";
+    let invDiscount = 0;
+    let invTotalPaid = 0;
+    let sellerName = currentUser ? currentUser.username.toUpperCase() : "غير معروف";
+
+    if (invId === 'current') {
+        if (invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة! أضف أصنافاً أولاً.', 'warn'); return; }
+        isCurrent = true;
+        invNum = activeInvoiceId;
+        invDate = new Date().toLocaleString('ar-EG');
+        itemsToPrint = invoiceItems;
+        invDiscount = invoiceDiscountPercent;
+        
+        let totalSellEGP = 0;
+        itemsToPrint.forEach(i => totalSellEGP += i.sellTotal);
+        invTotalPaid = totalSellEGP - ((totalSellEGP * invDiscount) / 100);
+        
+    } else {
+        invToPrint = savedInvoices.find(i => String(i.id) === String(invId));
+        if (!invToPrint) return;
+        invNum = invToPrint.id;
+        invDate = formatDateDisplay(invToPrint.date);
+        invDiscount = invToPrint.discount || 0;
+        invTotalPaid = invToPrint.totalEGP || 0;
+        
+        if (invToPrint.items && Array.isArray(invToPrint.items)) {
+            itemsToPrint = invToPrint.items;
+        } else {
+            itemsToPrint = [{ name: cleanItemSummaryText(invToPrint.itemsText), qty: 1, sellTotal: invToPrint.totalEGP || 0 }];
+        }
+        
+        if (invToPrint.items && invToPrint.items.length > 0 && invToPrint.items[0].seller) {
+            sellerName = invToPrint.items[0].seller;
+        } else if (invToPrint.itemsText && invToPrint.itemsText.includes("بائع:")) {
+            const match = invToPrint.itemsText.match(/بائع:\s*([^\n|]+)/);
+            if (match) sellerName = match[1].trim();
+        }
+    }
+
+    if (targetApp === 'print_bridge') {
+        let textReceipt = "=== صيدلية أنجم الخضراء ===\n";
+        textReceipt += "رقم الفاتورة: #" + invNum + "\n";
+        textReceipt += "التاريخ: " + invDate + "\n";
+        textReceipt += "البائع: " + sellerName + "\n";
+        textReceipt += "--------------------------------\n";
+
+        let totalItemsCount = 0;
+        itemsToPrint.forEach(i => {
+            textReceipt += "- " + i.name + "\n";
+            textReceipt += "الكمية: " + i.qty + " | السعر: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n";
+            totalItemsCount += parseInt(i.qty) || 1;
+        });
+
+        textReceipt += "--------------------------------\n";
+        textReceipt += "إجمالي الأصناف: " + totalItemsCount + " صنف\n";
+        if (invDiscount > 0) textReceipt += "خصم خاص: " + invDiscount + "%\n";
+        textReceipt += "الإجمالي المدفوع: " + parseFloat(invTotalPaid).toFixed(2) + " ج.م\n";
+        textReceipt += "--------------------------------\n";
+        textReceipt += "شكراً لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n";
+
+        let encodedText = encodeURIComponent(textReceipt);
+        window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+        toast("✅ تم إرسال الأمر للطابعة!", "success");
+    } else {
+        let totalItemsCount = 0;
+        let itemsHtml = itemsToPrint.map(i => {
+            totalItemsCount += parseInt(i.qty) || 1;
+            return `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #ccc; padding:4px 0; margin-bottom:4px;">
+                <div style="flex:2; text-align:right; font-weight:bold; font-size:12px;">${escapeHtml(i.name)}</div>
+                <div style="flex:1; text-align:center; font-size:12px;">${i.qty}</div>
+                <div style="flex:1; text-align:left; font-weight:bold; font-size:12px;">${parseFloat(i.sellTotal).toFixed(2)}</div>
+            </div>`;
+        }).join('');
+
+        let printHtml = `
+            <div style="width: 80mm; padding: 10px; font-family: 'Cairo', Arial, sans-serif; direction: rtl; color: #000; margin: 0 auto;">
+                <h2 style="text-align:center; font-size: 16px; margin-bottom: 5px;">Anjum Green Pharmacy</h2>
+                <h3 style="text-align:center; font-size: 14px; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #000; padding-bottom: 5px;">فاتورة مبيعات</h3>
+                
+                <div style="font-size: 12px; margin-bottom: 3px;"><strong>رقم:</strong> #${invNum}</div>
+                <div style="font-size: 12px; margin-bottom: 3px;"><strong>التاريخ:</strong> ${invDate}</div>
+                <div style="font-size: 12px; margin-bottom: 10px;"><strong>البائع:</strong> ${sellerName}</div>
+                
+                <div style="border-bottom: 2px solid #000; margin-bottom: 5px;"></div>
+                <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:12px; border-bottom:1px solid #000; padding-bottom:3px; margin-bottom:5px;">
+                    <div style="flex:2; text-align:right;">الصنف</div>
+                    <div style="flex:1; text-align:center;">الكمية</div>
+                    <div style="flex:1; text-align:left;">الإجمالي</div>
+                </div>
+                
+                ${itemsHtml}
+                
+                <div style="border-top: 2px solid #000; margin-top: 5px; padding-top: 5px;"></div>
+                <div style="display:flex; justify-content:space-between; font-size: 12px; margin-bottom: 3px;">
+                    <div>إجمالي عدد الأصناف:</div>
+                    <div style="font-weight:bold;">${totalItemsCount}</div>
+                </div>
+                ${invDiscount > 0 ? `<div style="display:flex; justify-content:space-between; font-size: 12px; margin-bottom: 3px;">
+                    <div>نسبة الخصم:</div>
+                    <div style="font-weight:bold;">${invDiscount}%</div>
+                </div>` : ''}
+                <div style="display:flex; justify-content:space-between; font-size: 14px; font-weight:bold; margin-top: 5px;">
+                    <div>الإجمالي المدفوع:</div>
+                    <div>${parseFloat(invTotalPaid).toFixed(2)} ج.م</div>
+                </div>
+                
+                <div style="text-align:center; margin-top: 15px; font-size: 11px; border-top: 1px dashed #000; padding-top: 5px;">
+                    شكراً لزيارتكم ونتمنى لكم الشفاء العاجل
+                </div>
+            </div>
+        `;
+
+        const printSec = document.getElementById('receiptPrintSection');
+        printSec.innerHTML = printHtml;
+        printSec.style.display = 'block';
+        
+        const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
+        pageStyle.innerHTML = `@media print { @page { size: 80mm auto; margin: 0 !important; } }`;
+        document.head.appendChild(pageStyle);
+        document.body.classList.add('printing-receipt');
+        
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-receipt'); 
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = ''; 
+                const pStyle = document.getElementById('dynamic-page-size'); 
+                if(pStyle) pStyle.remove();
+            }, 500);
+        }, 300);
+    }
+}
+
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
     const q = query.toLowerCase().trim(); if (!q) { listEl.style.display = 'none'; return; }
     const barcodeMatched = products.find(p => p.barcode && p.barcode.toLowerCase() === q);
@@ -962,45 +1125,6 @@ function saveInvoice() {
     prepareNewInvoice(); generateReport();
 }
 
-function printCurrentActiveInvoice() {
-    if (invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة! أضف أصنافاً أولاً.', 'warn'); return; }
-    
-    let textReceipt = "=== صيدلية أنجم الخضراء ===\n";
-    textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
-    textReceipt += "التاريخ: " + new Date().toLocaleString('ar-EG') + "\n";
-    let sellerName = currentUser ? currentUser.username.toUpperCase() : "غير معروف";
-    textReceipt += "البائع: " + sellerName + "\n";
-    textReceipt += "--------------------------------\n";
-
-    let totalSellEGP = 0;
-    let totalItemsCount = 0;
-    
-    invoiceItems.forEach(i => {
-        textReceipt += "- " + i.name + "\n";
-        textReceipt += "الكمية: " + i.qty + " | الإجمالي: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n";
-        totalSellEGP += i.sellTotal;
-        totalItemsCount += parseInt(i.qty);
-    });
-
-    textReceipt += "--------------------------------\n";
-    textReceipt += "إجمالي عدد الأصناف: " + totalItemsCount + " صنف\n";
-    
-    const discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
-    if (invoiceDiscountPercent > 0) {
-        textReceipt += "خصم خاص: " + invoiceDiscountPercent + "%\n";
-    }
-    const finalPayable = totalSellEGP - discountVal;
-    
-    textReceipt += "الإجمالي المدفوع: " + finalPayable.toFixed(2) + " ج.م\n";
-    textReceipt += "--------------------------------\n";
-    textReceipt += "شكراً لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n";
-
-    let encodedText = encodeURIComponent(textReceipt);
-    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
-    
-    toast("✅ تم إرسال الأمر للطابعة!", "success");
-}
-
 function saveFinanceEntry() {
     const type = document.getElementById('finType')?.value; const category = document.getElementById('finCategory')?.value.trim(); const amount = parseFloat(document.getElementById('finAmount')?.value) || 0; const dateRaw = document.getElementById('finDate')?.value; const notes = document.getElementById('finNotes')?.value.trim();
     if (!category) { toast('أدخل التصنيف!', 'warn'); return; } if (amount <= 0) { toast('أدخل مبلغ صحيح!', 'warn'); return; }
@@ -1024,7 +1148,7 @@ function deleteFinanceEntry(id) {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
     confirmModal("هل أنت متأكد من حذف هذه العملية المالية؟", () => {
         savedFinances = savedFinances.filter(f => f.id !== id); saveFinancesToStorage(); syncToCloud("deleteFinance", { id });
-        renderFinanceTable(); toast('🗑️️ تم الحذف', 'success');
+        renderFinanceTable(); toast('🗑 تم الحذف', 'success');
     });
 }
 
@@ -1309,52 +1433,6 @@ function filterNearExpiryOneMonth() {
     updateSelectedStockCount();
 }
 
-function printSingleReceipt(invId) {
-    const inv = savedInvoices.find(function(i) { return i.id === invId; }); 
-    if (!inv) return;
-
-    let textReceipt = "=== Anjum Green Pharmacy ===\n";
-    textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
-    textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
-    
-    let sellerName = "غير معروف";
-    if (inv.items && inv.items.length > 0 && inv.items[0].seller) {
-        sellerName = inv.items[0].seller;
-    } else if (inv.itemsText && inv.itemsText.includes("بائع:")) {
-        const match = inv.itemsText.match(/بائع:\s*([^\|]+)/);
-        if (match) sellerName = match[1].trim();
-    }
-    textReceipt += "البائع: " + sellerName + "\n";
-    textReceipt += "--------------------------\n";
-
-    let totalItemsCount = 0;
-    if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-        inv.items.forEach(function(i) {
-            textReceipt += "- " + i.name + "\n";
-            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + " ج.م\n";
-            totalItemsCount += parseInt(i.qty);
-        });
-    } else {
-        let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
-        textReceipt += oldText + "\n";
-        totalItemsCount = 1; 
-    }
-
-    textReceipt += "--------------------------\n";
-    textReceipt += "إجمالي عدد الأصناف: " + totalItemsCount + " صنف\n";
-    if (inv.discount > 0) {
-        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
-    }
-    textReceipt += "الإجمالي المدفوع: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n";
-    textReceipt += "--------------------------\n";
-    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n";
-
-    let encodedText = encodeURIComponent(textReceipt);
-    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
-    
-    toast("✅ تم إرسال الفاتورة للطباعة!", "success");
-}
-
 function exportSalesReportExcel() {
     const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
     const filteredInvoices = savedInvoices.filter(inv => {
@@ -1456,7 +1534,7 @@ function generateReport() {
             <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
             <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
             <td class="no-pdf">
-                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
+                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="promptPrintReceipt('${inv.id}')">إيصال 🧾</button>
                 <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
                 <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
             </td>
@@ -1674,7 +1752,7 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+function bootSystem() {
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) { 
@@ -1704,4 +1782,5 @@ window.addEventListener('DOMContentLoaded', () => {
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
         else if (e.key === 'Escape') closeModal();
     });
-});
+}
+bootSystem();
