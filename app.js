@@ -222,7 +222,8 @@ async function validateEntryPassword() {
 
         syncToCloud("updateUserActivity", { username: matched.username, isOnline: true, lastLogin: new Date().toLocaleString() });
 
-        applyRolePermissions(); initSystem();
+        applyRolePermissions(); 
+        initSystem();
     } else {
         toast('❌ كلمة المرور غير صحيحة!', 'error');
     }
@@ -265,7 +266,7 @@ async function createNewUserSystem() {
 
     if (!uName || !uPass) { toast("يرجى إدخال اسم المستخدم وكلمة المرور!", 'warn'); return; }
     const exists = cloudUsers.find(u => u.username.toLowerCase() === uName);
-    if (exists) { toast(`⚠️ المستخدم [${uName.toUpperCase()}] موجود بالفعل!`, 'error'); return; }
+    if (exists) { toast(`⚠ المستخدم [${uName.toUpperCase()}] موجود بالفعل!`, 'error'); return; }
 
     const passHash = await sha256Hex(uPass);
     const newUser = { username: uName, passwordHash: passHash, role: uRole, lastLogin: '-', isOnline: 'Offline' };
@@ -590,7 +591,7 @@ function promptPrintBarcodeLabel(prodId) {
     if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
 
     openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️️ خيارات طباعة الباركود</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️ خيارات طباعة الباركود</h3>
         <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
         
         <div class="payment-grid" style="margin-bottom:15px; gap:10px;">
@@ -733,6 +734,99 @@ function executeAdvancedPrint(prodId) {
             setTimeout(() => {
                 document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; const pStyle = document.getElementById('dynamic-page-size'); if(pStyle) pStyle.remove();
             }, 500);
+        }, 300);
+    }
+}
+
+function openReceiptPrintModal(invId = null) {
+    if (!invId && invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة!', 'warn'); return; }
+    let title = invId ? 'إيصال فاتورة #' + invId : 'إيصال الفاتورة الحالية';
+    openModal(`
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🖨 خيارات طباعة الفاتورة</h3>
+        <p style="font-size:1.1rem; font-weight:bold; text-align:center; margin-bottom:15px; color:#27ae60;">${title}</p>
+        <div class="pay-box" style="margin-bottom:20px;">
+            <label style="font-size:1.1rem; color:#27ae60;">كيف تريد الطباعة؟</label>
+            <select id="receiptTargetApp" style="font-weight:bold; color:#1e3c72; padding:12px; font-size:1.1rem; border:2px solid #3498db; width:100%; border-radius:8px;">
+                <option value="direct">💻 طباعة مباشرة (لاب توب / متصفح الموبايل)</option>
+                <option value="print_bridge">🚀 إرسال لتطبيق Print Bridge (طابعة الموبايل)</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeReceiptPrint(${invId || 'null'})">تأكيد الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function executeReceiptPrint(invId) {
+    const targetApp = document.getElementById('receiptTargetApp')?.value || 'direct';
+    closeModal();
+
+    let invNumber = activeInvoiceId, invDate = new Date().toLocaleString('ar-EG');
+    let sellerName = currentUser ? currentUser.username.toUpperCase() : "غير معروف";
+    let discount = invoiceDiscountPercent, totalEGP = 0, totalItemsCount = 0;
+    let itemsToPrint = invoiceItems;
+
+    if (invId) {
+        const inv = savedInvoices.find(i => i.id === invId);
+        if (!inv) return;
+        invNumber = inv.id; invDate = formatDateDisplay(inv.date);
+        discount = inv.discount || 0; totalEGP = parseFloat(inv.totalEGP) || 0;
+        
+        if (inv.items && inv.items.length > 0 && inv.items[0].seller) sellerName = inv.items[0].seller;
+        else if (inv.itemsText && inv.itemsText.includes("بائع:")) {
+            const match = inv.itemsText.match(/بائع:\s*([^\|]+)/);
+            if (match) sellerName = match[1].trim();
+        }
+
+        if (inv.items && Array.isArray(inv.items)) itemsToPrint = inv.items;
+        else itemsToPrint = [{name: cleanItemSummaryText(inv.itemsText), qty: 1, sellTotal: totalEGP}];
+    } else {
+        let totalSell = 0;
+        itemsToPrint.forEach(i => totalSell += i.sellTotal);
+        totalEGP = totalSell - ((totalSell * discount) / 100);
+    }
+
+    itemsToPrint.forEach(i => totalItemsCount += parseInt(i.qty) || 1);
+
+    if (targetApp === 'print_bridge') {
+        let textReceipt = "=== Anjum Green Pharmacy ===\nرقم: #" + invNumber + "\nالتاريخ: " + invDate + "\nالبائع: " + sellerName + "\n--------------------------------\n";
+        itemsToPrint.forEach(i => { textReceipt += "- " + i.name + "\nالكمية: " + i.qty + " | القيمة: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n"; });
+        textReceipt += "--------------------------------\nإجمالي الأصناف: " + totalItemsCount + " صنف\n";
+        if (discount > 0) textReceipt += "خصم خاص: " + discount + "%\n";
+        textReceipt += "المدفوع: " + parseFloat(totalEGP).toFixed(2) + " ج.م\n--------------------------------\nشكراً لزيارتكم ونتمنى لكم الشفاء\n\n\n";
+
+        let encodedText = encodeURIComponent(textReceipt);
+        window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+        toast("✅ تم إرسال الأمر للطابعة!", "success");
+    } else {
+        let printHtml = `
+            <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 10px; width: 100%; max-width: 320px; margin: 0 auto; color: #000; font-size: 14px;">
+                <h2 style="text-align:center; margin-bottom: 5px; font-size: 18px; font-weight: 900;">Anjum Green Pharmacy</h2>
+                <div style="text-align:center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; font-weight:bold;">
+                    <div>رقم الفاتورة: #${invNumber}</div><div>التاريخ: ${invDate}</div><div>البائع: ${sellerName}</div>
+                </div>
+                <table style="width: 100%; text-align: right; border-collapse: collapse; font-weight:bold;">
+                    <thead style="border-bottom: 1px dashed #000;"><tr><th style="padding: 4px 0;">الصنف</th><th style="padding: 4px 0; text-align: center;">الكمية</th><th style="padding: 4px 0; text-align: left;">القيمة</th></tr></thead>
+                    <tbody>
+                        ${itemsToPrint.map(i => `<tr><td style="padding: 4px 0;">${escapeHtml(i.name)}</td><td style="padding: 4px 0; text-align: center;">${i.qty}</td><td style="padding: 4px 0; text-align: left;">${parseFloat(i.sellTotal).toFixed(2)}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+                <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px; font-weight: bold;">
+                    <div>إجمالي الأصناف: ${totalItemsCount}</div>
+                    ${discount > 0 ? `<div>خصم: ${discount}%</div>` : ''}
+                    <div style="font-size: 16px; margin-top: 5px;">الإجمالي المدفوع: <span style="float:left;">${parseFloat(totalEGP).toFixed(2)} ج.م</span></div>
+                </div>
+                <div style="text-align: center; margin-top: 15px; font-size: 12px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء</div>
+            </div>
+        `;
+        const printSec = document.getElementById('receiptPrintSection');
+        printSec.innerHTML = printHtml;
+        printSec.style.display = 'block';
+        document.body.classList.add('printing-receipt');
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; }, 500);
         }, 300);
     }
 }
@@ -964,98 +1058,6 @@ function saveInvoice() {
     prepareNewInvoice(); generateReport();
 }
 
-function openReceiptPrintModal(invId = null) {
-    if (!invId && invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة!', 'warn'); return; }
-
-    openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🖨️ خيارات طباعة الفاتورة</h3>
-        <div class="pay-box" style="margin-bottom:20px;">
-            <label style="font-size:1.1rem; color:#27ae60;">كيف تريد الطباعة؟</label>
-            <select id="receiptTargetApp" style="font-weight:bold; color:#1e3c72; padding:12px; font-size:1.1rem; border:2px solid #3498db;">
-                <option value="direct">💻 طباعة مباشرة (لاب توب / متصفح الموبايل)</option>
-                <option value="print_bridge">🚀 إرسال لتطبيق Print Bridge (طابعة الموبايل)</option>
-            </select>
-        </div>
-        <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeReceiptPrint(${invId || 'null'})">تأكيد الطباعة 🖨️</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
-        </div>
-    `);
-}
-
-function executeReceiptPrint(invId) {
-    const targetApp = document.getElementById('receiptTargetApp')?.value || 'direct';
-    closeModal();
-
-    let invNumber = activeInvoiceId, invDate = new Date().toLocaleString('ar-EG');
-    let sellerName = currentUser ? currentUser.username.toUpperCase() : "غير معروف";
-    let discount = invoiceDiscountPercent, totalEGP = 0, totalItemsCount = 0;
-    let itemsToPrint = invoiceItems;
-
-    if (invId) {
-        const inv = savedInvoices.find(i => i.id === invId);
-        if (!inv) return;
-        invNumber = inv.id; invDate = formatDateDisplay(inv.date);
-        discount = inv.discount || 0; totalEGP = parseFloat(inv.totalEGP) || 0;
-        
-        if (inv.items && inv.items.length > 0 && inv.items[0].seller) sellerName = inv.items[0].seller;
-        else if (inv.itemsText && inv.itemsText.includes("بائع:")) {
-            const match = inv.itemsText.match(/بائع:\s*([^\|]+)/);
-            if (match) sellerName = match[1].trim();
-        }
-
-        if (inv.items && Array.isArray(inv.items)) itemsToPrint = inv.items;
-        else itemsToPrint = [{name: cleanItemSummaryText(inv.itemsText), qty: 1, sellTotal: totalEGP}];
-    } else {
-        let totalSell = 0;
-        itemsToPrint.forEach(i => totalSell += i.sellTotal);
-        totalEGP = totalSell - ((totalSell * discount) / 100);
-    }
-
-    itemsToPrint.forEach(i => totalItemsCount += parseInt(i.qty) || 1);
-
-    if (targetApp === 'print_bridge') {
-        let textReceipt = "=== Anjum Green Pharmacy ===\nرقم: #" + invNumber + "\nالتاريخ: " + invDate + "\nالبائع: " + sellerName + "\n--------------------------------\n";
-        itemsToPrint.forEach(i => { textReceipt += "- " + i.name + "\nالكمية: " + i.qty + " | القيمة: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n"; });
-        textReceipt += "--------------------------------\nإجمالي الأصناف: " + totalItemsCount + " صنف\n";
-        if (discount > 0) textReceipt += "خصم خاص: " + discount + "%\n";
-        textReceipt += "المدفوع: " + totalEGP.toFixed(2) + " ج.م\n--------------------------------\nشكراً لزيارتكم ونتمنى لكم الشفاء\n\n\n";
-
-        let encodedText = encodeURIComponent(textReceipt);
-        window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
-        toast("✅ تم إرسال الأمر للطابعة!", "success");
-    } else {
-        let printHtml = `
-            <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 10px; width: 100%; max-width: 320px; margin: 0 auto; color: #000; font-size: 14px;">
-                <h2 style="text-align:center; margin-bottom: 5px; font-size: 18px; font-weight: 900;">Anjum Green Pharmacy</h2>
-                <div style="text-align:center; margin-bottom: 10px; border-bottom: 1px dashed #000; padding-bottom: 5px; font-weight:bold;">
-                    <div>رقم الفاتورة: #${invNumber}</div><div>التاريخ: ${invDate}</div><div>البائع: ${sellerName}</div>
-                </div>
-                <table style="width: 100%; text-align: right; border-collapse: collapse; font-weight:bold;">
-                    <thead style="border-bottom: 1px dashed #000;"><tr><th style="padding: 4px 0;">الصنف</th><th style="padding: 4px 0; text-align: center;">الكمية</th><th style="padding: 4px 0; text-align: left;">القيمة</th></tr></thead>
-                    <tbody>
-                        ${itemsToPrint.map(i => `<tr><td style="padding: 4px 0;">${escapeHtml(i.name)}</td><td style="padding: 4px 0; text-align: center;">${i.qty}</td><td style="padding: 4px 0; text-align: left;">${parseFloat(i.sellTotal).toFixed(2)}</td></tr>`).join('')}
-                    </tbody>
-                </table>
-                <div style="margin-top: 10px; border-top: 1px dashed #000; padding-top: 5px; font-weight: bold;">
-                    <div>إجمالي الأصناف: ${totalItemsCount}</div>
-                    ${discount > 0 ? `<div>خصم: ${discount}%</div>` : ''}
-                    <div style="font-size: 16px; margin-top: 5px;">الإجمالي المدفوع: <span style="float:left;">${totalEGP.toFixed(2)} ج.م</span></div>
-                </div>
-                <div style="text-align: center; margin-top: 15px; font-size: 12px; font-weight:bold;">شكراً لزيارتكم ونتمنى لكم الشفاء</div>
-            </div>
-        `;
-        const printSec = document.getElementById('receiptPrintSection');
-        printSec.innerHTML = printHtml;
-        printSec.style.display = 'block';
-        document.body.classList.add('printing-receipt');
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => { document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; }, 500);
-        }, 300);
-    }
-}
-
 function saveFinanceEntry() {
     const type = document.getElementById('finType')?.value; const category = document.getElementById('finCategory')?.value.trim(); const amount = parseFloat(document.getElementById('finAmount')?.value) || 0; const dateRaw = document.getElementById('finDate')?.value; const notes = document.getElementById('finNotes')?.value.trim();
     if (!category) { toast('أدخل التصنيف!', 'warn'); return; } if (amount <= 0) { toast('أدخل مبلغ صحيح!', 'warn'); return; }
@@ -1281,28 +1283,28 @@ function generateSelectedShortagesReport() {
     selectedProducts.sort((a, b) => a.n.localeCompare(b.n, 'ar'));
 
     let printHtml = `
-        <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 30px; background: #fff;">
+        <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 20px; background: #fff; width: 100%; max-width: 750px; margin: 0 auto;">
             <h2 style="text-align:center; color:#1e3c72; font-weight:900; margin-bottom: 5px;">Anjum Green Pharmacy</h2>
             <h3 style="text-align:center; color:#e74c3c; margin-bottom: 20px;">تقرير النواقص والأصناف المحددة (مرتب أبجدياً)</h3>
-            <div style="font-size:1.2rem; font-weight:bold; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px;">
+            <div style="font-size:1.1rem; font-weight:bold; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px;">
                 إجمالي الأصناف المطلوبة: <span style="color:#27ae60;">${selectedProducts.length} صنف</span>
             </div>
-            <table style="width:100%; border-collapse: collapse; text-align: center; font-size:1.1rem;" border="1">
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size:1rem;" border="1">
                 <thead style="background: #1e3c72; color: white;">
                     <tr>
-                        <th style="padding: 12px;">#</th>
-                        <th style="padding: 12px; text-align:right;">اسم الصنف</th>
-                        <th style="padding: 12px;">الرصيد الحالي</th>
-                        <th style="padding: 12px;">المطلوب</th>
+                        <th style="padding: 10px; width: 5%;">#</th>
+                        <th style="padding: 10px; text-align:right; width: 55%;">اسم الصنف</th>
+                        <th style="padding: 10px; width: 15%;">الرصيد الحالي</th>
+                        <th style="padding: 10px; width: 25%;">المطلوب</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${selectedProducts.map((p, i) => `
                         <tr>
-                            <td style="padding: 10px; font-weight:bold;">${i + 1}</td>
-                            <td style="padding: 10px; font-weight: bold; text-align:right;">${escapeHtml(p.n)}</td>
-                            <td style="padding: 10px; color: ${p.q <= 3 ? '#c0392b' : '#2c3e50'}; font-weight: bold;">${p.q}</td>
-                            <td style="padding: 10px; width:200px;"></td>
+                            <td style="padding: 8px; font-weight:bold;">${i + 1}</td>
+                            <td style="padding: 8px; font-weight: bold; text-align:right;">${escapeHtml(p.n)}</td>
+                            <td style="padding: 8px; color: ${p.q <= 3 ? '#c0392b' : '#2c3e50'}; font-weight: bold;">${p.q}</td>
+                            <td style="padding: 8px;"></td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -1683,37 +1685,13 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-        try {
-            const splash = document.getElementById('splashScreen');
-            if (splash) { 
-                splash.style.opacity = '0'; 
-                setTimeout(() => { 
-                    splash.style.display = 'none'; 
-                    const login = document.getElementById('loginOverlay');
-                    if (login) login.style.display = 'flex'; 
-                }, 800); 
-            }
-        } catch(e) {}
-    }, 2500);
-
-    try {
-        loadLocalUsers().then(() => { fetchInitialUsersOnly(); const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus(); }).catch(()=>{});
-    } catch(e) {}
-
-   // --- دالة تشغيل النظام عند الفتح ---
 async function startApp() {
     try {
         await loadLocalUsers();
         fetchInitialUsersOnly();
-        const userEl = document.getElementById('entryUserSelect'); 
-        if (userEl) userEl.focus();
     } catch(e) { console.error("User Load Error", e); }
-
     window.addEventListener('online', updateOnlineStatus); 
     window.addEventListener('offline', updateOnlineStatus);
-    
     window.addEventListener('keydown', (e) => {
         if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
         else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
@@ -1721,8 +1699,6 @@ async function startApp() {
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
         else if (e.key === 'Escape') closeModal();
     });
-
-    // إخفاء شاشة البداية بسلاسة
     setTimeout(() => {
         try {
             const splash = document.getElementById('splashScreen');
@@ -1740,32 +1716,6 @@ async function startApp() {
         } catch(e) { console.error("Splash Error", e); }
     }, 2500);
 }
-
-// تشغيل الدالة بمجرد تحميل الصفحة
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startApp);
-} else {
-    startApp();
-    async function startApp() {
-    try {
-        await loadLocalUsers();
-        fetchInitialUsersOnly();
-    } catch(e) { 
-        console.error("User Load Error", e); 
-    }
-
-    window.addEventListener('online', updateOnlineStatus); 
-    window.addEventListener('offline', updateOnlineStatus);
-    
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
-        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
-        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
-        else if (e.key === 'Escape') closeModal();
-    });
-}
-
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startApp);
 } else {
