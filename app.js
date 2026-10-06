@@ -1745,21 +1745,48 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
-    setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        if (splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; }, 800); }
-    }, 4000);
+// ==========================================
+// دالة إخفاء شاشة الترحيب بضمان تام
+// ==========================================
+function dismissSplashForcefully() {
+    const splash = document.getElementById('splashScreen');
+    const login = document.getElementById('loginOverlay');
+    if (splash && splash.style.display !== 'none') {
+        splash.style.opacity = '0';
+        setTimeout(() => {
+            splash.style.display = 'none';
+            if (login) login.style.display = 'flex';
+            const userEl = document.getElementById('entryUserSelect');
+            if (userEl) userEl.focus();
+        }, 600);
+    }
+}
 
-    await loadLocalUsers(); fetchInitialUsersOnly();
-    const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus();
+// 1. إخفاء الشاشة بعد 2.5 ثانية تلقائياً مهما حدث
+setTimeout(dismissSplashForcefully, 2500);
 
-    window.addEventListener('online', updateOnlineStatus); window.addEventListener('offline', updateOnlineStatus);
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
-        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
-        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
-        else if (e.key === 'Escape') closeModal();
-    });
+// 2. إخفاؤها فور إكتمال تحميل الصفحة
+window.addEventListener('load', () => {
+    dismissSplashForcefully();
+});
+
+// 3. تهيئة النظام والحسابات
+(async function startApp() {
+    try {
+        await loadLocalUsers();
+        fetchInitialUsersOnly();
+    } catch (e) {
+        console.error("Initialization error:", e);
+    }
+})();
+
+// 4. أحداث الشاشة واختصارات لوحة المفاتيح
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+    else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
+    else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+    else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+    else if (e.key === 'Escape') closeModal();
 });
