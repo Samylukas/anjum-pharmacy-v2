@@ -1,5 +1,7 @@
-Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-Chart.defaults.color = '#333';
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+    Chart.defaults.color = '#333';
+}
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
