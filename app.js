@@ -1,11 +1,13 @@
-Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-Chart.defaults.color = '#333';
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+    Chart.defaults.color = '#333';
+}
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    return String(str).replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"').replace(/'/g, ''');
 }
 
 function uid() {
@@ -97,7 +99,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     toast('⏳ جاري تجهيز التقرير...', 'info');
     await new Promise(r => setTimeout(r, 400));
 
-    const fileName = `${titleText.replace(/[^a-zA-Z0-9؀-ۿ]/g, '_')}_${Date.now()}.pdf`;
+    const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
         margin: 0.2,
         filename: fileName,
@@ -586,7 +588,7 @@ function promptPrintBarcodeLabel(prodId) {
     if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
 
     openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷 خيارات طباعة الباركود</h3>
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️ خيارات طباعة الباركود</h3>
         <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
         
         <div class="payment-grid" style="margin-bottom:15px; gap:10px;">
@@ -966,23 +968,30 @@ function printCurrentActiveInvoice() {
     let textReceipt = "=== صيدلية أنجم الخضراء ===\n";
     textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
     textReceipt += "التاريخ: " + new Date().toLocaleString('ar-EG') + "\n";
+    let sellerName = currentUser ? currentUser.username.toUpperCase() : "غير معروف";
+    textReceipt += "البائع: " + sellerName + "\n";
     textReceipt += "--------------------------------\n";
 
     let totalSellEGP = 0;
+    let totalItemsCount = 0;
+    
     invoiceItems.forEach(i => {
         textReceipt += "- " + i.name + "\n";
         textReceipt += "الكمية: " + i.qty + " | الإجمالي: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n";
         totalSellEGP += i.sellTotal;
+        totalItemsCount += parseInt(i.qty);
     });
 
     textReceipt += "--------------------------------\n";
+    textReceipt += "إجمالي عدد الأصناف: " + totalItemsCount + " صنف\n";
+    
     const discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
     if (invoiceDiscountPercent > 0) {
         textReceipt += "خصم خاص: " + invoiceDiscountPercent + "%\n";
     }
     const finalPayable = totalSellEGP - discountVal;
     
-    textReceipt += "الإجمالي المطلوب: " + finalPayable.toFixed(2) + " ج.م\n";
+    textReceipt += "الإجمالي المدفوع: " + finalPayable.toFixed(2) + " ج.م\n";
     textReceipt += "--------------------------------\n";
     textReceipt += "شكراً لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n";
 
@@ -1015,7 +1024,7 @@ function deleteFinanceEntry(id) {
     if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
     confirmModal("هل أنت متأكد من حذف هذه العملية المالية؟", () => {
         savedFinances = savedFinances.filter(f => f.id !== id); saveFinancesToStorage(); syncToCloud("deleteFinance", { id });
-        renderFinanceTable(); toast('🗑️ تم الحذف', 'success');
+        renderFinanceTable(); toast('🗑️️ تم الحذف', 'success');
     });
 }
 
@@ -1046,7 +1055,7 @@ function renderFinanceTable() {
             <tr style="background:${f.type === 'Revenue' ? '#eafaf1' : '#fdedec'};">
                 <td style="font-weight:bold;">${idx + 1}</td>
                 <td style="white-space:nowrap; direction:ltr; font-weight:bold;">${formatDateDisplay(f.date)}</td>
-                <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};px;">${f.type === 'Revenue' ? 'إيراد' : 'مصروف'}</td>
+                <td style="font-weight:bold; color:${f.type === 'Revenue' ? '#27ae60' : '#c0392b'};">${f.type === 'Revenue' ? 'إيراد' : 'مصروف'}</td>
                 <td style="text-align:right; font-weight:bold;">${escapeHtml(f.category)}</td>
                 <td style="font-weight:bold; font-size:1.1rem;">${f.amount.toFixed(2)}</td>
                 <td style="text-align:right;">${escapeHtml(f.notes || '-')}</td>
@@ -1217,28 +1226,28 @@ function generateSelectedShortagesReport() {
     selectedProducts.sort((a, b) => a.n.localeCompare(b.n, 'ar'));
 
     let printHtml = `
-        <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 30px; background: #fff;">
+        <div style="direction: rtl; font-family: 'Cairo', sans-serif; padding: 20px; background: #fff; width: 100%; max-width: 750px; margin: 0 auto;">
             <h2 style="text-align:center; color:#1e3c72; font-weight:900; margin-bottom: 5px;">Anjum Green Pharmacy</h2>
             <h3 style="text-align:center; color:#e74c3c; margin-bottom: 20px;">تقرير النواقص والأصناف المحددة (مرتب أبجدياً)</h3>
-            <div style="font-size:1.2rem; font-weight:bold; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px;">
+            <div style="font-size:1.1rem; font-weight:bold; margin-bottom:15px; background:#f8f9fa; padding:10px; border-radius:8px;">
                 إجمالي الأصناف المطلوبة: <span style="color:#27ae60;">${selectedProducts.length} صنف</span>
             </div>
-            <table style="width:100%; border-collapse: collapse; text-align: center; font-size:1.1rem;" border="1">
+            <table style="width:100%; border-collapse: collapse; text-align: center; font-size:1rem;" border="1">
                 <thead style="background: #1e3c72; color: white;">
                     <tr>
-                        <th style="padding: 12px;">#</th>
-                        <th style="padding: 12px; text-align:right;">اسم الصنف</th>
-                        <th style="padding: 12px;">الرصيد الحالي</th>
-                        <th style="padding: 12px;">ملاحظات</th>
+                        <th style="padding: 10px; width: 5%;">#</th>
+                        <th style="padding: 10px; text-align:right; width: 55%;">اسم الصنف</th>
+                        <th style="padding: 10px; width: 15%;">الرصيد الحالي</th>
+                        <th style="padding: 10px; width: 25%;">المطلوب</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${selectedProducts.map((p, i) => `
                         <tr>
-                            <td style="padding: 10px; font-weight:bold;">${i + 1}</td>
-                            <td style="padding: 10px; font-weight: bold; text-align:right;">${escapeHtml(p.n)}</td>
-                            <td style="padding: 10px; color: ${p.q <= 3 ? '#c0392b' : '#2c3e50'}; font-weight: bold;">${p.q}</td>
-                            <td style="padding: 10px;"></td>
+                            <td style="padding: 8px; font-weight:bold;">${i + 1}</td>
+                            <td style="padding: 8px; font-weight: bold; text-align:right;">${escapeHtml(p.n)}</td>
+                            <td style="padding: 8px; color: ${p.q <= 3 ? '#c0392b' : '#2c3e50'}; font-weight: bold;">${p.q}</td>
+                            <td style="padding: 8px;"></td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -1307,24 +1316,38 @@ function printSingleReceipt(invId) {
     let textReceipt = "=== Anjum Green Pharmacy ===\n";
     textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
     textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
-    textReceipt += "--------------------------\n\n";
+    
+    let sellerName = "غير معروف";
+    if (inv.items && inv.items.length > 0 && inv.items[0].seller) {
+        sellerName = inv.items[0].seller;
+    } else if (inv.itemsText && inv.itemsText.includes("بائع:")) {
+        const match = inv.itemsText.match(/بائع:\s*([^\|]+)/);
+        if (match) sellerName = match[1].trim();
+    }
+    textReceipt += "البائع: " + sellerName + "\n";
+    textReceipt += "--------------------------\n";
 
+    let totalItemsCount = 0;
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
         inv.items.forEach(function(i) {
-            textReceipt += i.name + "\n";
-            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
+            textReceipt += "- " + i.name + "\n";
+            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + " ج.م\n";
+            totalItemsCount += parseInt(i.qty);
         });
     } else {
         let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
-        textReceipt += oldText + "\n\n";
+        textReceipt += oldText + "\n";
+        totalItemsCount = 1; 
     }
 
     textReceipt += "--------------------------\n";
+    textReceipt += "إجمالي عدد الأصناف: " + totalItemsCount + " صنف\n";
     if (inv.discount > 0) {
         textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
     }
-    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
-    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
+    textReceipt += "الإجمالي المدفوع: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n";
+    textReceipt += "--------------------------\n";
+    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n";
 
     let encodedText = encodeURIComponent(textReceipt);
     window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
@@ -1343,7 +1366,7 @@ function exportSalesReportExcel() {
         if (inv.items && Array.isArray(inv.items)) {
             cleanItems = inv.items.map(item => `${item.name} (الكمية:${item.qty})`).join(' | ');
         } else {
-            cleanItems = inv.itemsText ? inv.itemsText.replace(/<br>/g, ' | ').replace(/&rlm;/g, '').trim() : "عنصر محفوظ";
+            cleanItems = inv.itemsText ? inv.itemsText.replace(/<br>/g, ' | ').replace(/‏/g, '').trim() : "عنصر محفوظ";
         }
         return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صافي الربح": inv.netProfit || 0 };
     });
@@ -1370,18 +1393,18 @@ function buildInvoiceTally(filteredInvoices) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                return `صنف: ${escapeHtml(i.name)} \vert{} كمية: ${i.qty}`;
+                return `صنف: ${escapeHtml(i.name)} \\vert{} كمية: ${i.qty}`;
             }).join('<br>');
         } else {
             itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
-            itemsListHtml = itemsListHtml.replace(/\|?\s*(بائع|Seller):.*?(?=(\||$))/gi, '').trim();
+            itemsListHtml = itemsListHtml.replace(/\\|?\\s*(بائع|Seller):.*?(?=(\\||$))/gi, '').trim();
             
             u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
 
             (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
                 const namePart = raw.split(' | ')[0] || raw;
                 const cleanName = namePart.replace(/صنف:/g, '').replace(/<[^>]*>?/gm, '').trim();
-                const qtyMatch = raw.match(/كمية:\s*(\d+)/); const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                const qtyMatch = raw.match(/كمية:\\s*(\\d+)/); const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
                 if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty;
             });
         }
@@ -1651,7 +1674,7 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         if (splash) { 
@@ -1662,14 +1685,15 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (login) login.style.display = 'flex'; 
             }, 800); 
         }
-    }, 2500); // إخفاء بعد ثانيتين ونصف كحد أقصى
+    }, 3000);
 
     try {
-        await loadLocalUsers(); 
-        fetchInitialUsersOnly();
-        const userEl = document.getElementById('entryUserSelect'); 
-        if (userEl) userEl.focus();
-    } catch(e) { console.error("Error loading users:", e); }
+        loadLocalUsers().then(() => {
+            fetchInitialUsersOnly();
+            const userEl = document.getElementById('entryUserSelect'); 
+            if (userEl) userEl.focus();
+        });
+    } catch (e) { console.error("Error loading users:", e); }
 
     window.addEventListener('online', updateOnlineStatus); 
     window.addEventListener('offline', updateOnlineStatus);
