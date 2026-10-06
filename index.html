@@ -339,7 +339,7 @@
         
         <div id="batchActionsBar" class="alerts-bar no-pdf" style="display:none; background:#e8f4f8; border:1px solid #3498db; margin-top:15px; flex-wrap:nowrap;">
             <div style="font-size:1.1rem; color:#1e3c72; font-weight:bold;">✅ تم تحديد: <span id="selectedStockCount" style="color:#e74c3c; font-size:1.4rem; font-weight:900;">0</span> أصناف</div>
-            <button class="btn btn-darkblue" onclick="generateSelectedShortagesReport()">🖨️️ طباعة الأصناف المحددة</button>
+            <button class="btn btn-darkblue" onclick="generateSelectedShortagesReport()">🖨️ طباعة الأصناف المحددة</button>
         </div>
 
         <div class="card" id="stockPrintArea" style="padding:0; overflow:hidden; margin-top:15px;">
@@ -580,23 +580,4 @@
     </div>
 </div>
 
-<div id="receiptPrintSection"> </div>
-
-<script src="app.js"> </script>
-
-<script>
-setTimeout(function() {
-var splash = document.getElementById('splashScreen');
-var login = document.getElementById('loginOverlay');
-var main = document.getElementById('mainContainer');
-if (splash && splash.style.display !== 'none') {
-splash.style.display = 'none';
-if (login && (!main || main.style.display === 'none')) {
-login.style.display = 'flex';
-}
-}
-}, 4500);
-</script>
-
-</body>
-</html>
+<div id="receiptPrint
