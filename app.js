@@ -1702,8 +1702,18 @@ window.addEventListener('DOMContentLoaded', () => {
         loadLocalUsers().then(() => { fetchInitialUsersOnly(); const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus(); }).catch(()=>{});
     } catch(e) {}
 
+   // --- دالة تشغيل النظام عند الفتح ---
+async function startApp() {
+    try {
+        await loadLocalUsers();
+        fetchInitialUsersOnly();
+        const userEl = document.getElementById('entryUserSelect'); 
+        if (userEl) userEl.focus();
+    } catch(e) { console.error("User Load Error", e); }
+
     window.addEventListener('online', updateOnlineStatus); 
     window.addEventListener('offline', updateOnlineStatus);
+    
     window.addEventListener('keydown', (e) => {
         if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
         else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
@@ -1711,4 +1721,29 @@ window.addEventListener('DOMContentLoaded', () => {
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
         else if (e.key === 'Escape') closeModal();
     });
-});
+
+    // إخفاء شاشة البداية بسلاسة
+    setTimeout(() => {
+        try {
+            const splash = document.getElementById('splashScreen');
+            if (splash) { 
+                splash.style.opacity = '0'; 
+                setTimeout(() => { 
+                    splash.style.display = 'none'; 
+                    const login = document.getElementById('loginOverlay');
+                    const main = document.getElementById('mainContainer');
+                    if (login && (!main || main.style.display === 'none')) {
+                        login.style.display = 'flex'; 
+                    }
+                }, 800); 
+            }
+        } catch(e) { console.error("Splash Error", e); }
+    }, 2500);
+}
+
+// تشغيل الدالة بمجرد تحميل الصفحة
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
