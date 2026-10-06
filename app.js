@@ -1790,3 +1790,20 @@ window.addEventListener('keydown', (e) => {
     else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
     else if (e.key === 'Escape') closeModal();
 });
+window.addEventListener('DOMContentLoaded', function() {
+    loadLocalUsers().then(function() {
+        fetchInitialUsersOnly();
+    }).catch(function(err) {
+        console.error("Error loading users:", err);
+    });
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener('keydown', function(e) {
+        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); if(document.getElementById('searchInput')) document.getElementById('searchInput').focus(); }
+        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+        else if (e.key === 'Escape') closeModal();
+    });
+});
