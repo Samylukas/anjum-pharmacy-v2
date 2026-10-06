@@ -190,7 +190,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
+        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
     </div>
 </div>
 
@@ -316,7 +316,7 @@
             </div>
         </div>
         <button class="btn btn-darkblue" style="margin-top: 20px; font-size: 1.2rem; width:100%; padding:15px;" onclick="saveInvoice()">حفظ الفاتورة (Ctrl+S) 💾</button>
-        <button class="btn btn-purple" style="margin-top: 10px; font-size: 1.2rem; width:100%; padding:15px;" onclick="openReceiptPrintModal()">طباعة الإيصال للعميل 🖨️</button>
+        طباعة الإيصال للعميل 🖨️ (Xprinter)
     </div>
 
     <div id="stockTab" class="tab-content manager-only">
@@ -336,12 +336,6 @@
             <div id="stockCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
         </div>
-        
-        <div id="batchActionsBar" class="alerts-bar no-pdf" style="display:none; background:#e8f4f8; border:1px solid #3498db; margin-top:15px; flex-wrap:nowrap;">
-            <div style="font-size:1.1rem; color:#1e3c72; font-weight:bold;">✅ تم تحديد: <span id="selectedStockCount" style="color:#e74c3c; font-size:1.4rem; font-weight:900;">0</span> أصناف</div>
-            <button class="btn btn-darkblue" onclick="generateSelectedShortagesReport()">🖨️ طباعة الأصناف المحددة</button>
-        </div>
-
         <div class="card" id="stockPrintArea" style="padding:0; overflow:hidden; margin-top:15px;">
             <div style="text-align:center; margin:20px 0;" class="report-title-header" id="stockPrintHeader">
                 <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">Anjum Green Pharmacy</h2>
@@ -349,7 +343,7 @@
             </div>
             <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
                 <table style="width:100%;" id="stockTable">
-                    <thead><tr><th class="no-pdf" style="width:40px;"><input type="checkbox" style="transform:scale(1.3); cursor:pointer;" onchange="toggleAllStockSelection(this)"></th><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
+                    <thead><tr><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
                     <tbody id="stockTableBody"></tbody>
                 </table>
             </div>
@@ -580,4 +574,9 @@
     </div>
 </div>
 
-<div id="receiptPrint
+<div id="receiptPrintSection"></div>
+
+<!-- ربط ملف الجافاسكريبت المباشر -->
+<script src="app.js"></script>
+</body>
+</html>
