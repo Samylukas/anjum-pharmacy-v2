@@ -24,6 +24,7 @@
 
         #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
         .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; opacity: 0; transform: translateY(20px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .splash-anjum { color: #1e3c72; } .splash-green { color: #27ae60; }
         
         .branch-container { position: relative; width: 220px; height: 220px; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
@@ -189,7 +190,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span style="color: #1e3c72;">Anjum</span> <br> <span style="color: #27ae60;">Green Pharmacy</span>
+        <span class="splash-anjum">Anjum</span> <br> <span class="splash-green">Green Pharmacy</span>
     </div>
 </div>
 
@@ -315,7 +316,7 @@
             </div>
         </div>
         <button class="btn btn-darkblue" style="margin-top: 20px; font-size: 1.2rem; width:100%; padding:15px;" onclick="saveInvoice()">حفظ الفاتورة (Ctrl+S) 💾</button>
-        <button class="btn btn-purple" style="margin-top: 10px; font-size: 1.2rem; width:100%; padding:15px;" onclick="promptPrintReceipt('current')">خيارات طباعة الإيصال 🖨️</button>
+        <button class="btn btn-purple" style="margin-top: 10px; font-size: 1.2rem; width:100%; padding:15px;" onclick="openReceiptPrintModal()">طباعة الإيصال للعميل 🖨️</button>
     </div>
 
     <div id="stockTab" class="tab-content manager-only">
@@ -579,8 +580,4 @@
     </div>
 </div>
 
-<div id="receiptPrintSection"></div>
-
-<script src="app.js"></script>
-</body>
-</html>
+<div id="receiptPrint
