@@ -580,22 +580,4 @@
     </div>
 </div>
 
-<div id="receiptPrintSection"></div>
-
-<script src="app.js"></script>
-<script>
-    // حماية إضافية لإخفاء شاشة البداية 
-    setTimeout(function() {
-        var splash = document.getElementById('splashScreen');
-        var login = document.getElementById('loginOverlay');
-        var mainContainer = document.getElementById('mainContainer');
-        if (splash && splash.style.display !== 'none') {
-            splash.style.display = 'none';
-            if (login && (!mainContainer || mainContainer.style.display === 'none')) {
-                login.style.display = 'flex';
-            }
-        }
-    }, 4500);
-</script>
-</body>
-</html>
+<div id="receiptPrint
