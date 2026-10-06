@@ -812,16 +812,36 @@ function prepareNewInvoice() {
 }
 
 function clearCurrentInvoice() {
+    // التحقق: إذا كانت الفاتورة الحالية هي فاتورة سابقة (تم تحميلها للتعديل)
+    // لا يجب مسحها بزر F8 حتى لا يحدث خلل في المخزون والفواتير المحفوظة
+    const isEditingSavedInvoice = savedInvoices.some(inv => inv.id === activeInvoiceId);
+    
+    if (isEditingSavedInvoice) {
+        toast('⚠️ لا يمكن مسح فاتورة محفوظة قيد التعديل. لحذفها، اذهب للتقارير.', 'warn', 4000);
+        return; // نوقف التنفيذ هنا
+    }
+
     if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
     if (document.getElementById('searchResults')) document.getElementById('searchResults').style.display = 'none';
     if (document.getElementById('productCard')) document.getElementById('productCard').style.display = 'none';
     selectedProdId = null;
 
     if (invoiceItems.length > 0) {
-        invoiceItems.forEach(item => { const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); if (p) p.q += item.qty; });
-        saveProductsToStorage(); renderStockTable(); updateAlertsBar();
+        invoiceItems.forEach(item => { 
+            const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); 
+            if (p) {
+                p.q += item.qty; 
+                // تمت إضافة السطر القادم لضمان تحديث السحابة عند مسح الفاتورة
+                syncToCloud("updateSingleProduct", p);
+            }
+        });
+        saveProductsToStorage(); 
+        renderStockTable(); 
+        updateAlertsBar();
     }
-    invoiceItems = []; invoiceDiscountPercent = 0;
+    
+    invoiceItems = []; 
+    invoiceDiscountPercent = 0;
     if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
     renderInvoice();
 }
