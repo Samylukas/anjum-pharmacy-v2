@@ -24,7 +24,6 @@
 
         #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
         .splash-title { font-size: 2.8rem; font-weight: 800; margin-top: 20px; opacity: 0; transform: translateY(20px); animation: slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 2.2s; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .splash-anjum { color: #1e3c72; } .splash-green { color: #27ae60; }
         
         .branch-container { position: relative; width: 220px; height: 220px; }
         .branch-path { stroke-dasharray: 250; stroke-dashoffset: 250; animation: drawBranch 1.5s ease-out forwards 0.2s; }
@@ -190,7 +189,7 @@
         </svg>
     </div>
     <div class="splash-title">
-        <span class="splash-anjum">Anjum Green</span> <br> <span class="splash-green">Pharmacy</span>
+        <span style="color: #1e3c72;">Anjum</span> <br> <span style="color: #27ae60;">Green Pharmacy</span>
     </div>
 </div>
 
@@ -316,7 +315,7 @@
             </div>
         </div>
         <button class="btn btn-darkblue" style="margin-top: 20px; font-size: 1.2rem; width:100%; padding:15px;" onclick="saveInvoice()">حفظ الفاتورة (Ctrl+S) 💾</button>
-        طباعة الإيصال للعميل 🖨️ (Xprinter)
+        <button class="btn btn-purple" style="margin-top: 10px; font-size: 1.2rem; width:100%; padding:15px;" onclick="promptPrintReceipt('current')">خيارات طباعة الإيصال 🖨️</button>
     </div>
 
     <div id="stockTab" class="tab-content manager-only">
@@ -336,6 +335,12 @@
             <div id="stockCameraReader" class="camera-div"></div>
             <button class="btn btn-red" style="margin:10px auto; width:90%; padding:10px;" onclick="stopCameraScanner('stock')">إغلاق الكاميرا ❌</button>
         </div>
+        
+        <div id="batchActionsBar" class="alerts-bar no-pdf" style="display:none; background:#e8f4f8; border:1px solid #3498db; margin-top:15px; flex-wrap:nowrap;">
+            <div style="font-size:1.1rem; color:#1e3c72; font-weight:bold;">✅ تم تحديد: <span id="selectedStockCount" style="color:#e74c3c; font-size:1.4rem; font-weight:900;">0</span> أصناف</div>
+            <button class="btn btn-darkblue" onclick="generateSelectedShortagesReport()">🖨️ طباعة الأصناف المحددة</button>
+        </div>
+
         <div class="card" id="stockPrintArea" style="padding:0; overflow:hidden; margin-top:15px;">
             <div style="text-align:center; margin:20px 0;" class="report-title-header" id="stockPrintHeader">
                 <h2 style="color:#1e3c72; margin:0; font-size:1.8rem; font-weight:800;">Anjum Green Pharmacy</h2>
@@ -343,7 +348,7 @@
             </div>
             <div class="table-responsive" style="margin:0; border:none; border-radius:0;">
                 <table style="width:100%;" id="stockTable">
-                    <thead><tr><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
+                    <thead><tr><th class="no-pdf" style="width:40px;"><input type="checkbox" style="transform:scale(1.3); cursor:pointer;" onchange="toggleAllStockSelection(this)"></th><th style="width:40px;">#</th><th>المنتج</th><th>الكمية</th><th>سعر الجملة</th><th id="thStockGuideHead">الحد الأدنى (×3)</th><th>الباركود</th><th>الصلاحية</th><th class="no-pdf" style="width:220px;">الإجراءات</th></tr></thead>
                     <tbody id="stockTableBody"></tbody>
                 </table>
             </div>
@@ -576,7 +581,6 @@
 
 <div id="receiptPrintSection"></div>
 
-<!-- ربط ملف الجافاسكريبت المباشر -->
 <script src="app.js"></script>
 </body>
 </html>
