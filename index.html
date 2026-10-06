@@ -580,4 +580,23 @@
     </div>
 </div>
 
-<div id="receiptPrin
+<div id="receiptPrintSection"> </div>
+
+<script src="app.js"> </script>
+
+<script>
+setTimeout(function() {
+var splash = document.getElementById('splashScreen');
+var login = document.getElementById('loginOverlay');
+var main = document.getElementById('mainContainer');
+if (splash && splash.style.display !== 'none') {
+splash.style.display = 'none';
+if (login && (!main || main.style.display === 'none')) {
+login.style.display = 'flex';
+}
+}
+}, 4500);
+</script>
+
+</body>
+</html>
