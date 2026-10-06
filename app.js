@@ -7,6 +7,38 @@ function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+function printCurrentActiveInvoice() {
+    if (invoiceItems.length === 0) { toast('⚠️ الفاتورة فارغة! أضف أصنافاً أولاً.', 'warn'); return; }
+    
+    // تنسيق مخصص ليظهر بشكل ممتاز على طابعات Xprinter عبر Print Bridge
+    let textReceipt = "=== صيدلية أنجم الخضراء ===\n";
+    textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
+    textReceipt += "التاريخ: " + new Date().toLocaleString('ar-EG') + "\n";
+    textReceipt += "--------------------------------\n";
+
+    let totalSellEGP = 0;
+    invoiceItems.forEach(i => {
+        textReceipt += "- " + i.name + "\n";
+        textReceipt += "الكمية: " + i.qty + " | الإجمالي: " + parseFloat(i.sellTotal).toFixed(2) + " ج.م\n";
+        totalSellEGP += i.sellTotal;
+    });
+
+    textReceipt += "--------------------------------\n";
+    const discountVal = (totalSellEGP * invoiceDiscountPercent) / 100;
+    if (invoiceDiscountPercent > 0) {
+        textReceipt += "خصم خاص: " + invoiceDiscountPercent + "%\n";
+    }
+    const finalPayable = totalSellEGP - discountVal;
+    
+    textReceipt += "الإجمالي المطلوب: " + finalPayable.toFixed(2) + " ج.م\n";
+    textReceipt += "--------------------------------\n";
+    textReceipt += "شكراً لزيارتكم ونتمنى لكم الشفاء العاجل\n\n\n"; // مسافات إضافية لقص الورقة
+
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+    
+    toast("✅ تم إرسال الأمر للطابعة!", "success");
+}
 
 function uid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
