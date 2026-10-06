@@ -1,7 +1,5 @@
-if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-    Chart.defaults.color = '#333';
-}
+Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+Chart.defaults.color = '#333';
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
@@ -147,8 +145,6 @@ let RATES = { USD: 50, EUR: 60, GBP: 70, EGP: 1, VISA: 1, GUIDE_MULT: 3 };
 let products = []; let selectedProdId = null; let selectedStockProdId = null;
 let invoiceItems = []; let savedInvoices = []; let savedFinances = [];
 let invoiceCounter = 1001; let activeInvoiceId = 1001;
-let lowStockSelectionMode = false;
-let selectedLowStockIds = new Set();
 
 let monthlyChartInst = null;
 let topProductsChartInstance = null;
@@ -446,7 +442,7 @@ function showTab(tabId, evt) {
     let btnEl = evt && evt.target ? evt.target : document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
     if (btnEl) btnEl.classList.add('active');
 
-    if (tabId === 'stockTab') { lowStockSelectionMode = false; renderStockTable(); renderLowStockSelectionReport(); }
+    if (tabId === 'stockTab') renderStockTable();
     if (tabId === 'reportsTab') generateReport();
     if (tabId === 'financeTab') renderFinanceTable();
 }
@@ -816,36 +812,16 @@ function prepareNewInvoice() {
 }
 
 function clearCurrentInvoice() {
-    // التحقق: إذا كانت الفاتورة الحالية هي فاتورة سابقة (تم تحميلها للتعديل)
-    // لا يجب مسحها بزر F8 حتى لا يحدث خلل في المخزون والفواتير المحفوظة
-    const isEditingSavedInvoice = savedInvoices.some(inv => inv.id === activeInvoiceId);
-    
-    if (isEditingSavedInvoice) {
-        toast('⚠️ لا يمكن مسح فاتورة محفوظة قيد التعديل. لحذفها، اذهب للتقارير.', 'warn', 4000);
-        return; // نوقف التنفيذ هنا
-    }
-
     if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
     if (document.getElementById('searchResults')) document.getElementById('searchResults').style.display = 'none';
     if (document.getElementById('productCard')) document.getElementById('productCard').style.display = 'none';
     selectedProdId = null;
 
     if (invoiceItems.length > 0) {
-        invoiceItems.forEach(item => { 
-            const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); 
-            if (p) {
-                p.q += item.qty; 
-                // تمت إضافة السطر القادم لضمان تحديث السحابة عند مسح الفاتورة
-                syncToCloud("updateSingleProduct", p);
-            }
-        });
-        saveProductsToStorage(); 
-        renderStockTable(); 
-        updateAlertsBar();
+        invoiceItems.forEach(item => { const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); if (p) p.q += item.qty; });
+        saveProductsToStorage(); renderStockTable(); updateAlertsBar();
     }
-    
-    invoiceItems = []; 
-    invoiceDiscountPercent = 0;
+    invoiceItems = []; invoiceDiscountPercent = 0;
     if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
     renderInvoice();
 }
@@ -1121,18 +1097,10 @@ function deleteProductSystem(prodId) {
     });
 }
 
-function stockRowHtml(p, index, rowClass, statusSuffix, showLowStockCheckbox = false) {
+function stockRowHtml(p, index, rowClass, statusSuffix) {
     const guideMult = RATES.GUIDE_MULT || 3;
-    const checked = selectedLowStockIds.has(String(p.id)) ? 'checked' : '';
-    const selectCell = showLowStockCheckbox ? `
-        <td class="no-pdf" style="width:55px;">
-            <input type="checkbox" class="low-stock-check" ${checked}
-                onchange="toggleLowStockSelection('${String(p.id).replace(/'/g, "\\'")}', this.checked)"
-                style="transform:scale(1.35); cursor:pointer;" aria-label="اختيار ${escapeHtml(p.n)}">
-        </td>` : '';
     return `
     <tr class="${rowClass}">
-        ${selectCell}
         <td style="font-weight:bold;">${index + 1}</td>
         <td style="text-align:right; font-weight:bold; white-space:normal; font-size:1.05rem;">${escapeHtml(p.n)}${statusSuffix}</td>
         <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${p.q}</td>
@@ -1151,107 +1119,25 @@ function stockRowHtml(p, index, rowClass, statusSuffix, showLowStockCheckbox = f
 
 function renderStockTable(filter = '') {
     const tbody = document.getElementById('stockTableBody'); if (!tbody) return;
-    const f = filter.toLowerCase();
-    const matched = products.filter(p => (p.n && p.n.toLowerCase().includes(f)) || (p.barcode && p.barcode.toLowerCase().includes(f)));
-    const today = new Date();
-    const selectHead = document.getElementById('stockSelectHead');
-    if (selectHead) selectHead.style.display = lowStockSelectionMode ? '' : 'none';
+    const f = filter.toLowerCase(); const matched = products.filter(p => (p.n && p.n.toLowerCase().includes(f)) || (p.barcode && p.barcode.toLowerCase().includes(f))); const today = new Date();
 
     tbody.innerHTML = matched.map((p, index) => {
         let expRowClass = '', expStatusText = '';
         if (p.expiry) {
             const diffDays = (new Date(p.expiry) - today) / 86400000;
-            if (diffDays < 0) { expRowClass = 'exp-expired-row'; expStatusText = ' 🔴 (منتهي)'; }
-            else if (diffDays <= 90) { expRowClass = 'exp-warning-row'; expStatusText = ' 🟡 (قريب الانتهاء)'; }
+            if (diffDays < 0) { expRowClass = 'exp-expired-row'; expStatusText = ' 🔴 (منتهي)'; } else if (diffDays <= 90) { expRowClass = 'exp-warning-row'; expStatusText = ' 🟡 (قريب الانتهاء)'; }
         }
-        const rowStyle = p.q <= 3 ? 'low-stock-row' : expRowClass;
-        const suffix = (p.q <= 3 ? ' ⚠️ (نواقص)' : '') + expStatusText;
-        return stockRowHtml(p, index, rowStyle, suffix, lowStockSelectionMode && p.q <= 3);
+        const rowStyle = p.q <= 3 ? 'low-stock-row' : expRowClass; const suffix = (p.q <= 3 ? ' ⚠️ (نواقص)' : '') + expStatusText;
+        return stockRowHtml(p, index, rowStyle, suffix);
     }).join('');
-
-    if (lowStockSelectionMode) updateLowStockSelectionUI();
 }
 
-function filterStockTable(val) {
-    lowStockSelectionMode = false;
-    renderStockTable(val);
-    renderLowStockSelectionReport();
-}
-
-function toggleLowStockSelection(productId, checked) {
-    const id = String(productId);
-    if (checked) selectedLowStockIds.add(id); else selectedLowStockIds.delete(id);
-    updateLowStockSelectionUI();
-    renderLowStockSelectionReport();
-}
-
-function toggleSelectAllLowStock(checked) {
-    const lowStockProducts = products.filter(p => p.q <= 3);
-    if (checked) lowStockProducts.forEach(p => selectedLowStockIds.add(String(p.id)));
-    else lowStockProducts.forEach(p => selectedLowStockIds.delete(String(p.id)));
-    renderStockTable(document.getElementById('stockFilterInput')?.value || '');
-    renderLowStockSelectionReport();
-}
-
-function updateLowStockSelectionUI() {
-    const count = selectedLowStockIds.size;
-    const countEl = document.getElementById('selectedLowStockCount');
-    if (countEl) countEl.textContent = count;
-    const selectAll = document.getElementById('selectAllLowStock');
-    if (selectAll) {
-        const totalLow = products.filter(p => p.q <= 3).length;
-        selectAll.checked = totalLow > 0 && count === totalLow;
-        selectAll.indeterminate = count > 0 && count < totalLow;
-    }
-}
+function filterStockTable(val) { renderStockTable(val); }
 
 function filterLowStock() {
     if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
-    lowStockSelectionMode = true;
-    const matched = products.filter(p => p.q <= 3).sort((a, b) => String(a.n || '').localeCompare(String(b.n || ''), 'ar', { sensitivity: 'base' }));
-    const tbody = document.getElementById('stockTableBody');
-    const selectHead = document.getElementById('stockSelectHead');
-    if (selectHead) selectHead.style.display = '';
-    if (tbody) tbody.innerHTML = matched.map((p, index) => stockRowHtml(p, index, 'low-stock-row', ' ⚠️ (نواقص)', true)).join('');
-    updateLowStockSelectionUI();
-    renderLowStockSelectionReport();
-}
-
-function renderLowStockSelectionReport() {
-    const area = document.getElementById('lowStockSelectedPrintArea');
-    const tbody = document.getElementById('lowStockSelectedBody');
-    const countEl = document.getElementById('selectedLowStockCount');
-    if (!area || !tbody) return;
-
-    const selected = products
-        .filter(p => selectedLowStockIds.has(String(p.id)))
-        .sort((a, b) => String(a.n || '').localeCompare(String(b.n || ''), 'ar', { sensitivity: 'base' }));
-
-    if (countEl) countEl.textContent = selected.length;
-    area.style.display = selected.length ? 'block' : 'none';
-    tbody.innerHTML = selected.length ? selected.map((p, i) => `
-        <tr>
-            <td>${i + 1}</td>
-            <td style="text-align:right;font-weight:bold;">${escapeHtml(p.n)}</td>
-            <td style="font-weight:bold;color:#c0392b;">${p.q}</td>
-            <td style="direction:ltr;font-family:monospace;">${escapeHtml(p.barcode || '-')}</td>
-            <td style="direction:ltr;">${escapeHtml(p.expiry || '-')}</td>
-        </tr>`).join('') : '';
-}
-
-function clearLowStockSelection() {
-    selectedLowStockIds.clear();
-    updateLowStockSelectionUI();
-    renderStockTable('');
-    renderLowStockSelectionReport();
-}
-
-function printSelectedLowStockReport() {
-    if (selectedLowStockIds.size === 0) {
-        toast('⚠️ اختر صنفاً واحداً على الأقل من النواقص أولاً', 'warn');
-        return;
-    }
-    downloadDirectPDF('lowStockSelectedPrintArea', 'Selected_Low_Stock_Report', false);
+    const matched = products.filter(p => p.q <= 3); const tbody = document.getElementById('stockTableBody');
+    if (tbody) tbody.innerHTML = matched.map((p, index) => stockRowHtml(p, index, 'low-stock-row', ' ⚠️ (نواقص)')).join('');
 }
 
 function filterNearExpiryOneMonth() {
@@ -1268,162 +1154,37 @@ function filterNearExpiryOneMonth() {
     }
 }
 
-// 🖨️ طباعة الفاتورة - خيارات الطباعة مع الحفاظ على Print Bridge الحالي
-function getInvoiceForPrinting(invId) {
-    if (invId !== undefined && invId !== null) {
-        const saved = savedInvoices.find(i => String(i.id) === String(invId));
-        if (saved) return saved;
-    }
-    if (invoiceItems.length === 0) return null;
+// 🖨️ طباعة الفاتورة - Print Bridge
+function printSingleReceipt(invId) {
+    const inv = savedInvoices.find(function(i) { return i.id === invId; }); 
+    if (!inv) return;
 
-    let totalSell = 0, totalComm = 0, totalProfit = 0;
-    invoiceItems.forEach(i => {
-        totalSell += parseFloat(i.sellTotal) || 0;
-        totalComm += parseFloat(i.commTotal) || 0;
-        totalProfit += parseFloat(i.netProfit) || 0;
-    });
-    return {
-        id: activeInvoiceId,
-        date: (document.getElementById('invoiceDate')?.value || '').replace('T', ' '),
-        status: 'Draft',
-        items: JSON.parse(JSON.stringify(invoiceItems)),
-        discount: invoiceDiscountPercent || 0,
-        totalComm,
-        totalEGP: totalSell - (totalSell * (invoiceDiscountPercent || 0) / 100),
-        netProfit: totalProfit - (totalSell * (invoiceDiscountPercent || 0) / 100)
-    };
-}
-
-function openInvoicePrintOptions(invId) {
-    const inv = getInvoiceForPrinting(invId);
-    if (!inv) {
-        toast('⚠️ لا توجد فاتورة بها أصناف للطباعة', 'warn');
-        return;
-    }
-    const safeId = escapeHtml(inv.id);
-    openModal(`
-        <h3 style="text-align:center;color:#1e3c72;margin-bottom:18px;font-size:1.4rem;">🖨️ إعدادات طباعة الفاتورة #${safeId}</h3>
-        <div class="pay-box" style="margin-bottom:12px;">
-            <label>طريقة / تطبيق الطباعة</label>
-            <select id="invPrintTarget" style="font-weight:bold;color:#1e3c72;padding:10px;">
-                <option value="print_bridge">🚀 Print Bridge - الطابعة الحرارية</option>
-                <option value="android_share">📱 أندرويد / مشاركة PDF</option>
-                <option value="direct">💻 طباعة مباشرة من الكمبيوتر</option>
-            </select>
-        </div>
-        <div class="payment-grid" style="margin-bottom:10px;">
-            <div class="pay-box"><label>عرض الورق (مم)</label><select id="invPrintW"><option value="58">58 mm</option><option value="80" selected>80 mm</option><option value="${38.1}">38.1 mm</option></select></div>
-            <div class="pay-box"><label>ارتفاع الصفحة (مم)</label><input type="number" id="invPrintH" value="120" min="30" max="500" step="1"></div>
-            <div class="pay-box"><label>حجم الخط</label><input type="number" id="invPrintFont" value="12" min="8" max="28" step="1"></div>
-            <div class="pay-box"><label>عدد النسخ</label><input type="number" id="invPrintCopies" value="1" min="1" max="5" step="1"></div>
-        </div>
-        <label style="display:block;text-align:center;margin:10px 0;font-weight:bold;">
-            <input type="checkbox" id="invPrintRotate" style="transform:scale(1.2);margin-left:8px;"> 🔄 تدوير الصفحة 90°
-        </label>
-        <p style="font-size:.9rem;color:#7f8c8d;text-align:center;margin:12px 0;">مقاس الورق والخط يطبقان على العرض/الطباعة المباشرة. رابط Print Bridge نفسه لم يتم تغييره.</p>
-        <div style="display:flex;justify-content:center;gap:10px;margin-top:18px;">
-            <button class="btn btn-purple" style="padding:12px 20px;font-size:1.1rem;" onclick="executeInvoicePrint('${safeId}')">تنفيذ الطباعة 🖨️</button>
-            <button class="btn btn-gray" style="padding:12px 20px;font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
-        </div>
-    `);
-}
-
-function buildReceiptText(inv, charsPerLine = 48) {
-    const line = '-'.repeat(Math.max(20, Math.min(charsPerLine, 64)));
-    let textReceipt = '=== Anjum Green Pharmacy ===\n';
-    textReceipt += 'رقم الفاتورة: #' + inv.id + '\n';
-    textReceipt += 'التاريخ: ' + formatDateDisplay(inv.date) + '\n';
-    textReceipt += line + '\n\n';
+    let textReceipt = "=== Anjum Green Pharmacy ===\n";
+    textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
+    textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
+    textReceipt += "--------------------------\n\n";
 
     if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
         inv.items.forEach(function(i) {
-            textReceipt += i.name + '\n';
-            textReceipt += 'الكمية: ' + i.qty + ' | السعر: ' + (parseFloat(i.sellTotal) || 0).toFixed(2) + '\n\n';
+            textReceipt += i.name + "\n";
+            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
         });
     } else {
-        textReceipt += cleanItemSummaryText(inv.itemsText).replace(/<br>/g, '\n') + '\n\n';
+        let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
+        textReceipt += oldText + "\n\n";
     }
 
-    textReceipt += line + '\n';
-    if ((parseFloat(inv.discount) || 0) > 0) textReceipt += 'نسبة الخصم: ' + inv.discount + '%\n';
-    textReceipt += 'الإجمالي النهائي: ' + (parseFloat(inv.totalEGP) || 0).toFixed(2) + ' ج.م\n\n';
-    textReceipt += 'شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n';
-    return textReceipt;
-}
-
-async function executeInvoicePrint(invId) {
-    const inv = getInvoiceForPrinting(invId);
-    if (!inv) { closeModal(); toast('⚠️ الفاتورة غير موجودة', 'warn'); return; }
-
-    const targetApp = document.getElementById('invPrintTarget')?.value || 'print_bridge';
-    const wMM = parseFloat(document.getElementById('invPrintW')?.value) || 80;
-    const hMM = parseFloat(document.getElementById('invPrintH')?.value) || 120;
-    const fontSz = parseInt(document.getElementById('invPrintFont')?.value) || 12;
-    const copies = Math.max(1, Math.min(5, parseInt(document.getElementById('invPrintCopies')?.value) || 1));
-    const rotated = document.getElementById('invPrintRotate')?.checked;
-    const charsPerLine = wMM <= 40 ? 28 : (wMM <= 60 ? 32 : 48);
-
-    // Print Bridge: نحافظ على نفس الـ URI العامل حالياً بدون أي تغيير في الكوبري.
-    if (targetApp === 'print_bridge') {
-        closeModal();
-        const encodedText = encodeURIComponent(buildReceiptText(inv, charsPerLine));
-        window.location.href = 'printbridge://print?type=receipt&text=' + encodedText;
-        toast('✅ تم إرسال الفاتورة إلى Print Bridge!', 'success');
-        return;
+    textReceipt += "--------------------------\n";
+    if (inv.discount > 0) {
+        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
     }
+    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
+    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
 
-    closeModal();
-
-    // إنشاء منطقة طباعة مؤقتة للـ PDF / الطباعة المباشرة.
-    const tempId = 'temporaryInvoicePrintArea';
-    let old = document.getElementById(tempId);
-    if (old) old.remove();
-    const printW = rotated ? hMM : wMM;
-    const printH = rotated ? wMM : hMM;
-    const items = (inv.items || []).map(i => `
-        <div style="margin:0 0 5mm 0;border-bottom:1px dashed #999;padding-bottom:3mm;">
-            <div style="font-weight:800;">${escapeHtml(i.name)}</div>
-            <div>الكمية: ${i.qty} &nbsp; | &nbsp; الإجمالي: ${(parseFloat(i.sellTotal)||0).toFixed(2)} ج.م</div>
-        </div>`).join('');
-    const area = document.createElement('div');
-    area.id = tempId;
-    area.style.cssText = `background:#fff;color:#111;width:${printW}mm;min-height:${printH}mm;padding:5mm;box-sizing:border-box;font-size:${fontSz}px;direction:rtl;position:absolute;left:-100000px;top:0;`;
-    area.innerHTML = `
-        <div style="text-align:center;font-weight:900;font-size:${fontSz+3}px;margin-bottom:4mm;">Anjum Green Pharmacy</div>
-        <div style="text-align:center;margin-bottom:4mm;">فاتورة #${escapeHtml(inv.id)}<br>${escapeHtml(formatDateDisplay(inv.date))}</div>
-        ${items}
-        <div style="border-top:2px solid #111;margin-top:4mm;padding-top:4mm;font-weight:900;">
-            ${inv.discount > 0 ? `<div>الخصم: ${inv.discount}%</div>` : ''}
-            <div>الإجمالي النهائي: ${(parseFloat(inv.totalEGP)||0).toFixed(2)} ج.م</div>
-        </div>
-        <div style="text-align:center;margin-top:6mm;">شكرا لزيارتكم ونتمنى لكم الشفاء العاجل</div>`;
-    document.body.appendChild(area);
-
-    if (targetApp === 'android_share') {
-        // نستخدم محرك الـ PDF الموجود بالمشروع؛ وهو بالفعل يدعم Capacitor Share على أندرويد.
-        await downloadDirectPDF(tempId, 'Invoice_' + inv.id, false);
-        area.remove();
-        return;
-    }
-
-    // طباعة الكمبيوتر: نستخدم نافذة الطباعة الأصلية مع نفس المقاس.
-    const printWindow = window.open('', '_blank', 'width=500,height=700');
-    if (!printWindow) { area.remove(); toast('⚠️ المتصفح منع نافذة الطباعة', 'warn'); return; }
-    const html = area.outerHTML.replace('position:absolute;left:-100000px;top:0;', 'position:static;left:auto;top:auto;');
-    printWindow.document.write(`<html dir="rtl"><head><title>Invoice ${escapeHtml(inv.id)}</title><style>@page{size:${printW}mm ${printH}mm;margin:0}html,body{margin:0;padding:0;background:#fff}body{font-family:Arial,sans-serif}</style></head><body>${html}</body></html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { for (let i=0;i<copies;i++) printWindow.print(); printWindow.close(); }, 350);
-    area.remove();
-    toast('✅ تم تجهيز الفاتورة للطباعة المباشرة', 'success');
-}
-
-function printSingleReceipt(invId) {
-    openInvoicePrintOptions(invId);
-}
-
-function printCurrentInvoice() {
-    openInvoicePrintOptions();
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+    
+    toast("✅ تم إرسال الفاتورة للطباعة!", "success");
 }
 
 function exportSalesReportExcel() {
@@ -1745,63 +1506,19 @@ function generateSingleProductDetailsReport(productName) {
     display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
-// ==========================================
-// دالة إخفاء شاشة الترحيب بضمان تام
-// ==========================================
-function dismissSplashForcefully() {
-    const splash = document.getElementById('splashScreen');
-    const login = document.getElementById('loginOverlay');
-    if (splash && splash.style.display !== 'none') {
-        splash.style.opacity = '0';
-        setTimeout(() => {
-            splash.style.display = 'none';
-            if (login) login.style.display = 'flex';
-            const userEl = document.getElementById('entryUserSelect');
-            if (userEl) userEl.focus();
-        }, 600);
-    }
-}
+window.addEventListener('DOMContentLoaded', async () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; document.getElementById('loginOverlay').style.display = 'flex'; }, 800); }
+    }, 4000);
 
-// 1. إخفاء الشاشة بعد 2.5 ثانية تلقائياً مهما حدث
-setTimeout(dismissSplashForcefully, 2500);
+    await loadLocalUsers(); fetchInitialUsersOnly();
+    const userEl = document.getElementById('entryUserSelect'); if (userEl) userEl.focus();
 
-// 2. إخفاؤها فور إكتمال تحميل الصفحة
-window.addEventListener('load', () => {
-    dismissSplashForcefully();
-});
-
-// 3. تهيئة النظام والحسابات
-(async function startApp() {
-    try {
-        await loadLocalUsers();
-        fetchInitialUsersOnly();
-    } catch (e) {
-        console.error("Initialization error:", e);
-    }
-})();
-
-// 4. أحداث الشاشة واختصارات لوحة المفاتيح
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-    else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
-    else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
-    else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
-    else if (e.key === 'Escape') closeModal();
-});
-window.addEventListener('DOMContentLoaded', function() {
-    loadLocalUsers().then(function() {
-        fetchInitialUsersOnly();
-    }).catch(function(err) {
-        console.error("Error loading users:", err);
-    });
-
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
-    window.addEventListener('keydown', function(e) {
+    window.addEventListener('online', updateOnlineStatus); window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener('keydown', (e) => {
         if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
-        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); if(document.getElementById('searchInput')) document.getElementById('searchInput').focus(); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
         else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
         else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
         else if (e.key === 'Escape') closeModal();
