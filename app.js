@@ -1746,4 +1746,29 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startApp);
 } else {
     startApp();
+    async function startApp() {
+    try {
+        await loadLocalUsers();
+        fetchInitialUsersOnly();
+    } catch(e) { 
+        console.error("User Load Error", e); 
+    }
+
+    window.addEventListener('online', updateOnlineStatus); 
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
+        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+        else if (e.key === 'Escape') closeModal();
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
 }
