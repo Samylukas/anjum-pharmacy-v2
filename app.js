@@ -84,31 +84,28 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
+    // مسح الفواصل اليدوية التي تسبب صفحات بيضاء
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
 
-    if (!isLandscape) {
-        let rowsPerPage = 50; 
-        let tableId = elementId === 'reportsPrintArea' ? 'reportsTable' : (elementId === 'financePrintArea' ? 'financeTable' : 'stockTable');
-        const rows = element.querySelectorAll(`#${tableId} tbody tr`);
-        rows.forEach((row, index) => {
-            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1 && !row.classList.contains('total-row')) {
-                row.classList.add('page-break-row');
-            }
-        });
-        element.classList.add('pdf-compact');
-    }
+    // ✨ الحل لمشكلة قص الجدول من الأطراف في اللغة العربية
+    const originalWidth = element.style.width;
+    const originalMinWidth = element.style.minWidth;
+    element.style.width = '100%';
+    element.style.minWidth = isLandscape ? '1050px' : '800px';
+
+    element.classList.add('pdf-compact');
 
     toast('⏳ جاري تجهيز التقرير...', 'info');
     await new Promise(r => setTimeout(r, 400));
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
-        margin: [0.1, 0.1, 0.1, 0.1], 
+        margin: 0.3, // هوامش مريحة لمنع القطع
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: element.scrollWidth },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
+        pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row', '.report-summary-cards'] }
     };
 
     try {
@@ -116,7 +113,6 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
             try {
                 let pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
                 
-                // التأكد من وجود مكتبات الحفظ والمشاركة في الموبايل
                 if (!window.Capacitor.Plugins.Filesystem || !window.Capacitor.Plugins.Share) {
                     toast('⚠️ أدوات الحفظ غير مفعلة، جاري التنزيل المباشر...', 'warn');
                     const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
@@ -127,7 +123,6 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
                 } else {
                     let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
                     const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
-                    // فتح شاشة المشاركة عشان تقدر تحفظه أو تبعته واتس اب
                     await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ أو مشاركة التقرير 📄' });
                     toast('✅ تم تجهيز التقرير للمشاركة!', 'success');
                 }
@@ -145,7 +140,9 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     } catch (err) {
         console.error('PDF Error:', err); window.print();
     } finally {
-        if (!isLandscape) element.classList.remove('pdf-compact');
+        element.style.width = originalWidth;
+        element.style.minWidth = originalMinWidth;
+        element.classList.remove('pdf-compact');
         headers.forEach(h => h.style.display = 'none');
         noPdfElements.forEach(el => el.style.display = '');
         document.getElementById('reportLoader').style.display = 'none';
@@ -160,15 +157,14 @@ function printStockTable() {
         const uncheckedRows = document.querySelectorAll('#stockTableBody tr:not(.pdf-selected-row)');
         uncheckedRows.forEach(row => row.style.display = 'none');
         
-        // تحويل حقول الإدخال لنصوص مطبوعة لتجنب مشاكل التصميم
-        const inputs = document.querySelectorAll('.req-qty-input');
+        const inputs = document.querySelectorAll('#stockTableBody tr.pdf-selected-row .req-qty-input');
         inputs.forEach(inp => {
-            const val = inp.value || ' ';
+            const val = inp.value || '0';
             const span = document.createElement('span');
             span.className = 'req-qty-print-span';
             span.textContent = val;
             span.style.fontWeight = 'bold';
-            span.style.color = '#1e3c72';
+            span.style.color = '#c0392b';
             inp.style.display = 'none';
             inp.parentNode.appendChild(span);
         });
@@ -178,8 +174,8 @@ function printStockTable() {
         if (isFilteredLow) {
             const allRows = document.querySelectorAll('#stockTableBody tr');
             allRows.forEach(row => row.style.display = '');
-            // استرجاع حقول الإدخال بعد الطباعة
-            const inputs = document.querySelectorAll('.req-qty-input');
+            
+            const inputs = document.querySelectorAll('#stockTableBody tr .req-qty-input');
             inputs.forEach(inp => {
                 inp.style.display = '';
                 const span = inp.parentNode.querySelector('.req-qty-print-span');
@@ -479,19 +475,8 @@ function processOfflineQueue() {
 }
 
 function initSystem() {
-    loadDataFromStorage(); 
-    loadRatesFromStorage(); 
-    
-    // تأكيد عرض الجداول من الذاكرة فوراً لعدم رؤية شاشة بيضاء
-    renderStockTable();
-    generateReport();
-    renderFinanceTable();
-    
-    prepareNewInvoice(); 
-    fetchCloudInvoicesData();
-    updateOnlineStatus(); 
-    updateAlertsBar();
-    
+    loadDataFromStorage(); loadRatesFromStorage(); prepareNewInvoice(); fetchCloudInvoicesData();
+    updateOnlineStatus(); updateAlertsBar();
     const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     if (document.getElementById('finDate')) document.getElementById('finDate').value = now.toISOString().slice(0, 16);
 }
@@ -667,13 +652,14 @@ function onBarcodeScanned(key, decodedText) {
 // Sales & Invoices
 // ==========================================
 
-// ==========================================
-// Sales & Invoices Printing (Browser & Bridge)
-// ==========================================
-
 function promptPrintCustomerReceipt() {
     if (invoiceItems.length === 0) {
         toast("⚠️ الفاتورة فارغة! أضف أصناف أولاً", "warn");
+        return;
+    }
+
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+        printCustomerReceiptBridge();
         return;
     }
 
@@ -719,7 +705,7 @@ function printCustomerReceiptBridge() {
     invoiceItems.forEach(item => {
         totalQtyCount += item.qty;
         totalSellPriceSum += item.sellTotal;
-        textReceipt += `${item.name}\n(الكمية: ${item.qty}) | (السعر: ${item.sellTotal.toFixed(2)} ج.م)\n`;
+        textReceipt += `${item.name}\n(الكمية: ${item.qty}) \vert{} (السعر: ${item.sellTotal.toFixed(2)} ج.م)\n`;
     });
 
     textReceipt += "------------------------------\n";
@@ -727,8 +713,7 @@ function printCustomerReceiptBridge() {
     textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
     textReceipt += "------------------------------\n";
     
-    // استخدام وسم الباركود المخصص لبريدج
-    textReceipt += `<BC>${activeInvoiceId}</BC>\n\n`;
+    textReceipt += `[BARCODE]${activeInvoiceId}\n\n`;
     textReceipt += "نتمنى لكم الشفاء العاجل\n";
 
     let encodedText = encodeURIComponent(textReceipt);
@@ -807,14 +792,192 @@ function printCustomerReceiptBrowser() {
     
     setTimeout(() => {
         window.print();
+        window.onafterprint = () => {
+            document.body.classList.remove('printing-receipt'); 
+            printSec.style.display = 'none'; 
+            printSec.innerHTML = ''; 
+            if(pageStyle) pageStyle.remove();
+            window.onafterprint = null;
+        };
         setTimeout(() => {
             document.body.classList.remove('printing-receipt'); 
             printSec.style.display = 'none'; 
             printSec.innerHTML = ''; 
-            const pStyle = document.getElementById('dynamic-page-size'); 
-            if(pStyle) pStyle.remove();
+            if(pageStyle) pageStyle.remove();
+        }, 120000);
+    }, 500);
+}
+
+function promptPrintBarcodeLabel(prodId) {
+    const prod = findProductById(prodId);
+    if (!prod) { toast("❌ المنتج غير موجود!", 'error'); return; }
+    if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
+
+    openModal(`
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️ خيارات طباعة الباركود</h3>
+        <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
+        
+        <div class="payment-grid" style="margin-bottom:15px; gap:10px;">
+            <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1" style="padding:10px;"></div>
+            <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="12" min="4" max="24" style="padding:10px;"></div>
+            <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="38.1" step="0.01" style="padding:10px;" title="1.5 انش = 38.1 مم"></div>
+            <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01" style="padding:10px;" title="1 انش = 25.4 مم"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:8px; transform:scale(1.2);"> اسم المنتج</label>
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:8px; transform:scale(1.2);"> السعر</label>
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPharmacy" checked style="margin-left:8px; transform:scale(1.2);"> الصيدلية</label>
+            <div class="pay-box" style="width:100%; margin-top:10px;">
+                <label style="font-size:1rem;">العملة الظاهرة:</label>
+                <select id="lblCurrency" style="font-weight:bold; color:#27ae60; padding:10px;">
+                    <option value="EGP">جنيه (EGP)</option>
+                    <option value="USD">دولار ($)</option>
+                    <option value="EUR">يورو (€)</option>
+                    <option value="GBP">استرليني (£)</option>
+                </select>
+            </div>
+            <label style="font-weight:bold; font-size:1rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:10px;">
+                <input type="checkbox" id="lblRotatePrint" style="margin-left:8px; transform:scale(1.2);"> 🔄 عكس أبعاد الورقة (دوران 90 درجة)
+            </label>
+        </div>
+
+        <div class="pay-box" style="margin-bottom:20px;">
+            <label style="font-size:1rem;">التطبيق الهدف للطباعة:</label>
+            <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72; padding:10px;">
+                <option value="print_bridge">🚀 طباعة فورية (Print Bridge)</option>
+                <option value="android_share">📱 إرسال لتطبيق الطابعة (أندرويد / 4Barcode / MacroPous)</option>
+                <option value="direct">💻 الطباعة المباشرة (كمبيوتر / لاب توب)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeAdvancedPrint('${prodId}')">تنفيذ الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function executeAdvancedPrint(prodId) {
+    const prod = findProductById(prodId); if (!prod) return;
+    const targetApp = document.getElementById('lblTargetApp')?.value;
+
+    if (targetApp === 'print_bridge') {
+        if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
+        closeModal();
+        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
+        toast("✅ تم إرسال الباركود للطابعة!", "success");
+        return;
+    }
+
+    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
+    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
+    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
+    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
+    const showName = document.getElementById('lblShowName')?.checked;
+    const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
+    const isRotated = document.getElementById('lblRotatePrint')?.checked;
+    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
+    closeModal();
+    
+    const guideMult = RATES.GUIDE_MULT || 3;
+    const safeName = escapeHtml(prod.n);
+    let baseEGP = prod.p * guideMult;
+    let finalPriceVal = baseEGP; let currencySymbol = 'ج.م';
+
+    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
+    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
+    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
+
+    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
+    
+    let printW = isRotated ? hMM : wMM; 
+    let printH = isRotated ? wMM : hMM;
+    
+    let pxW = Math.round(printW * 3.7795);
+    let pxH = Math.round(printH * 3.7795);
+    let innerPxW = Math.round(wMM * 3.7795);
+    let innerPxH = Math.round(hMM * 3.7795);
+
+    let labelsHtml = '';
+
+    for (let i = 0; i < count; i++) {
+        labelsHtml += `
+            <div class="custom-label-card" style="width: ${pxW}px; height:${pxH}px; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; position: relative;">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${innerPxW}px; height: ${innerPxH}px; padding: 2px; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''} text-align:center;">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1.2; margin-bottom: 2px;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.2; max-width: 95%; overflow: hidden; white-space: nowrap; margin-bottom: 2px;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="margin:0; padding:0;"></svg>
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.2; margin-top: 2px;">${finalPriceStr}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    const printSec = document.getElementById('receiptPrintSection');
+    printSec.style.cssText = 'display: block; position: absolute; left: -9999px; top: -9999px; background: #fff; z-index: -1;';
+    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; gap:10px;">${labelsHtml}</div>`;
+
+    for (let i = 0; i < count; i++) {
+        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.2, height: 26, fontSize: 12, margin: 2, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
+    }
+
+    if (targetApp === 'android_share') {
+        toast("⏳ جاري تجهيز الملصق للأندرويد...", "info", 2000);
+        
+        setTimeout(() => {
+            const element = document.querySelector('.custom-label-card'); 
+            html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff', logging: false }).then(canvas => {
+                canvas.toBlob(async (blob) => {
+                    const fileName = `Barcode_${prod.barcode}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    
+                    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                        try {
+                            let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
+                            const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
+                            await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
+                            toast("✅ تم الإرسال بنجاح!", "success");
+                        } catch (err) { console.error('Share Plugin Failed:', err); }
+                    } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({ files: [file], title: 'طباعة باركود', text: 'مشاركة لتطبيق الطابعة' });
+                            toast("✅ تم الإرسال بنجاح!", "success");
+                        } catch (err) {
+                            const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
+                        }
+                    } else {
+                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
+                    }
+                    
+                    printSec.style.cssText = 'display: none;'; printSec.innerHTML = '';
+                }, 'image/png');
+            });
+        }, 500); 
+    } else {
+        printSec.style.cssText = 'display: block;';
+        const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
+        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm${printH}mm; margin: 0 !important; } }`;
+        document.head.appendChild(pageStyle);
+        document.body.classList.add('printing-receipt');
+        setTimeout(() => {
+            window.print();
+            window.onafterprint = () => {
+                document.body.classList.remove('printing-receipt'); 
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = ''; 
+                if(pageStyle) pageStyle.remove();
+                window.onafterprint = null;
+            };
+            setTimeout(() => {
+                document.body.classList.remove('printing-receipt'); 
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = ''; 
+                if(pageStyle) pageStyle.remove();
+            }, 120000);
         }, 500);
-    }, 300);
+    }
 }
 
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
@@ -880,7 +1043,6 @@ function addToInvoice() {
     invoiceItems.push({
         productId: p.id, name: p.n, qty: qty, commUnitPrice: p.p, sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
         commTotal, sellTotal, netProfit, usd: u, eur: eu, gbp: g, egp: eg, visa: v,
-        // حفظ اسم الكاشير 
         seller: currentUser ? currentUser.username.toUpperCase() : 'Unknown'
     });
     renderInvoice(); document.getElementById('productCard').style.display = 'none'; document.getElementById('searchInput').value = '';
@@ -991,11 +1153,6 @@ function renderInvoice() {
     if (document.getElementById('liveEGP')) document.getElementById('liveEGP').textContent = sumEGP.toFixed(2) + ' ج.م';
     if (document.getElementById('liveVISA')) document.getElementById('liveVISA').textContent = sumVISA.toFixed(2) + ' ج.م';
     if (document.getElementById('liveTotalEGP')) document.getElementById('liveTotalEGP').textContent = finalPayable.toFixed(2) + ' ج.م';
-}
-
-function getItemPaidText(item) {
-    if (!item) return ''; 
-    return `${escapeHtml(item.name)} - كمية: ${item.qty}`;
 }
 
 function saveInvoice() {
@@ -1166,182 +1323,6 @@ function exportFinanceExcel() {
 // ==========================================
 // Stock Module
 // ==========================================
-// إعادة زر الليبل المفقود
-function promptPrintBarcodeLabel(prodId) {
-    const prod = findProductById(prodId);
-    if (!prod) { toast("❌ المنتج غير موجود!", 'error'); return; }
-    if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
-
-    openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️ خيارات طباعة الباركود</h3>
-        <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
-        
-        <div class="payment-grid" style="margin-bottom:15px; gap:10px;">
-            <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1" style="padding:10px;"></div>
-            <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="12" min="4" max="24" style="padding:10px;"></div>
-            <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="38.1" step="0.01" style="padding:10px;" title="1.5 انش = 38.1 مم"></div>
-            <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01" style="padding:10px;" title="1 انش = 25.4 مم"></div>
-        </div>
-
-        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:8px; transform:scale(1.2);"> اسم المنتج</label>
-            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:8px; transform:scale(1.2);"> السعر</label>
-            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPharmacy" checked style="margin-left:8px; transform:scale(1.2);"> الصيدلية</label>
-            <div class="pay-box" style="width:100%; margin-top:10px;">
-                <label style="font-size:1rem;">العملة الظاهرة:</label>
-                <select id="lblCurrency" style="font-weight:bold; color:#27ae60; padding:10px;">
-                    <option value="EGP">جنيه (EGP)</option>
-                    <option value="USD">دولار ($)</option>
-                    <option value="EUR">يورو (€)</option>
-                    <option value="GBP">استرليني (£)</option>
-                </select>
-            </div>
-            <label style="font-weight:bold; font-size:1rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:10px;">
-                <input type="checkbox" id="lblRotatePrint" style="margin-left:8px; transform:scale(1.2);"> 🔄 عكس أبعاد الورقة (دوران 90 درجة)
-            </label>
-        </div>
-
-        <div class="pay-box" style="margin-bottom:20px;">
-            <label style="font-size:1rem;">التطبيق الهدف للطباعة:</label>
-            <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72; padding:10px;">
-                <option value="print_bridge">🚀 طباعة فورية (Print Bridge)</option>
-                <option value="android_share">📱 إرسال لتطبيق الطابعة (أندرويد / 4Barcode / MacroPous)</option>
-                <option value="direct">💻 الطباعة المباشرة (كمبيوتر / لاب توب)</option>
-            </select>
-        </div>
-
-        <div style="display:flex; justify-content:center; gap:10px;">
-            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeAdvancedPrint('${prodId}')">تنفيذ الطباعة 🖨️</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
-        </div>
-    `);
-}
-
-function executeAdvancedPrint(prodId) {
-    const prod = findProductById(prodId); if (!prod) return;
-    const targetApp = document.getElementById('lblTargetApp')?.value;
-
-    if (targetApp === 'print_bridge') {
-        if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
-        closeModal();
-        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
-        toast("✅ تم إرسال الباركود للطابعة!", "success");
-        return;
-    }
-
-    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
-    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
-    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
-    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
-    const showName = document.getElementById('lblShowName')?.checked;
-    const showPrice = document.getElementById('lblShowPrice')?.checked;
-    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
-    const isRotated = document.getElementById('lblRotatePrint')?.checked;
-    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
-    closeModal();
-    
-    const guideMult = RATES.GUIDE_MULT || 3;
-    const safeName = escapeHtml(prod.n);
-    let baseEGP = prod.p * guideMult;
-    let finalPriceVal = baseEGP; let currencySymbol = 'ج.م';
-
-    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
-    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
-    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
-
-    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
-    
-    let printW = isRotated ? hMM : wMM; 
-    let printH = isRotated ? wMM : hMM;
-    
-    // التحويل للبيكسل عشان الموبايل ومكتبة الرسم يقروا الأبعاد صح (1 ملم = ~3.78 بيكسل)
-    let pxW = Math.round(printW * 3.7795);
-    let pxH = Math.round(printH * 3.7795);
-    let innerPxW = Math.round(wMM * 3.7795);
-    let innerPxH = Math.round(hMM * 3.7795);
-
-    let labelsHtml = '';
-
-    for (let i = 0; i < count; i++) {
-        labelsHtml += `
-            <div class="custom-label-card" style="width: ${pxW}px; height:${pxH}px; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; position: relative;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${innerPxW}px; height: ${innerPxH}px; padding: 2px; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''} text-align:center;">
-                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1.2; margin-bottom: 2px;">Anjum Green Pharmacy</div>` : ''}
-                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.2; max-width: 95\%; overflow: hidden; white-space: nowrap; margin-bottom: 2px;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="margin:0; padding:0;"></svg>
-                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.2; margin-top: 2px;">${finalPriceStr}</div>` : ''}
-                </div>
-            </div>
-        `;
-    }
-
-    const printSec = document.getElementById('receiptPrintSection');
-    // نخرجه بره الشاشة بدل إخفاؤه تماماً، عشان نعرف نصوره بجودة عالية في الموبايل
-    printSec.style.cssText = 'display: block; position: absolute; left: -9999px; top: -9999px; background: #fff; z-index: -1;';
-    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; gap:10px;">${labelsHtml}</div>`;
-
-    for (let i = 0; i < count; i++) {
-        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.2, height: 26, fontSize: 12, margin: 2, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
-    }
-
-    if (targetApp === 'android_share') {
-        toast("⏳ جاري تجهيز الملصق للأندرويد...", "info", 2000);
-        
-        // إعطاء المتصفح نصف ثانية لرسم الباركود والنصوص قبل التصوير
-        setTimeout(() => {
-            const element = document.querySelector('.custom-label-card'); 
-            html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff', logging: false }).then(canvas => {
-                canvas.toBlob(async (blob) => {
-                    const fileName = `Barcode_${prod.barcode}.png`;
-                    const file = new File([blob], fileName, { type: 'image/png' });
-                    
-                    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-                        try {
-                            let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
-                            const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
-                            await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
-                            toast("✅ تم الإرسال بنجاح!", "success");
-                        } catch (err) { console.error('Share Plugin Failed:', err); }
-                    } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({ files: [file], title: 'طباعة باركود', text: 'مشاركة لتطبيق الطابعة' });
-                            toast("✅ تم الإرسال بنجاح!", "success");
-                        } catch (err) {
-                            const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
-                        }
-                    } else {
-                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
-                    }
-                    
-                    printSec.style.cssText = 'display: none;'; printSec.innerHTML = '';
-                }, 'image/png');
-            });
-        }, 500); 
-    } else {
-        printSec.style.cssText = 'display: block;';
-        const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
-        document.head.appendChild(pageStyle);
-        document.body.classList.add('printing-receipt');
-        setTimeout(() => {
-            window.print();
-            window.onafterprint = () => {
-                document.body.classList.remove('printing-receipt'); 
-                printSec.style.display = 'none'; 
-                printSec.innerHTML = ''; 
-                if(pageStyle) pageStyle.remove();
-                window.onafterprint = null;
-            };
-            setTimeout(() => {
-                document.body.classList.remove('printing-receipt'); 
-                printSec.style.display = 'none'; 
-                printSec.innerHTML = ''; 
-                if(pageStyle) pageStyle.remove();
-            }, 120000);
-        }, 500);
-    }
-}
-
 function addNewProductToSystem() {
     const name = document.getElementById('newProdName')?.value.trim(); const price = parseFloat(document.getElementById('newProdPrice')?.value) || 0; const qty = parseInt(document.getElementById('newProdQty')?.value) || 0; const barcode = document.getElementById('newProdBarcode')?.value.trim(); const expiry = document.getElementById('newProdExpiry')?.value;
     if (!name) { toast('أدخل اسم المنتج!', 'warn'); return; }
@@ -1443,7 +1424,6 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
     const guideMult = RATES.GUIDE_MULT || 3;
     const isFilteredLow = isLowStockModeActive;
     
-    // النواقص لها جدول مخصص
     if (isFilteredLow) {
         return `
         <tr class="low-stock-row pdf-selected-row">
@@ -1455,7 +1435,6 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
         </tr>`;
     }
 
-    // المخزون العادي وإضافة زر الليبل المفقود
     return `
     <tr class="${rowClass}">
         <td style="font-weight:bold;">${index + 1}</td>
@@ -1604,7 +1583,6 @@ function buildInvoiceTally(filteredInvoices) {
             itemsListHtml = inv.items.map(i => {
                 u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
                 if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                // تلوين وإبراز اسم البائع إن وجد
                 let sellerTag = i.seller ? ` <span style="font-size:0.85rem; color:#8e44ad; font-weight:bold;">(كاشير: ${escapeHtml(i.seller)})</span>` : '';
                 return `صنف: ${escapeHtml(i.name)}${sellerTag} \vert{} كمية: ${i.qty}`;
             }).join('<br>');
@@ -1669,6 +1647,7 @@ function generateReport() {
             <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
             <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
             <td class="no-pdf">
+                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
                 <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
                 <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
             </td>
