@@ -45,8 +45,7 @@ jobs:
       - name: Install Dependencies & Capacitor
         run: |
           npm init -y
-          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/barcode-scanner@latest --legacy-peer-deps
-
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/barcode-scanner@latest @capacitor/filesystem@latest @capacitor/share@latest --legacy-peer-deps
       - name: Create Capacitor Config
         run: |
           cat <<EOF > capacitor.config.json
