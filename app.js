@@ -702,7 +702,8 @@ function printCustomerReceiptBridge() {
     textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
     textReceipt += "------------------------------\n";
     
-    textReceipt += `[BARCODE]${activeInvoiceId}\n\n`;
+    // استخدام وسم الباركود المخصص لبريدج
+    textReceipt += `<BC>${activeInvoiceId}</BC>\n\n`;
     textReceipt += "نتمنى لكم الشفاء العاجل\n";
 
     let encodedText = encodeURIComponent(textReceipt);
