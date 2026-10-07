@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK & Deploy GitHub Pages
 
 on:
   push:
@@ -7,10 +7,21 @@ on:
       - master
   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# إعطاء الصلاحيات المطلوبة لنشر GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
+# منع إلغاء المهام السابقة لضمان اكتمال البناء والنشر
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 1️⃣ وظيفة بناء تطبيق الأندرويد APK
+  build-apk:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -30,6 +41,8 @@ jobs:
         run: |
           mkdir -p www
           cp index.html www/
+          cp -r *.js www/ 2>/dev/null || true
+          cp -r *.css www/ 2>/dev/null || true
 
       - name: Install Dependencies & Capacitor
         run: |
@@ -71,3 +84,25 @@ jobs:
         with:
           name: Anjum-Pharmacy-App
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  # 2️⃣ وظيفة نشر الموقع على GitHub Pages
+  deploy-pages:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
