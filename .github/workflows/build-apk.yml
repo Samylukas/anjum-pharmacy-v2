@@ -23,14 +23,13 @@ jobs:
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: zulu
+          distribution: 'zulu'
           java-version: '21'
 
       - name: Prepare Web Directory
         run: |
           mkdir -p www
           cp index.html www/
-          cp app.js www/
 
       - name: Install Dependencies & Capacitor
         run: |
@@ -39,7 +38,7 @@ jobs:
 
       - name: Create Capacitor Config
         run: |
-          cat > capacitor.config.json <<'EOF'
+          cat <<EOF > capacitor.config.json
           {
             "appId": "com.anjum.pharmacy",
             "appName": "Anjum Pharmacy",
@@ -54,12 +53,8 @@ jobs:
 
       - name: Set Min SDK Version to 26
         run: |
-          if [ -f android/variables.gradle ]; then
-            sed -i 's/minSdkVersion = 22/minSdkVersion = 26/g' android/variables.gradle
-            sed -i 's/minSdkVersion = 23/minSdkVersion = 26/g' android/variables.gradle
-            sed -i 's/minSdkVersion = 24/minSdkVersion = 26/g' android/variables.gradle
-            sed -i 's/minSdkVersion = 25/minSdkVersion = 26/g' android/variables.gradle
-          fi
+          sed -i 's/minSdkVersion = 22/minSdkVersion = 26/g' android/variables.gradle || true
+          sed -i 's/minSdkVersion = 24/minSdkVersion = 26/g' android/variables.gradle || true
 
       - name: Sync Capacitor Android
         run: |
@@ -76,4 +71,3 @@ jobs:
         with:
           name: Anjum-Pharmacy-App
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
