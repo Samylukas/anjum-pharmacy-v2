@@ -732,47 +732,45 @@ function printCustomerReceiptBrowser() {
         totalQtyCount += item.qty;
         totalSellPriceSum += item.sellTotal;
         return `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ccc; padding-bottom:5px;">
-                <div style="flex:2; text-align:right; font-weight:bold;">${escapeHtml(item.name)}</div>
-                <div style="flex:1; text-align:center;">${item.qty}</div>
-                <div style="flex:1; text-align:left;">${item.sellTotal.toFixed(2)}</div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px;">
+                <div style="flex:2; text-align:right; font-weight:bold; font-size:14px; color:#000;">${escapeHtml(item.name)}</div>
+                <div style="flex:1; text-align:center; font-size:14px; color:#000;">${item.qty}</div>
+                <div style="flex:1; text-align:left; font-size:14px; color:#000;">${item.sellTotal.toFixed(2)}</div>
             </div>
         `;
     }).join('');
 
+    // إزالة أي إيموجي، استخدام خط Arial الأساسي لدعم الطابعات الحرارية، وتغيير العرض لـ 72mm وهو العرض الفعلي القابل للطباعة في بكر الـ 80mm
     const printHtml = `
-        <div style="width: 80mm; padding: 5px; font-family: 'Cairo', sans-serif; color: #000; direction:rtl; text-align:center; margin:0 auto;">
-            <div style="display:flex; justify-content:center; align-items:center; gap:5px; margin-bottom:5px;">
-                <span style="font-size:24px;">🌿</span>
-            </div>
-            <h2 style="font-size: 1.2rem; font-weight: bold; margin: 0 0 5px 0;">Anjum Green Pharmacy</h2>
-            <div style="font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px;">رقم الفاتورة: #${activeInvoiceId}</div>
+        <div style="width: 72mm; padding: 0; font-family: 'Arial', sans-serif; color: #000; direction:rtl; text-align:center; margin:0 auto;">
+            <h2 style="font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color:#000;">Anjum Green Pharmacy</h2>
+            <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; color:#000;">رقم الفاتورة: #${activeInvoiceId}</div>
             
-            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.9rem; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-bottom:5px; color:#000;">
                 <div style="flex:2; text-align:right;">الصنف</div>
                 <div style="flex:1; text-align:center;">الكمية</div>
                 <div style="flex:1; text-align:left;">السعر</div>
             </div>
             
-            <div style="font-size: 0.85rem;">
+            <div>
                 ${itemsHtml}
             </div>
             
-            <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 1rem;">
+            <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 16px; color:#000;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
                     <span>إجمالي الأصناف:</span>
                     <span>${totalQtyCount}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
-                    <span>الإجمالي النهائي:</span>
-                    <span>${totalSellPriceSum.toFixed(2)} ج.م</span>
+                    <span>الإجمالي:</span>
+                    <span>${totalSellPriceSum.toFixed(2)}</span>
                 </div>
             </div>
             
             <div style="margin-top: 15px; display:flex; justify-content:center;">
                 <svg id="receipt-barcode" style="height:40px;"></svg>
             </div>
-            <div style="font-size: 0.85rem; font-weight: bold; margin-top: 10px;">نتمنى لكم الشفاء العاجل 🌿</div>
+            <div style="font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 20px; color:#000;">نتمنى لكم الشفاء العاجل</div>
         </div>
     `;
 
@@ -785,7 +783,8 @@ function printCustomerReceiptBrowser() {
     });
 
     const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-    pageStyle.innerHTML = `@media print { @page { size: 80mm auto; margin: 0 !important; } }`;
+    // إزالة المقاس الإجباري الخاطئ الذي يسبب سحب الورق الطويل
+    pageStyle.innerHTML = `@media print { @page { margin: 0 !important; } }`;
     document.head.appendChild(pageStyle);
     
     document.body.classList.add('printing-receipt');
@@ -807,7 +806,6 @@ function printCustomerReceiptBrowser() {
         }, 120000);
     }, 500);
 }
-
 function promptPrintBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
     if (!prod) { toast("❌ المنتج غير موجود!", 'error'); return; }
