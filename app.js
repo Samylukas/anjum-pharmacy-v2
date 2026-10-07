@@ -88,7 +88,6 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
 
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
 
-    // ✨ تأمين عرض الجدول باللغة العربية
     const originalWidth = element.style.width;
     const originalMinWidth = element.style.minWidth;
     element.style.width = '100%';
@@ -702,27 +701,37 @@ function executePrintCustomerReceipt() {
 function printCustomerReceiptBridge() {
     if (invoiceItems.length === 0) return;
 
-    let textReceipt = "--- Anjum Green Pharmacy ---\n";
-    textReceipt += `رقم الفاتورة: #${activeInvoiceId}\n`;
-    textReceipt += "------------------------------\n";
+    let textReceipt = "<C>=== Anjum Green Pharmacy ===</C>\n";
+    textReceipt += "<C>رقم الفاتورة: #" + activeInvoiceId + "</C>\n";
+    textReceipt += "--------------------------------\n";
 
     let totalQtyCount = 0;
     let totalSellPriceSum = 0;
 
-    invoiceItems.forEach(item => {
-        totalQtyCount += item.qty;
-        totalSellPriceSum += item.sellTotal;
-        textReceipt += `${item.name}\n(الكمية: ${item.qty}) \vert{} (السعر: ${item.sellTotal.toFixed(2)} ج.م)\n`;
-    });
+    if (invoiceItems.length === 1 && invoiceItems[0].name.includes('|')) {
+        let itemsArray = invoiceItems[0].name.split('|');
+        itemsArray.forEach(rawItem => {
+            let cleanItem = rawItem.trim().replace(/</g, '').replace(/>/g, ''); 
+            if (cleanItem) textReceipt += cleanItem + "\n";
+        });
+        totalQtyCount = invoiceItems[0].qty;
+        totalSellPriceSum = invoiceItems[0].sellTotal;
+    } else {
+        invoiceItems.forEach(item => {
+            totalQtyCount += item.qty;
+            totalSellPriceSum += item.sellTotal;
+            textReceipt += item.name + "\n";
+            textReceipt += "(الكمية: " + item.qty + ") | (السعر: " + item.sellTotal.toFixed(2) + " ج.م)\n";
+        });
+    }
 
-    textReceipt += "------------------------------\n";
-    textReceipt += `إجمالي الأصناف: ${totalQtyCount}\n`;
-    textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
-    textReceipt += "------------------------------\n";
+    textReceipt += "--------------------------------\n";
+    textReceipt += "إجمالي الأصناف: " + totalQtyCount + "\n";
+    textReceipt += "إجمالي الفاتورة: " + totalSellPriceSum.toFixed(2) + " ج.م\n";
+    textReceipt += "--------------------------------\n";
     
-    // استخدام التاج <BC> الخاص بتطبيق الطباعة القديم
-    textReceipt += `<BC>${activeInvoiceId}</BC>\n\n`;
-    textReceipt += "نتمنى لكم الشفاء العاجل\n";
+    textReceipt += "<C><BC>" + activeInvoiceId + "</BC></C>\n";
+    textReceipt += "<C>نتمنى لكم الشفاء العاجل</C>\n";
 
     let encodedText = encodeURIComponent(textReceipt);
     window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
@@ -866,11 +875,31 @@ function promptPrintBarcodeLabel(prodId) {
 function executeAdvancedPrint(prodId) {
     const prod = findProductById(prodId); if (!prod) return;
     const targetApp = document.getElementById('lblTargetApp')?.value;
+    
+    const showName = document.getElementById('lblShowName')?.checked;
+    const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
+    
+    const guideMult = RATES.GUIDE_MULT || 3;
+    const safeName = escapeHtml(prod.n);
+    let baseEGP = prod.p * guideMult;
+    let finalPriceVal = baseEGP; let currencySymbol = 'EGP';
+
+    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
+    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = 'EUR'; }
+    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = 'GBP'; }
+
+    const finalPriceStr = showPrice ? `${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
 
     if (targetApp === 'print_bridge') {
         if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
         closeModal();
-        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
+        
+        let printUrl = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
+        if (showName) printUrl += "&name=" + encodeURIComponent(safeName.substring(0, 20));
+        if (showPrice) printUrl += "&price=" + encodeURIComponent(finalPriceStr);
+        
+        window.location.href = printUrl;
         toast("✅ تم إرسال الباركود للطابعة!", "success");
         return;
     }
@@ -879,23 +908,9 @@ function executeAdvancedPrint(prodId) {
     const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
     const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
-    const showName = document.getElementById('lblShowName')?.checked;
-    const showPrice = document.getElementById('lblShowPrice')?.checked;
     const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
     const isRotated = document.getElementById('lblRotatePrint')?.checked;
-    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
     closeModal();
-    
-    const guideMult = RATES.GUIDE_MULT || 3;
-    const safeName = escapeHtml(prod.n);
-    let baseEGP = prod.p * guideMult;
-    let finalPriceVal = baseEGP; let currencySymbol = 'ج.م';
-
-    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
-    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
-    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
-
-    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
     
     let printW = isRotated ? hMM : wMM; 
     let printH = isRotated ? wMM : hMM;
@@ -930,7 +945,6 @@ function executeAdvancedPrint(prodId) {
 
     if (targetApp === 'android_share') {
         toast("⏳ جاري تجهيز الملصق للأندرويد...", "info", 2000);
-        
         setTimeout(() => {
             const element = document.querySelector('.custom-label-card'); 
             html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff', logging: false }).then(canvas => {
