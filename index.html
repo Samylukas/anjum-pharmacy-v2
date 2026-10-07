@@ -26,7 +26,6 @@
         #splashScreen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #ffffff; z-index: 2147483647; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.8s ease-in-out; direction: ltr; }
         .splash-title { font-size: 2.5rem; font-weight: 800; margin-top: 15px; opacity: 1; text-align: center; text-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* ضبط سطر أنجوم وسطر جرين فارماسي */
         .splash-anjum { color: #1e3c72; display: block; width: 100%; text-align: center; margin-bottom: 4px; } 
         .splash-green { color: #27ae60; display: block; width: 100%; text-align: center; }
         
@@ -117,4 +116,129 @@
         .scroll-btn:hover { opacity: 1; transform: scale(1.1); background: #1e3c72; }
 
         #toastStack { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 99999999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 400px; }
-        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: toastIn 0.3s ease-out
+        .toast { color: white; padding: 15px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: toastIn 0.3s ease-out; }
+        .toast.success { background: #27ae60; } .toast.error { background: #e74c3c; } .toast.warn { background: #f39c12; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
+
+        #floatingCameraOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999999; display: none; align-items: center; justify-content: center; padding: 15px; }
+        .camera-modal { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .camera-div-float { width:100%; min-height: 250px; border-radius: 8px; overflow: hidden; border: 2px solid #1e3c72; margin-bottom: 15px; background: #000; }
+
+        .scanner-box { display:none; margin-top:10px; border-radius:10px; overflow:hidden; border:2px solid #1e3c72; background:#fff; }
+        .camera-div { width:100%; }
+
+        #reportLoader { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999999999; }
+        .spinner { width: 60px; height: 60px; border: 6px solid #f3f3f3; border-top: 6px solid #f39c12; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .report-print-container { background: #fff; padding: 15px; border-radius: 10px; width: 100%; overflow-x: auto; margin-top: 15px; } 
+        .report-title-header { text-align: center; color: #1e3c72; margin-bottom: 15px; font-size: 1.5rem; display: none; border-bottom: 3px solid #f39c12; padding-bottom: 8px; font-weight: 800; }
+        
+        .pdf-compact table { font-size: 11px !important; line-height: 1.4 !important; width: 100% !important; }
+        .pdf-compact th, .pdf-compact td { padding: 6px 5px !important; height: auto !important; }
+        .pdf-compact .report-title-header { font-size: 1.4rem !important; margin-bottom: 10px !important; padding-bottom: 5px !important; }
+        .page-break-row { page-break-after: always !important; break-after: page !important; }
+        
+        .chart-page { width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; padding: 10px; background: #fff; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; }
+        .chart-page canvas { max-height: 100% !important; max-width: 100% !important; }
+
+        .modern-date-picker { display: flex; flex-direction: row; gap: 15px; align-items: center; justify-content: center; background: #fff; padding: 12px 18px; border-radius: 10px; border: 1px solid #e0e0e0; flex-wrap: wrap; }
+        .modern-date-row { display: flex; align-items: center; gap: 8px; }
+        .modern-date-row label { font-weight: bold; color: #1e3c72; font-size: 0.95rem; }
+        .modern-date-row input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; font-family: inherit; }
+
+        @media print {
+            body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
+            html, body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
+            body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
+            .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
+            #reportLoader { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="reportLoader">
+    <div class="spinner"></div>
+    <h2 style="color:#1e3c72; margin-top:20px; font-weight:800;">⏳ جاري إعداد التقرير، يرجى الانتظار...</h2>
+</div>
+
+<div id="floatingCameraOverlay">
+    <div class="camera-modal">
+        <h3 style="color:#1e3c72; margin-bottom:15px; font-weight:800;">📷 مسح الباركود للمنتج</h3>
+        <div id="floatingCameraReader" class="camera-div-float"></div>
+        <button class="btn btn-red" style="width:100%; font-size:1.1rem; padding:12px;" onclick="closeFloatingCamera()">إغلاق الكاميرا ❌</button>
+    </div>
+</div>
+
+<!-- ✨ Splash Screen ✨ -->
+<div id="splashScreen">
+    <div class="branch-container">
+        <svg viewBox="-10 -10 120 120" width="100%" height="100%">
+            <path class="branch-path" d="M10,90 Q40,50 90,20" fill="none" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/>
+            <defs><path id="leaf" d="M0,0 Q-6,-8 0,-16 Q6,-8 0,0" /></defs>
+            <g transform="translate(35, 55) rotate(15)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-1"/></g>
+            <g transform="translate(55, 38) rotate(25)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-top d-2"/></g>
+            <g transform="translate(75, 26) rotate(35)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-top d-3"/></g>
+            <g transform="translate(25, 73) rotate(100)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-4"/></g>
+            <g transform="translate(45, 53) rotate(110)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-bottom d-5"/></g>
+            <g transform="translate(65, 37) rotate(120)"><use href="#leaf" fill="#2ecc71" class="anim-leaf swoop-bottom d-6"/></g>
+            <g transform="translate(90, 20) rotate(45)"><use href="#leaf" fill="#27ae60" class="anim-leaf swoop-tip d-7"/></g>
+        </svg>
+    </div>
+    <div class="splash-title">
+        <span class="splash-anjum">Anjum</span>
+        <span class="splash-green">Green Pharmacy</span>
+    </div>
+</div>
+
+<div id="toastStack"></div>
+<div id="modalOverlay" class="modal-overlay"><div class="modal-box" id="modalBox"></div></div>
+
+<div id="loginOverlay" class="login-overlay" style="display:none;">
+    <div class="login-card">
+        <h2 style="color:#1e3c72; margin-bottom:15px; font-size:1.6rem; font-weight:800;">
+            🔐 <span style="color:#27ae60;">🌿</span> تسجيل الدخول
+        </h2>
+        <p style="color:#7f8c8d; font-weight:700; margin-bottom:20px; font-size:1.1rem;">Anjum Green Pharmacy</p>
+        
+        <select id="entryUserSelect" class="search-box" style="text-align:center; margin-bottom:15px; font-weight:bold; font-size:1.1rem; padding:10px;">
+            <option value="">⏳ جاري تحميل المستخدمين...</option>
+        </select>
+        
+        <div class="pass-wrapper" style="margin-bottom:20px;">
+            <input type="password" id="entryPassInput" class="search-box" style="text-align:center; margin-bottom:0; font-size:1.1rem; padding:10px; letter-spacing:2px;" placeholder="كلمة المرور..." onkeypress="if(event.key === 'Enter') validateEntryPassword()">
+            <button type="button" class="pass-toggle-btn" onclick="togglePasswordVisibility()">👁️</button>
+        </div>
+        
+        <button class="btn btn-darkblue" style="width: 100%; font-size:1.1rem; padding:12px;" onclick="validateEntryPassword()">دخول 🚀</button>
+        <div style="margin-top:20px; font-size:0.85rem; font-weight:700; color:#95a5a6;">✨ برمجة وتصميم Samy Lukas</div>
+    </div>
+</div>
+
+<div class="app-container" id="mainContainer" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <span id="userGreeting" style="font-weight:800; color:#1e3c72; font-size:1.1rem;">👤 مرحباً</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div id="syncIndicator" class="sync-status status-online" style="margin:0;">🟢 متصل بالإنترنت</div>
+            <button class="btn btn-red" style="padding:8px 15px;" onclick="logout()">تسجيل الخروج 🚪</button>
+        </div>
+    </div>
+
+    <h1><span class="animated-leaf">🌿</span> Anjum Green Pharmacy</h1>
+
+    <div id="alertsContainer" class="alerts-bar">
+        <div>🔔 ملخص الحالة: <span id="lowStockCountVal" style="color:#d35400;">0 نواقص</span> | <span id="expiringCountVal" style="color:#e67e22;">0 صلاحية قريبة</span></div>
+        <button class="btn btn-purple manager-only" style="padding:6px 15px;" onclick="showTab('stockTab'); filterLowStock();">عرض النواقص 📦</button>
+    </div>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" id="btnSalesTab" onclick="showTab('salesTab', this)">🛒 بيع مباشر</button>
+        <button class="tab-btn" id="btnReturnTab" onclick="showTab('returnTab', this)">🔄 المرتجعات</button>
+        <button class="tab-btn manager-only" id="btnStockTab" onclick="showTab('stockTab', this)">🔒 📦 المخزون</button>
+        <button class="tab-btn manager-only" id="btnAddStockTab" onclick="showTab('addStockTab', this)">🔒 ➕ إضافة أصناف</button>
+        <button class="tab-btn admin-only" id="btnFinanceTab" onclick="showTab('financeTab', this)">🔒 💵 المالية</button>
+        <button class="tab-btn admin-only" id="btnReportsTab" onclick="showTab('
