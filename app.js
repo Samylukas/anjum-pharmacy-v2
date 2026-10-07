@@ -1,5 +1,7 @@
-Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
-Chart.defaults.color = '#333';
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.font.family = "'Cairo', system-ui, sans-serif";
+    Chart.defaults.color = '#333';
+}
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysvvrVlCAKXa-3f40U_iCCH_cmwS3qj921RIINwemHqP2RcIgSmzvGlmKepbu14gjBlw/exec";
 
@@ -84,10 +86,9 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
-    // مسح الفواصل اليدوية التي تسبب صفحات بيضاء
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
 
-    // ✨ الحل لمشكلة قص الجدول من الأطراف في اللغة العربية
+    // ✨ تأمين عرض الجدول باللغة العربية
     const originalWidth = element.style.width;
     const originalMinWidth = element.style.minWidth;
     element.style.width = '100%';
@@ -100,7 +101,7 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
-        margin: 0.3, // هوامش مريحة لمنع القطع
+        margin: 0.3,
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
@@ -219,25 +220,31 @@ function playBeepSound() {
 }
 
 async function loadLocalUsers() {
-    const savedUsers = localStorage.getItem('anjum_local_users');
-    if (savedUsers) {
-        cloudUsers = JSON.parse(savedUsers);
-        let changed = false;
-        for (const u of cloudUsers) {
-            if (u.password && !u.passwordHash) {
-                u.passwordHash = await sha256Hex(u.password); delete u.password; changed = true;
+    try {
+        const savedUsers = localStorage.getItem('anjum_local_users');
+        if (savedUsers && savedUsers !== '[]' && savedUsers !== 'null') {
+            cloudUsers = JSON.parse(savedUsers);
+            let changed = false;
+            for (const u of cloudUsers) {
+                if (u.password && !u.passwordHash) {
+                    u.passwordHash = await sha256Hex(u.password); delete u.password; changed = true;
+                }
             }
+            if (changed) localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
+        } else {
+            cloudUsers = [
+                { username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' },
+                { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' },
+                { username: 'cs2', passwordHash: await sha256Hex('456'), role: 'User' }
+            ];
+            localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
         }
-        if (changed) localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
-    } else {
-        cloudUsers = [
-            { username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' },
-            { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' },
-            { username: 'cs2', passwordHash: await sha256Hex('456'), role: 'User' }
-        ];
-        localStorage.setItem('anjum_local_users', JSON.stringify(cloudUsers));
+        renderUserDropdowns();
+    } catch (error) {
+        console.error("Local user load error:", error);
+        cloudUsers = [{ username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' }];
+        renderUserDropdowns();
     }
-    renderUserDropdowns();
 }
 
 function saveLocalUsers(users) {
@@ -713,7 +720,8 @@ function printCustomerReceiptBridge() {
     textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
     textReceipt += "------------------------------\n";
     
-    textReceipt += `[BARCODE]${activeInvoiceId}\n\n`;
+    // استخدام التاج <BC> الخاص بتطبيق الطباعة القديم
+    textReceipt += `<BC>${activeInvoiceId}</BC>\n\n`;
     textReceipt += "نتمنى لكم الشفاء العاجل\n";
 
     let encodedText = encodeURIComponent(textReceipt);
@@ -740,7 +748,6 @@ function printCustomerReceiptBrowser() {
         `;
     }).join('');
 
-    // إزالة أي إيموجي، استخدام خط Arial الأساسي لدعم الطابعات الحرارية، وتغيير العرض لـ 72mm وهو العرض الفعلي القابل للطباعة في بكر الـ 80mm
     const printHtml = `
         <div style="width: 72mm; padding: 0; font-family: 'Arial', sans-serif; color: #000; direction:rtl; text-align:center; margin:0 auto;">
             <h2 style="font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color:#000;">Anjum Green Pharmacy</h2>
@@ -783,7 +790,6 @@ function printCustomerReceiptBrowser() {
     });
 
     const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-    // إزالة المقاس الإجباري الخاطئ الذي يسبب سحب الورق الطويل
     pageStyle.innerHTML = `@media print { @page { margin: 0 !important; } }`;
     document.head.appendChild(pageStyle);
     
@@ -806,6 +812,7 @@ function printCustomerReceiptBrowser() {
         }, 120000);
     }, 500);
 }
+
 function promptPrintBarcodeLabel(prodId) {
     const prod = findProductById(prodId);
     if (!prod) { toast("❌ المنتج غير موجود!", 'error'); return; }
@@ -1293,8 +1300,6 @@ function renderFinanceTable() {
     }
 
     const net = totRev - totExp;
-    
-    // ✨ التعديل هنا: دمج الأعمدة، تصغير الخط، وتنزيل كل إجمالي في سطر لوحده
     const totalRowHtml = `
     <tr class="total-row">
         <td colspan="4" style="text-align: right; color: #1e3c72; padding: 15px 12px; font-weight:900; font-size:1.1rem;">إجماليات الحركة المالية:</td>
@@ -1303,23 +1308,6 @@ function renderFinanceTable() {
             <div style="color: #c0392b;">مصروفات: ${totExp.toFixed(2)} ج.م</div>
             <div style="color: ${net >= 0 ? '#27ae60' : '#c0392b'}; font-size:1.15rem; margin-top:5px; padding-top:5px; border-top:1px dashed #ccc;">الصافي: ${net.toFixed(2)} ج.م</div>
         </td>
-        <td class="no-pdf"></td>
-    </tr>`;
-
-    tbody.innerHTML += totalRowHtml;
-
-    if (document.getElementById('sumRevenues')) document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
-    if (document.getElementById('sumExpenses')) document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
-    const netEl = document.getElementById('netBalance');
-    if (netEl) { netEl.textContent = net.toFixed(2) + ' EGP'; netEl.style.color = net >= 0 ? '#27ae60' : '#c0392b'; }
-}
-
-    const net = totRev - totExp;
-    const totalRowHtml = `
-    <tr class="total-row">
-        <td colspan="4" style="text-align: right; color: #1e3c72; padding: 12px; font-weight:900;">إجماليات الحركة المالية:</td>
-        <td style="color: #27ae60; font-weight:900; font-size:1.2rem;">إيرادات: ${totRev.toFixed(2)}<br><span style="color:#c0392b;">مصروفات: ${totExp.toFixed(2)}</span></td>
-        <td style="color: ${net >= 0 ? '#27ae60' : '#c0392b'}; font-weight:900; font-size:1.2rem;">الصافي: ${net.toFixed(2)} ج.م</td>
         <td class="no-pdf"></td>
     </tr>`;
 
