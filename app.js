@@ -84,19 +84,29 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
-    // إزالة كسر الصفحات لضمان عدم وجود مساحات فارغة في نهاية الملف
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
-    element.classList.add('pdf-compact');
+
+    if (!isLandscape) {
+        let rowsPerPage = 50; 
+        let tableId = elementId === 'reportsPrintArea' ? 'reportsTable' : (elementId === 'financePrintArea' ? 'financeTable' : 'stockTable');
+        const rows = element.querySelectorAll(`#${tableId} tbody tr`);
+        rows.forEach((row, index) => {
+            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1 && !row.classList.contains('total-row')) {
+                row.classList.add('page-break-row');
+            }
+        });
+        element.classList.add('pdf-compact');
+    }
 
     toast('⏳ جاري تجهيز التقرير...', 'info');
     await new Promise(r => setTimeout(r, 400));
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
     const opt = {
-        margin: 0.1, // هوامش ضيقة لتفادي كسر الصفحات
+        margin: [0.1, 0.1, 0.1, 0.1], 
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: element.scrollWidth },
         jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
     };
@@ -105,22 +115,37 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
         if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
             try {
                 let pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-                let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
-                const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
-                await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ التقرير 📄' });
-                toast('✅ تم فتح شاشة المشاركة!', 'success');
-            } catch (shareErr) { console.error('Share Plugin Failed:', shareErr); window.print(); }
+                
+                // التأكد من وجود مكتبات الحفظ والمشاركة في الموبايل
+                if (!window.Capacitor.Plugins.Filesystem || !window.Capacitor.Plugins.Share) {
+                    toast('⚠️ أدوات الحفظ غير مفعلة، جاري التنزيل المباشر...', 'warn');
+                    const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                    const blobUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = fileName;
+                    document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove();
+                    toast('✅ تم تنزيل الملف!', 'success');
+                } else {
+                    let cleanBase64 = pdfDataUri.replace(/^data:application\/[a-z]+;base64,/, "");
+                    const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: cleanBase64, directory: 'CACHE' });
+                    // فتح شاشة المشاركة عشان تقدر تحفظه أو تبعته واتس اب
+                    await window.Capacitor.Plugins.Share.share({ title: titleText, url: savedFile.uri, dialogTitle: 'حفظ أو مشاركة التقرير 📄' });
+                    toast('✅ تم تجهيز التقرير للمشاركة!', 'success');
+                }
+            } catch (shareErr) { 
+                console.error('Mobile PDF Error:', shareErr); 
+                toast('❌ حدث خطأ في حفظ الملف على الموبايل', 'error');
+            }
         } else {
             const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = opt.filename;
             document.body.appendChild(a); a.click(); URL.revokeObjectURL(blobUrl); a.remove();
-            toast('✅ تم التنزيل!', 'success');
+            toast('✅ تم التنزيل بنجاح!', 'success');
         }
     } catch (err) {
         console.error('PDF Error:', err); window.print();
     } finally {
-        element.classList.remove('pdf-compact');
+        if (!isLandscape) element.classList.remove('pdf-compact');
         headers.forEach(h => h.style.display = 'none');
         noPdfElements.forEach(el => el.style.display = '');
         document.getElementById('reportLoader').style.display = 'none';
