@@ -642,15 +642,51 @@ function onBarcodeScanned(key, decodedText) {
 // Sales & Invoices
 // ==========================================
 
-function printCustomerReceiptBridge() {
+// ==========================================
+// Sales & Invoices Printing (Browser & Bridge)
+// ==========================================
+
+function promptPrintCustomerReceipt() {
     if (invoiceItems.length === 0) {
         toast("⚠️ الفاتورة فارغة! أضف أصناف أولاً", "warn");
         return;
     }
 
-    let textReceipt = "=== Anjum Green Pharmacy ===\n";
-    textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
-    textReceipt += "--------------------------\n";
+    openModal(`
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🖨️ خيارات طباعة الفاتورة</h3>
+        
+        <div class="pay-box" style="margin-bottom:20px;">
+            <label style="font-size:1.1rem; color:#1e3c72;">طريقة الطباعة المطلوبة:</label>
+            <select id="printMethodSelect" style="font-weight:bold; color:#27ae60; padding:12px; font-size:1.1rem;">
+                <option value="bridge">🚀 طباعة حرارية فورية (Print Bridge)</option>
+                <option value="browser">💻 طباعة من المتصفح (كمبيوتر / لاب توب)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executePrintCustomerReceipt()">تنفيذ الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function executePrintCustomerReceipt() {
+    const method = document.getElementById('printMethodSelect')?.value;
+    closeModal();
+    
+    if (method === 'bridge') {
+        printCustomerReceiptBridge();
+    } else {
+        printCustomerReceiptBrowser();
+    }
+}
+
+function printCustomerReceiptBridge() {
+    if (invoiceItems.length === 0) return;
+
+    let textReceipt = "--- Anjum Green Pharmacy ---\n";
+    textReceipt += `رقم الفاتورة: #${activeInvoiceId}\n`;
+    textReceipt += "------------------------------\n";
 
     let totalQtyCount = 0;
     let totalSellPriceSum = 0;
@@ -658,24 +694,101 @@ function printCustomerReceiptBridge() {
     invoiceItems.forEach(item => {
         totalQtyCount += item.qty;
         totalSellPriceSum += item.sellTotal;
-        // تنسيق مبسط ومنظم للطباعة الحرارية
-        textReceipt += `${item.name}\n(الكمية: ${item.qty}) \vert{} (السعر: ${item.sellTotal.toFixed(2)} ج.م)\n`;
+        textReceipt += `${item.name}\n(الكمية: ${item.qty}) | (السعر: ${item.sellTotal.toFixed(2)} ج.م)\n`;
     });
 
-    textReceipt += "--------------------------\n";
+    textReceipt += "------------------------------\n";
     textReceipt += `إجمالي الأصناف: ${totalQtyCount}\n`;
     textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
-    textReceipt += "--------------------------\n";
+    textReceipt += "------------------------------\n";
     
-    // أمر الباركود الافتراضي في Print Bridge
     textReceipt += `[BARCODE]${activeInvoiceId}\n\n`;
-    
     textReceipt += "نتمنى لكم الشفاء العاجل\n";
 
     let encodedText = encodeURIComponent(textReceipt);
     window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
     
     toast("✅ تم إرسال فاتورة العميل للطابعة!", "success");
+}
+
+function printCustomerReceiptBrowser() {
+    if (invoiceItems.length === 0) return;
+
+    let totalQtyCount = 0;
+    let totalSellPriceSum = 0;
+
+    let itemsHtml = invoiceItems.map(item => {
+        totalQtyCount += item.qty;
+        totalSellPriceSum += item.sellTotal;
+        return `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #ccc; padding-bottom:5px;">
+                <div style="flex:2; text-align:right; font-weight:bold;">${escapeHtml(item.name)}</div>
+                <div style="flex:1; text-align:center;">${item.qty}</div>
+                <div style="flex:1; text-align:left;">${item.sellTotal.toFixed(2)}</div>
+            </div>
+        `;
+    }).join('');
+
+    const printHtml = `
+        <div style="width: 80mm; padding: 5px; font-family: 'Cairo', sans-serif; color: #000; direction:rtl; text-align:center; margin:0 auto;">
+            <div style="display:flex; justify-content:center; align-items:center; gap:5px; margin-bottom:5px;">
+                <span style="font-size:24px;">🌿</span>
+            </div>
+            <h2 style="font-size: 1.2rem; font-weight: bold; margin: 0 0 5px 0;">Anjum Green Pharmacy</h2>
+            <div style="font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px;">رقم الفاتورة: #${activeInvoiceId}</div>
+            
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:0.9rem; margin-bottom:5px;">
+                <div style="flex:2; text-align:right;">الصنف</div>
+                <div style="flex:1; text-align:center;">الكمية</div>
+                <div style="flex:1; text-align:left;">السعر</div>
+            </div>
+            
+            <div style="font-size: 0.85rem;">
+                ${itemsHtml}
+            </div>
+            
+            <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 1rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+                    <span>إجمالي الأصناف:</span>
+                    <span>${totalQtyCount}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>الإجمالي النهائي:</span>
+                    <span>${totalSellPriceSum.toFixed(2)} ج.م</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; display:flex; justify-content:center;">
+                <svg id="receipt-barcode" style="height:40px;"></svg>
+            </div>
+            <div style="font-size: 0.85rem; font-weight: bold; margin-top: 10px;">نتمنى لكم الشفاء العاجل 🌿</div>
+        </div>
+    `;
+
+    const printSec = document.getElementById('receiptPrintSection');
+    printSec.innerHTML = printHtml;
+    printSec.style.display = 'block';
+
+    JsBarcode("#receipt-barcode", activeInvoiceId.toString(), {
+        format: "CODE128", width: 1.5, height: 40, fontSize: 12, margin: 5, flat: true, displayValue: true
+    });
+
+    const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
+    pageStyle.innerHTML = `@media print { @page { size: 80mm auto; margin: 0 !important; } }`;
+    document.head.appendChild(pageStyle);
+    
+    document.body.classList.add('printing-receipt');
+    
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            document.body.classList.remove('printing-receipt'); 
+            printSec.style.display = 'none'; 
+            printSec.innerHTML = ''; 
+            const pStyle = document.getElementById('dynamic-page-size'); 
+            if(pStyle) pStyle.remove();
+        }, 500);
+    }, 300);
 }
 
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
