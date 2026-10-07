@@ -1295,6 +1295,28 @@ function renderFinanceTable() {
     }
 
     const net = totRev - totExp;
+    
+    // ✨ التعديل هنا: دمج الأعمدة، تصغير الخط، وتنزيل كل إجمالي في سطر لوحده
+    const totalRowHtml = `
+    <tr class="total-row">
+        <td colspan="4" style="text-align: right; color: #1e3c72; padding: 15px 12px; font-weight:900; font-size:1.1rem;">إجماليات الحركة المالية:</td>
+        <td colspan="2" style="text-align: center; padding: 10px; font-weight:900; font-size:1.05rem; line-height:1.6;">
+            <div style="color: #27ae60;">إيرادات: ${totRev.toFixed(2)} ج.م</div>
+            <div style="color: #c0392b;">مصروفات: ${totExp.toFixed(2)} ج.م</div>
+            <div style="color: ${net >= 0 ? '#27ae60' : '#c0392b'}; font-size:1.15rem; margin-top:5px; padding-top:5px; border-top:1px dashed #ccc;">الصافي: ${net.toFixed(2)} ج.م</div>
+        </td>
+        <td class="no-pdf"></td>
+    </tr>`;
+
+    tbody.innerHTML += totalRowHtml;
+
+    if (document.getElementById('sumRevenues')) document.getElementById('sumRevenues').textContent = totRev.toFixed(2) + ' EGP';
+    if (document.getElementById('sumExpenses')) document.getElementById('sumExpenses').textContent = totExp.toFixed(2) + ' EGP';
+    const netEl = document.getElementById('netBalance');
+    if (netEl) { netEl.textContent = net.toFixed(2) + ' EGP'; netEl.style.color = net >= 0 ? '#27ae60' : '#c0392b'; }
+}
+
+    const net = totRev - totExp;
     const totalRowHtml = `
     <tr class="total-row">
         <td colspan="4" style="text-align: right; color: #1e3c72; padding: 12px; font-weight:900;">إجماليات الحركة المالية:</td>
