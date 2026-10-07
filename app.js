@@ -84,16 +84,18 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     const headers = element.querySelectorAll('.report-title-header');
     headers.forEach(h => h.style.display = 'block');
 
-    // إزالة class page-break-row من كل الصفوف
     document.querySelectorAll('.page-break-row').forEach(el => el.classList.remove('page-break-row'));
 
-    // تطبيق page-break فقط إذا لم يكن Landscape (للجداول الطويلة كالمبيعات)
+    // تجنب كسر الصفحات الذي يسبب مساحات فارغة
     if (!isLandscape) {
-        let rowsPerPage = 45; // عدد الصفوف قبل كسر الصفحة لتجنب الصفحات الفارغة
+        let rowsPerPage = 50; 
         let tableId = elementId === 'reportsPrintArea' ? 'reportsTable' : (elementId === 'financePrintArea' ? 'financeTable' : 'stockTable');
         const rows = element.querySelectorAll(`#${tableId} tbody tr`);
         rows.forEach((row, index) => {
-            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1) row.classList.add('page-break-row');
+            // عدم كسر الصفحات قبل الصفوف الإجمالية أو في نهاية الجدول
+            if ((index + 1) % rowsPerPage === 0 && index !== rows.length - 1 && !row.classList.contains('total-row')) {
+                row.classList.add('page-break-row');
+            }
         });
         element.classList.add('pdf-compact');
     }
@@ -102,13 +104,11 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
     await new Promise(r => setTimeout(r, 400));
 
     const fileName = `${titleText.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_')}_${Date.now()}.pdf`;
-    
-    // إعدادات محسنة لتجنب الصفحات الفارغة
     const opt = {
-        margin: [0.2, 0.2, 0.2, 0.2], // تقليل الهوامش
+        margin: [0.1, 0.1, 0.1, 0.1], // حواف ضيقة جداً لتفادي الصفحات الزائدة
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, scrollY: 0, windowWidth: element.scrollWidth },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
         jsPDF: { unit: 'in', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' },
         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.chart-page', '.total-row'] }
     };
@@ -146,12 +146,31 @@ function printStockTable() {
     if (isFilteredLow) {
         const uncheckedRows = document.querySelectorAll('#stockTableBody tr:not(.pdf-selected-row)');
         uncheckedRows.forEach(row => row.style.display = 'none');
+        // إخفاء حقول الإدخال واستبدالها بنصوص عند الطباعة (لتفادي مشاكل الحجم الفارغ)
+        const inputs = document.querySelectorAll('#stockTableBody tr.pdf-selected-row .req-qty-input');
+        inputs.forEach(inp => {
+            const val = inp.value || '';
+            const span = document.createElement('span');
+            span.className = 'req-qty-print-span';
+            span.textContent = val;
+            span.style.fontWeight = 'bold';
+            span.style.color = '#1e3c72';
+            inp.style.display = 'none';
+            inp.parentNode.appendChild(span);
+        });
     }
     
     downloadDirectPDF('stockPrintArea', 'Stock_Report', isFilteredLow ? false : true).finally(() => {
         if (isFilteredLow) {
             const allRows = document.querySelectorAll('#stockTableBody tr');
             allRows.forEach(row => row.style.display = '');
+            // إعادة إظهار حقول الإدخال
+            const inputs = document.querySelectorAll('#stockTableBody tr .req-qty-input');
+            inputs.forEach(inp => {
+                inp.style.display = '';
+                const span = inp.parentNode.querySelector('.req-qty-print-span');
+                if(span) span.remove();
+            });
         }
     });
 }
@@ -221,8 +240,7 @@ function renderUserDropdowns() {
     const selectEl = document.getElementById('entryUserSelect');
     const passSelectEl = document.getElementById('userSelectPass');
     
-    // تأكد من وجود مستخدمين
-    if (cloudUsers.length === 0) return;
+    if (!cloudUsers || cloudUsers.length === 0) return;
 
     const opts = cloudUsers.map(u => `<option value="${escapeHtml(u.username.toLowerCase())}">${escapeHtml(u.username.toUpperCase())}</option>`).join('');
     if (selectEl) selectEl.innerHTML = opts;
@@ -433,7 +451,7 @@ function syncToCloud(actionType, data) {
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: actionType, data: data })
     })
     .then(res => { if (!res.ok) throw new Error("HTTP error " + res.status); return res.json(); })
-    .catch(() => { queueOffline(actionType, data); toast('⚠️ تم وضع التحديث في طابور الانتظار لعدم توفر شبكة', 'warn'); });
+    .catch(() => { queueOffline(actionType, data); toast('⚠️ تم وضع التحديث في ط طابور الانتظار لعدم توفر شبكة', 'warn'); });
 }
 
 function queueOffline(actionType, data) {
@@ -623,6 +641,8 @@ function onBarcodeScanned(key, decodedText) {
 // ==========================================
 // Sales & Invoices
 // ==========================================
+
+// 2. تحديث خيارات وأزرار الطباعة بشكل احترافي
 function promptPrintCustomerReceipt() {
     if (invoiceItems.length === 0) {
         toast("⚠️ الفاتورة فارغة! أضف أصناف أولاً", "warn");
@@ -658,16 +678,13 @@ function executePrintCustomerReceipt() {
     }
 }
 
-// تعديل دالة الطباعة لتكون نظيفة ومنسقة
 function printCustomerReceiptBridge() {
-    if (invoiceItems.length === 0) {
-        toast("⚠️ الفاتورة فارغة! أضف أصناف أولاً", "warn");
-        return;
-    }
+    if (invoiceItems.length === 0) return;
 
-    let textReceipt = "=== Anjum Green Pharmacy ===\n";
-    textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
-    textReceipt += "--------------------------------\n";
+    // تم إزالة التاجات الغريبة واستبدالها بنصوص صافية ومناسبة للبريدج
+    let textReceipt = "--- Anjum Green Pharmacy ---\n";
+    textReceipt += `رقم الفاتورة: #${activeInvoiceId}\n`;
+    textReceipt += "------------------------------\n";
 
     let totalQtyCount = 0;
     let totalSellPriceSum = 0;
@@ -675,15 +692,17 @@ function printCustomerReceiptBridge() {
     invoiceItems.forEach(item => {
         totalQtyCount += item.qty;
         totalSellPriceSum += item.sellTotal;
-        textReceipt += `${item.name}\nكمية: ${item.qty}      السعر: ${item.sellTotal.toFixed(2)} ج.م\n`;
+        textReceipt += `${item.name}\n(الكمية: ${item.qty}) \vert{} (السعر: ${item.sellTotal.toFixed(2)})\n`;
     });
 
-    textReceipt += "--------------------------------\n";
+    textReceipt += "------------------------------\n";
     textReceipt += `إجمالي الأصناف: ${totalQtyCount}\n`;
-    textReceipt += `إجمالي السعر: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
-    textReceipt += "--------------------------------\n";
-    textReceipt += "[BARCODE]" + activeInvoiceId + "\n";
-    textReceipt += "🌿 نتمنى لكم الشفاء العاجل 🌿\n";
+    textReceipt += `إجمالي الفاتورة: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
+    textReceipt += "------------------------------\n";
+    
+    // الصيغة القياسية للباركود في Print Bridge
+    textReceipt += `[BARCODE]${activeInvoiceId}\n\n`;
+    textReceipt += "نتمنى لكم الشفاء العاجل\n";
 
     let encodedText = encodeURIComponent(textReceipt);
     window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
@@ -771,6 +790,157 @@ function printCustomerReceiptBrowser() {
     }, 300);
 }
 
+// 2. إعادة زر طباعة ملصق الباركود بجميع خياراته المتقدمة
+function promptPrintBarcodeLabel(prodId) {
+    const prod = findProductById(prodId);
+    if (!prod) { toast("❌ المنتج غير موجود!", 'error'); return; }
+    if (!prod.barcode) { toast("⚠️ لا يوجد باركود مسجل لهذا المنتج!", 'warn'); return; }
+
+    openModal(`
+        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">🏷️ خيارات طباعة الباركود</h3>
+        <p style="font-size:1.2rem; font-weight:bold; margin-bottom:20px; color:#27ae60; text-align:center;">${escapeHtml(prod.n)}</p>
+        
+        <div class="payment-grid" style="margin-bottom:15px; gap:10px;">
+            <div class="pay-box"><label>عدد الملصقات:</label><input type="number" id="lblCount" value="1" min="1" style="padding:10px;"></div>
+            <div class="pay-box"><label>حجم الخط (px):</label><input type="number" id="lblFont" value="12" min="4" max="24" style="padding:10px;"></div>
+            <div class="pay-box"><label>عرض الملصق (mm):</label><input type="number" id="lblW" value="38.1" step="0.01" style="padding:10px;" title="1.5 انش = 38.1 مم"></div>
+            <div class="pay-box"><label>طول الملصق (mm):</label><input type="number" id="lblH" value="25.4" step="0.01" style="padding:10px;" title="1 انش = 25.4 مم"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowName" checked style="margin-left:8px; transform:scale(1.2);"> اسم المنتج</label>
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPrice" checked style="margin-left:8px; transform:scale(1.2);"> السعر</label>
+            <label style="font-weight:bold; font-size:1rem; color:#1e3c72; cursor:pointer;"><input type="checkbox" id="lblShowPharmacy" checked style="margin-left:8px; transform:scale(1.2);"> الصيدلية</label>
+            <div class="pay-box" style="width:100%; margin-top:10px;">
+                <label style="font-size:1rem;">العملة الظاهرة:</label>
+                <select id="lblCurrency" style="font-weight:bold; color:#27ae60; padding:10px;">
+                    <option value="EGP">جنيه (EGP)</option>
+                    <option value="USD">دولار ($)</option>
+                    <option value="EUR">يورو (€)</option>
+                    <option value="GBP">استرليني (£)</option>
+                </select>
+            </div>
+            <label style="font-weight:bold; font-size:1rem; color:#c0392b; cursor:pointer; width:100%; text-align:center; margin-top:10px;">
+                <input type="checkbox" id="lblRotatePrint" style="margin-left:8px; transform:scale(1.2);"> 🔄 عكس أبعاد الورقة (دوران 90 درجة)
+            </label>
+        </div>
+
+        <div class="pay-box" style="margin-bottom:20px;">
+            <label style="font-size:1rem;">التطبيق الهدف للطباعة:</label>
+            <select id="lblTargetApp" style="font-weight:bold; color:#1e3c72; padding:10px;">
+                <option value="print_bridge">🚀 طباعة فورية (Print Bridge)</option>
+                <option value="android_share">📱 إرسال لتطبيق الطابعة (أندرويد / 4Barcode / MacroPous)</option>
+                <option value="direct">💻 الطباعة المباشرة (كمبيوتر / لاب توب)</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:10px;">
+            <button class="btn btn-purple" style="padding:12px 20px; font-size:1.1rem;" onclick="executeAdvancedPrint('${prodId}')">تنفيذ الطباعة 🖨️</button>
+            <button class="btn btn-gray" style="background:#7f8c8d; padding:12px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
+        </div>
+    `);
+}
+
+function executeAdvancedPrint(prodId) {
+    const prod = findProductById(prodId); if (!prod) return;
+    const targetApp = document.getElementById('lblTargetApp')?.value;
+
+    if (targetApp === 'print_bridge') {
+        if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
+        closeModal();
+        window.location.href = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
+        toast("✅ تم إرسال الباركود للطابعة!", "success");
+        return;
+    }
+
+    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
+    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
+    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
+    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
+    const showName = document.getElementById('lblShowName')?.checked;
+    const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
+    const isRotated = document.getElementById('lblRotatePrint')?.checked;
+    const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
+    closeModal();
+    
+    const guideMult = RATES.GUIDE_MULT || 3;
+    const safeName = escapeHtml(prod.n);
+    let baseEGP = prod.p * guideMult;
+    let finalPriceVal = baseEGP; let currencySymbol = 'ج.م';
+
+    if (selectedCurrency === 'USD') { finalPriceVal = baseEGP / (RATES.USD || 1); currencySymbol = '$'; }
+    else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = '€'; }
+    else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
+
+    const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
+    let printW = isRotated ? hMM : wMM; let printH = isRotated ? wMM : hMM;
+    let labelsHtml = '';
+
+    for (let i = 0; i < count; i++) {
+        labelsHtml += `
+            <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
+                <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    const printSec = document.getElementById('receiptPrintSection');
+    printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
+    printSec.style.display = 'block';
+
+    for (let i = 0; i < count; i++) {
+        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.1, height: 28, fontSize: 11, margin: 8, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
+    }
+
+    if (targetApp === 'android_share') {
+        toast("⏳ جاري تجهيز الملصق للأندرويد...", "info", 2000);
+        const element = document.querySelector('.custom-label-card'); 
+        html2canvas(element, { scale: 6, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
+            canvas.toBlob(async (blob) => {
+                const fileName = `Barcode_${prod.barcode}.png`;
+                const file = new File([blob], fileName, { type: 'image/png' });
+                
+                if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                    try {
+                        let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
+                        const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
+                        await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
+                        toast("✅ تم الإرسال بنجاح!", "success");
+                    } catch (err) { console.error('Share Plugin Failed:', err); }
+                } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({ files: [file], title: 'طباعة باركود', text: 'مشاركة لتطبيق الطابعة' });
+                        toast("✅ تم الإرسال بنجاح!", "success");
+                    } catch (err) {
+                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
+                    }
+                } else {
+                    const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
+                }
+                
+                printSec.style.display = 'none'; printSec.innerHTML = '';
+            }, 'image/png');
+        });
+    } else {
+        const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
+        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm${printH}mm; margin: 0 !important; } }`;
+        document.head.appendChild(pageStyle);
+        document.body.classList.add('printing-receipt');
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; const pStyle = document.getElementById('dynamic-page-size'); if(pStyle) pStyle.remove();
+            }, 500);
+        }, 300);
+    }
+}
+
 function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
     const q = query.toLowerCase().trim(); if (!q) { listEl.style.display = 'none'; return; }
     const barcodeMatched = products.find(p => p.barcode && p.barcode.toLowerCase() === q);
@@ -834,7 +1004,8 @@ function addToInvoice() {
     invoiceItems.push({
         productId: p.id, name: p.n, qty: qty, commUnitPrice: p.p, sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
         commTotal, sellTotal, netProfit, usd: u, eur: eu, gbp: g, egp: eg, visa: v,
-        seller: currentUser ? currentUser.username.toUpperCase() : 'Unknown' // إضافة اسم الكاشير
+        // تسجيل اسم الكاشير 
+        seller: currentUser ? currentUser.username.toUpperCase() : 'Unknown'
     });
     renderInvoice(); document.getElementById('productCard').style.display = 'none'; document.getElementById('searchInput').value = '';
 }
@@ -946,11 +1117,6 @@ function renderInvoice() {
     if (document.getElementById('liveTotalEGP')) document.getElementById('liveTotalEGP').textContent = finalPayable.toFixed(2) + ' ج.م';
 }
 
-function getItemPaidText(item) {
-    if (!item) return ''; 
-    return `${escapeHtml(item.name)} - كمية: ${item.qty}`;
-}
-
 function saveInvoice() {
     if (invoiceItems.length === 0) { toast('أضف منتجات للفاتورة أولاً!', 'warn'); return; }
     
@@ -969,7 +1135,7 @@ function saveInvoice() {
 
     invoiceItems.forEach(i => {
         totalSell += i.sellTotal; totalComm += i.commTotal; totalProfit += i.netProfit; 
-        itemsSummaryText.push(`${getItemPaidText(i)} (بائع: ${i.seller || 'Unknown'})`);
+        itemsSummaryText.push(`${escapeHtml(i.name)} - كمية: ${i.qty} (بائع: ${i.seller || 'Unknown'})`);
         const p = findProductById(i.productId) || products.find(p2 => p2.n === i.name); if (p) syncToCloud("updateSingleProduct", p);
     });
 
@@ -1005,7 +1171,7 @@ function searchInvoiceForReturn() {
     returnFoundInvoice = inv;
     let itemsStr = "";
     if (inv.items && Array.isArray(inv.items)) {
-        itemsStr = inv.items.map(i => `• ${i.name} (كمية: ${i.qty}) -${i.sellTotal.toFixed(2)} ج.م`).join("<br>");
+        itemsStr = inv.items.map(i => `• ${i.name} (كمية: ${i.qty}) - ${i.sellTotal.toFixed(2)} ج.م`).join("<br>");
     } else {
         itemsStr = inv.itemsText || "عنصر محفوظ";
     }
@@ -1114,557 +1280,6 @@ function exportFinanceExcel() {
     });
     const excelData = filtered.map((f, i) => ({ "#": i + 1, "التاريخ": f.date, "النوع": f.type === 'Revenue'?'إيراد':'مصروف', "التصنيف": f.category, "المبلغ (EGP)": f.amount, "ملاحظات": f.notes || "" }));
     const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المالية"); XLSX.writeFile(wb, `Finance_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
-
-// ==========================================
-// Stock Module
-// ==========================================
-function addNewProductToSystem() {
-    const name = document.getElementById('newProdName')?.value.trim(); const price = parseFloat(document.getElementById('newProdPrice')?.value) || 0; const qty = parseInt(document.getElementById('newProdQty')?.value) || 0; const barcode = document.getElementById('newProdBarcode')?.value.trim(); const expiry = document.getElementById('newProdExpiry')?.value;
-    if (!name) { toast('أدخل اسم المنتج!', 'warn'); return; }
-    if (products.find(p => p.n.toLowerCase() === name.toLowerCase())) { toast(`⚠️ اسم المنتج [${name}] مسجل بالفعل!`, 'error'); return; }
-    if (barcode && products.find(p => p.barcode && p.barcode.toLowerCase() === barcode.toLowerCase())) { toast(`⚠️ الباركود [${barcode}] مسجل بالفعل!`, 'error'); return; }
-
-    const productToSync = { id: uid(), n: name, p: price, q: qty, barcode, expiry };
-    products.push(productToSync); saveProductsToStorage(); syncToCloud("updateSingleProduct", productToSync); updateAlertsBar();
-
-    toast(`✅ تم حفظ المنتج (${name}) بنجاح!`, 'success');
-    if (document.getElementById('newProdName')) document.getElementById('newProdName').value = ''; if (document.getElementById('newProdBarcode')) document.getElementById('newProdBarcode').value = '';
-}
-
-function searchAddStockProduct() { genericProductSearch(document.getElementById('addStockSearch')?.value || '', document.getElementById('addStockResults'), (p) => pickAddStockProduct(p.id)); }
-
-function pickAddStockProduct(prodId) {
-    const p = findProductById(prodId); if (!p) return; selectedStockProdId = p.id;
-    document.getElementById('addStockResults').style.display = 'none'; document.getElementById('addStockSearch').value = p.n; document.getElementById('addStockName').textContent = p.n; document.getElementById('currentStockVal').textContent = p.q; document.getElementById('addStockCard').style.display = 'block';
-}
-
-function saveStockAddition() {
-    const p = findProductById(selectedStockProdId); if (!p) return;
-    const addQty = parseInt(document.getElementById('newStockQty')?.value) || 0; p.q += addQty;
-    saveProductsToStorage(); syncToCloud("updateSingleProduct", p); updateAlertsBar();
-
-    toast(`✅ تم التزويد (${p.n}) بـ ${addQty} وحدة! الإجمالي: ${p.q}`, 'success');
-    document.getElementById('addStockCard').style.display = 'none'; document.getElementById('addStockSearch').value = ''; renderStockTable();
-}
-
-function isManagerUser() { return currentUser && (currentUser.username === 'admin' || currentUser.username === 'cs2' || currentUser.role === 'Admin'); }
-
-function editProductSystem(prodId) {
-    if (!isManagerUser()) { toast("❌ متاح للمديرين فقط!", 'error'); return; }
-    const prod = findProductById(prodId); if (!prod) return;
-
-    openModal(`
-        <h3 style="text-align:center; color:#1e3c72; margin-bottom:15px; font-size:1.4rem; font-weight:800;">✏️ تعديل بيانات المنتج</h3>
-        <div class="payment-grid">
-            <div class="pay-box" style="grid-column:span 2;"><label>اسم المنتج</label><input type="text" id="editName" value="${escapeHtml(prod.n)}" style="padding:12px; font-size:1.1rem;"></div>
-            <div class="pay-box"><label>سعر الجملة (EGP)</label><input type="number" id="editPrice" value="${prod.p}" style="padding:12px; font-size:1.1rem;"></div>
-            <div class="pay-box"><label>الكمية المتاحة</label><input type="number" id="editQty" value="${prod.q}" style="padding:12px; font-size:1.1rem;"></div>
-            <div class="pay-box"><label>الباركود</label><input type="text" id="editBarcode" value="${escapeHtml(prod.barcode || '')}" style="padding:12px; font-size:1.1rem;"></div>
-            <div class="pay-box"><label>تاريخ الصلاحية</label><input type="date" id="editExpiry" value="${escapeHtml(prod.expiry || '')}" style="padding:12px; font-size:1.1rem;"></div>
-        </div>
-        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
-            <button class="btn btn-green" style="padding:10px 20px; font-size:1.1rem;" onclick="saveProductEdit('${prodId}')">حفظ التعديل ✅</button>
-            <button class="btn btn-gray" style="background:#7f8c8d; padding:10px 20px; font-size:1.1rem;" onclick="closeModal()">إلغاء</button>
-        </div>
-    `);
-}
-
-function saveProductEdit(prodId) {
-    const prod = findProductById(prodId); if (!prod) return;
-    const newName = document.getElementById('editName')?.value.trim(); const newBarcode = document.getElementById('editBarcode')?.value.trim();
-
-    if (newName && newName.toLowerCase() !== prod.n.toLowerCase() && products.find(p => p.id !== prodId && p.n.toLowerCase() === newName.toLowerCase())) { toast(`⚠️ الاسم [${newName}] مكرر!`, 'error'); return; }
-    if (newBarcode && newBarcode.toLowerCase() !== (prod.barcode || '').toLowerCase() && products.find(p => p.id !== prodId && p.barcode && p.barcode.toLowerCase() === newBarcode.toLowerCase())) { toast(`⚠️ الباركود [${newBarcode}] مكرر!`, 'error'); return; }
-
-    prod.n = newName || prod.n; prod.p = parseFloat(document.getElementById('editPrice')?.value) || prod.p; prod.q = parseInt(document.getElementById('editQty')?.value); if (isNaN(prod.q)) prod.q = 0; prod.barcode = newBarcode; prod.expiry = document.getElementById('editExpiry')?.value.trim();
-    saveProductsToStorage(); syncToCloud("updateSingleProduct", prod); updateAlertsBar(); closeModal();
-    toast(`✅ تم التحديث (${prod.n})!`, 'success'); renderStockTable();
-}
-
-function scanAndEditProductBarcode(prodId) {
-    if (!findProductById(prodId)) return; 
-    selectedStockEditProductId = prodId; 
-    openFloatingCamera();
-}
-
-function deleteProductSystem(prodId) {
-    if (!isManagerUser()) { toast("❌ متاح للمديرين فقط!", 'error'); return; }
-    const prod = findProductById(prodId); if (!prod) return;
-    confirmModal(`هل أنت متأكد من حذف المنتج (${prod.n}) بالكامل؟`, () => {
-        syncToCloud("deleteProduct", { id: prod.id, name: prod.n }); products = products.filter(p => p.id !== prodId);
-        saveProductsToStorage(); updateAlertsBar(); toast(`🗑️ تم الحذف!`, 'success'); renderStockTable();
-    });
-}
-
-function toggleSelectAllLowStock(checkboxEl) {
-    const isChecked = checkboxEl.checked;
-    const itemCheckboxes = document.querySelectorAll('.low-stock-check');
-    itemCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-        toggleLowStockRowSelection(cb);
-    });
-}
-
-function toggleLowStockRowSelection(cb) {
-    const tr = cb.closest('tr');
-    if (!tr) return;
-    if (cb.checked) {
-        tr.classList.add('pdf-selected-row');
-    } else {
-        tr.classList.remove('pdf-selected-row');
-    }
-}
-
-function stockRowHtml(p, index, rowClass, statusSuffix) {
-    const guideMult = RATES.GUIDE_MULT || 3;
-    const isFilteredLow = isLowStockModeActive;
-    
-    // النواقص لها جدول مخصص بمسلسل عادي
-    if (isFilteredLow) {
-        return `
-        <tr class="low-stock-row pdf-selected-row">
-            <td class="no-pdf"><input type="checkbox" class="low-stock-check" checked onchange="toggleLowStockRowSelection(this)"></td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#1e3c72;">${index + 1}</td>
-            <td style="text-align:right; font-weight:bold; white-space:normal; font-size:1.05rem;">${escapeHtml(p.n)}</td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#c0392b;">${(p.p || 0).toFixed(2)} ج.م</td>
-            <td><input type="number" placeholder="الكمية المطلوبة..." style="width:100%; padding:5px; border:1px solid #ccc; border-radius:5px; text-align:center;"></td>
-        </tr>`;
-    }
-
-    return `
-    <tr class="${rowClass}">
-        <td style="font-weight:bold;">${index + 1}</td>
-        <td style="text-align:right; font-weight:bold; white-space:normal; font-size:1.05rem;">${escapeHtml(p.n)}${statusSuffix}</td>
-        <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${p.q}</td>
-        <td style="font-weight:bold;">${p.p.toFixed(2)}</td>
-        <td style="color:#27ae60; font-weight:bold; font-size:1.1rem;">${(p.p * guideMult).toFixed(2)}</td>
-        <td style="font-family:monospace; font-weight:bold; color:#e67e22; direction:ltr; font-size:1.05rem;">${escapeHtml(p.barcode || '-')}</td>
-        <td style="direction:ltr; font-weight:bold;">${escapeHtml(p.expiry || '-')}</td>
-        <td class="no-pdf">
-            <button class="btn btn-blue" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="editProductSystem('${p.id}')">تعديل ✏️</button>
-            <button class="btn btn-purple" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="scanAndEditProductBarcode('${p.id}')">باركود 📷</button>
-            <button class="btn btn-red" style="padding: 6px 12px; font-size: 0.9rem; margin: 2px;" onclick="deleteProductSystem('${p.id}')">حذف 🗑️</button>
-        </td>
-    </tr>`;
-}
-
-function renderStockTable(filter = '') {
-    const tbody = document.getElementById('stockTableBody'); if (!tbody) return;
-    const thead = document.getElementById('stockTableHead');
-    if (thead) {
-        thead.innerHTML = `
-            <tr>
-                <th style="width:40px;">#</th>
-                <th>المنتج</th>
-                <th>الكمية</th>
-                <th>سعر الجملة</th>
-                <th id="thStockGuideHead">الحد الأدنى (×${RATES.GUIDE_MULT || 3})</th>
-                <th>الباركود</th>
-                <th>الصلاحية</th>
-                <th class="no-pdf" style="width:220px;">الإجراءات</th>
-            </tr>`;
-    }
-
-    if(document.getElementById('stockReportSubtitle')) document.getElementById('stockReportSubtitle').textContent = "تقرير المخزون الشامل";
-
-    const f = filter.toLowerCase(); const matched = products.filter(p => (p.n && p.n.toLowerCase().includes(f)) || (p.barcode && p.barcode.toLowerCase().includes(f))); const today = new Date();
-
-    tbody.innerHTML = matched.map((p, index) => {
-        let expRowClass = '', expStatusText = '';
-        if (p.expiry) {
-            const diffDays = (new Date(p.expiry) - today) / 86400000;
-            if (diffDays < 0) { expRowClass = 'exp-expired-row'; expStatusText = ' 🔴 (منتهي)'; } else if (diffDays <= 90) { expRowClass = 'exp-warning-row'; expStatusText = ' 🟡 (قريب الانتهاء)'; }
-        }
-        const rowStyle = p.q <= 3 ? 'low-stock-row' : expRowClass; const suffix = (p.q <= 3 ? ' ⚠️ (نواقص)' : '') + expStatusText;
-        return stockRowHtml(p, index, rowStyle, suffix);
-    }).join('');
-}
-
-function filterStockTable(val) { renderStockTable(val); }
-
-function filterLowStock() {
-    isLowStockModeActive = true;
-    if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
-    
-    const thead = document.getElementById('stockTableHead');
-    if (thead) {
-        thead.innerHTML = `
-            <tr>
-                <th id="thSelectHead" style="width:40px;" class="no-pdf"><input type="checkbox" id="selectAllLowStockToggle" checked onchange="toggleSelectAllLowStock(this)"></th>
-                <th style="width:50px;">#</th>
-                <th>اسم الصنف</th>
-                <th>السعر التجاري</th>
-                <th>الكمية المطلوبة</th>
-            </tr>`;
-    }
-
-    if(document.getElementById('stockReportSubtitle')) document.getElementById('stockReportSubtitle').textContent = "تقرير النواقص والأصناف المطلوبة";
-
-    const matched = products.filter(p => p.q <= 3).sort((a, b) => a.n.localeCompare(b.n, 'ar'));
-    let sumTradePrice = 0;
-
-    const tbody = document.getElementById('stockTableBody');
-    if (tbody) {
-        tbody.innerHTML = matched.map((p, index) => {
-            sumTradePrice += (p.p || 0);
-            return stockRowHtml(p, index, 'low-stock-row', '');
-        }).join('');
-
-        tbody.innerHTML += `
-            <tr class="total-row">
-                <td colspan="3" style="text-align:right; font-weight:900;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
-                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.2rem;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
-            </tr>
-        `;
-    }
-}
-
-function filterNearExpiryOneMonth() {
-    isLowStockModeActive = false;
-    if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
-    const today = new Date();
-    const matched = products.filter(p => { if (!p.expiry) return false; return ((new Date(p.expiry) - today) / 86400000) <= 30; });
-    if (matched.length === 0) { toast('🟢 لا توجد أصناف صلاحيتها قريبة جداً!', 'success'); renderStockTable(); return; }
-    
-    renderStockTable();
-    const tbody = document.getElementById('stockTableBody');
-    if (tbody) {
-        tbody.innerHTML = matched.map((p, index) => {
-            const isExpired = ((new Date(p.expiry) - today) / 86400000) < 0;
-            return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 منتهي)' : ' (⚠️ قريب جداً)');
-        }).join('');
-    }
-}
-
-// ==========================================
-// Reporting Module
-// ==========================================
-
-function exportSalesReportExcel() {
-    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = savedInvoices.filter(inv => {
-        if (!inv.date) return true; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return false; if (toD && invD > toD) return false; return true;
-    });
-
-    const excelData = filteredInvoices.map((inv, i) => {
-        let cleanItems = '';
-        if (inv.items && Array.isArray(inv.items)) {
-            cleanItems = inv.items.map(item => `${item.name} (الكمية:${item.qty})`).join(' | ');
-        } else {
-            cleanItems = inv.itemsText ? inv.itemsText.replace(/<br>/g, ' | ').replace(/&rlm;/g, '').trim() : "عنصر محفوظ";
-        }
-        return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صافي الربح": inv.netProfit || 0 };
-    });
-
-    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
-}
-
-function buildInvoiceTally(filteredInvoices) {
-    let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
-    let grandTotalSell = 0, grandNetProfit = 0, grandTotalComm = 0; 
-    const productStats = {}; const perInvoice = [];
-    const monthlySales = {};
-
-    filteredInvoices.forEach(inv => {
-        let u = 0, eu = 0, g = 0, eg = 0, v = 0; let itemsListHtml = "";
-        
-        let dStr = inv.date ? inv.date.substring(0, 10) : "";
-        let monthKey = "غير معروف";
-        if (dStr.length >= 7) { monthKey = dStr.substring(0, 7); }
-        
-        monthlySales[monthKey] = (monthlySales[monthKey] || 0) + (inv.totalEGP || 0);
-
-        if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
-            itemsListHtml = inv.items.map(i => {
-                u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
-                if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
-                // تلوين وإبراز اسم البائع إن وجد
-                let sellerTag = i.seller ? ` <span style="font-size:0.85rem; color:#8e44ad; font-weight:bold;">(كاشير: ${escapeHtml(i.seller)})</span>` : '';
-                return `صنف: ${escapeHtml(i.name)}${sellerTag} \vert{} كمية: ${i.qty}`;
-            }).join('<br>');
-        } else {
-            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
-            itemsListHtml = itemsListHtml.replace(/\|?\s*(بائع|Seller):.*?(?=(\||$))/gi, '').trim();
-            
-            u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
-
-            (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
-                const namePart = raw.split(' | ')[0] || raw;
-                const cleanName = namePart.replace(/صنف:/g, '').replace(/<[^>]*>?/gm, '').trim();
-                const qtyMatch = raw.match(/كمية:\s*(\d+)/); const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
-                if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty;
-            });
-        }
-        
-        sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v; grandTotalSell += inv.totalEGP || 0; grandNetProfit += inv.netProfit || 0; grandTotalComm += inv.totalComm || 0;
-        perInvoice.push({ inv, u, eu, g, eg, v, itemsListHtml });
-    });
-
-    const sortedTop = Object.keys(productStats).map(name => ({ name, qty: productStats[name] })).sort((a, b) => b.qty - a.qty);
-    return { sumUSD, sumEUR, sumGBP, sumEGP, sumVISA, grandTotalSell, grandNetProfit, grandTotalComm, sortedTop, perInvoice, monthlySales };
-}
-
-function filteredInvoicesByRange(fromD, toD) {
-    return savedInvoices.filter(inv => { if (!inv.date) return true; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return false; if (toD && invD > toD) return false; return true; });
-}
-
-function generateReport() {
-    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
-    const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
-
-    if (filteredInvoices.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
-        if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
-        if (document.getElementById('advancedChartsArea')) document.getElementById('advancedChartsArea').style.display = 'none';
-        return;
-    }
-
-    const tally = buildInvoiceTally(filteredInvoices);
-
-    const rowsHtml = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
-        let payStr = ``;
-        if(u > 0) payStr += `$ ${u} | `;
-        if(eu > 0) payStr += `€ ${eu} | `;
-        if(g > 0) payStr += `£ ${g} | `;
-        if(v > 0) payStr += `💳 ${v} | `;
-        payStr += `${eg} ج.م`;
-
-        const cleanDateStr = formatDateDisplay(inv.date);
-        return `
-        <tr>
-            <td style="font-weight:bold; font-size:1.05rem;">${index + 1}</td>
-            <td style="font-weight:bold; font-size:1.05rem; color:#e67e22;">#${inv.id}</td>
-            <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
-            <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
-            <td style="font-weight:bold; direction:rtl;">${payStr}</td>
-            <td style="color:#2c3e50; font-weight:bold; font-size:1.1rem;">${(inv.totalComm || 0).toFixed(2)}</td>
-            <td style="color:#e67e22; font-weight:bold; font-size:1.1rem;">${inv.discount || 0}%</td>
-            <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
-            <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
-            <td class="no-pdf">
-                <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
-                <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
-            </td>
-        </tr>`;
-    }).join('');
-
-    const totalRowHtml = `
-    <tr class="total-row">
-        <td colspan="5" style="text-align: right; color: #1e3c72; padding: 12px;">الإجماليات الكلية للفترة المحددة:</td>
-        <td style="color: #2c3e50;">${tally.grandTotalComm.toFixed(2)}</td>
-        <td>-</td>
-        <td style="color: #27ae60;">${tally.grandTotalSell.toFixed(2)}</td>
-        <td style="color: #8e44ad;">${tally.grandNetProfit.toFixed(2)}</td>
-        <td class="no-pdf"></td>
-    </tr>`;
-
-    tbody.innerHTML = rowsHtml + totalRowHtml;
-
-    const cardsContainer = document.getElementById('reportSummaryCardsContainer');
-    if (cardsContainer) {
-        cardsContainer.innerHTML = `
-            <div class="english-summary-card net">
-                <div class="title">Net 💰 Profit Total</div>
-                <div class="value">${tally.grandNetProfit.toFixed(2)} EGP</div>
-            </div>
-            <div class="english-summary-card gross">
-                <div class="title">Gross 🛒 Sales Total</div>
-                <div class="value">${tally.grandTotalSell.toFixed(2)} EGP</div>
-            </div>
-            <div class="english-summary-card visa">
-                <div class="title">Total 💳 Visa</div>
-                <div class="value">${tally.sumVISA.toFixed(2)} EGP</div>
-            </div>
-            <div class="english-summary-card cash">
-                <div class="title">Cash 💵 & FX Total</div>
-                <div class="value">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)}<br>EGP: ${tally.sumEGP.toFixed(2)}</div>
-            </div>
-        `;
-    }
-
-    const chartContainer = document.getElementById('advancedChartsArea');
-    if (chartContainer) {
-        chartContainer.style.display = 'flex';
-        
-        const monthKeys = Object.keys(tally.monthlySales).sort();
-        let monthlyChartTitle = 'مبيعات الشهور';
-        if (monthKeys.length === 2) monthlyChartTitle = 'مقارنة المبيعات (الشهر الحالي والسابق)';
-        else if (monthKeys.length > 2) monthlyChartTitle = 'تحليل نمو المبيعات الشهرية';
-
-        if(window.monthlyChartInst) window.monthlyChartInst.destroy();
-        if(monthKeys.length > 0) {
-            window.monthlyChartInst = new Chart(document.getElementById('monthlyChart'), {
-                type: 'bar',
-                data: {
-                    labels: monthKeys,
-                    datasets: [{
-                        label: 'إجمالي المبيعات (ج.م)',
-                        data: monthKeys.map(k => tally.monthlySales[k]),
-                        backgroundColor: '#3498db',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    animation: false, responsive: true, maintainAspectRatio: false,
-                    plugins: { title: { display: true, text: monthlyChartTitle, font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
-                }
-            });
-        }
-
-        const top10 = tally.sortedTop.slice(0, 10);
-        if(window.topProductsChartInstance) window.topProductsChartInstance.destroy();
-        if(top10.length > 0) {
-            const niceColors = ['#3498db', '#9b59b6', '#e67e22', '#1abc9c', '#f1c40f', '#e74c3c', '#34495e', '#16a085', '#27ae60', '#2980b9'];
-            window.topProductsChartInstance = new Chart(document.getElementById('topProductsChart'), {
-                type: 'bar',
-                data: {
-                    labels: top10.map(p => p.name.length > 20 ? p.name.substring(0, 20) + '...' : p.name),
-                    datasets: [{
-                        label: 'الكمية المباعة',
-                        data: top10.map(p => p.qty),
-                        backgroundColor: niceColors.slice(0, top10.length),
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    animation: false, responsive: true, maintainAspectRatio: false,
-                    plugins: { title: { display: true, text: 'أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
-                }
-            });
-        }
-    }
-}
-
-function loadInvoiceToEdit(invId) {
-    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
-    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
-    showTab('salesTab'); loadInvoiceIntoForm(inv);
-}
-
-function cancelInvoiceSystem(invId) {
-    const invIdx = savedInvoices.findIndex(i => i.id === invId); if (invIdx === -1) return;
-    const inv = savedInvoices[invIdx];
-
-    confirmModal(`هل أنت متأكد من حذف وإلغاء الفاتورة #${invId} وإرجاع أصنافها للمخزون؟`, () => {
-        if (inv.items && Array.isArray(inv.items)) {
-            inv.items.forEach(item => { 
-                const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); 
-                if (p) { 
-                    p.q += item.qty; 
-                    syncToCloud("updateSingleProduct", p); 
-                } 
-            });
-            saveProductsToStorage(); renderStockTable(); updateAlertsBar();
-        }
-
-        savedInvoices.splice(invIdx, 1); saveInvoicesToStorage(); syncToCloud("deleteInvoice", { id: invId });
-        toast(`🗑️ تم حذف الفاتورة #${invId} وإرجاع الأصناف للمخزون!`, 'success'); fetchCloudInvoicesData();
-    });
-}
-
-function handleNetProfitAction() {
-    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
-    
-    generateReport();
-
-    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
-    const deductExp = document.getElementById('deductExpensesToggle')?.checked || false;
-
-    const filteredInvoices = filteredInvoicesByRange(fromD, toD); const tally = buildInvoiceTally(filteredInvoices);
-    let netProfit = tally.grandNetProfit;
-
-    if (deductExp) {
-        let totalExpensesInPeriod = 0;
-        savedFinances.forEach(f => {
-            if (f.type === 'Expense') {
-                if (!f.date) return; const fD = f.date.slice(0, 10); if (fromD && fD < fromD) return; if (toD && fD > toD) return; totalExpensesInPeriod += (parseFloat(f.amount) || 0);
-            }
-        });
-        netProfit -= totalExpensesInPeriod;
-
-        const cardsContainer = document.getElementById('reportSummaryCardsContainer');
-        if (cardsContainer) {
-            const netCard = cardsContainer.querySelector('.english-summary-card.net .value');
-            if (netCard) {
-                netCard.textContent = netProfit.toFixed(2) + ' EGP';
-                toast(`تم خصم المصروفات الحالية (${totalExpensesInPeriod} EGP)`, 'info', 4000);
-            }
-        }
-    }
-}
-
-function clearSingleProductReportSearch() {
-    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = '';
-    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
-    const display = document.getElementById('singleProdReportDisplay');
-    if (display) { display.style.display = 'none'; display.innerHTML = ''; }
-}
-
-function searchSingleProductReport() {
-    const query = document.getElementById('singleProdSearchInput')?.value.trim() || '';
-    const list = document.getElementById('singleProductReportResults'); const display = document.getElementById('singleProdReportDisplay');
-    if (!query) { if(list) list.style.display = 'none'; if(display) display.style.display = 'none'; return; }
-
-    const q = query.toLowerCase(); const matchedProds = products.filter(p => p.n && p.n.toLowerCase().includes(q));
-
-    if (matchedProds.length > 0 && query.length < 3) {
-        list.innerHTML = matchedProds.map(p => `<div class="result-item" data-name="${escapeHtml(p.n)}"><span style="font-weight:bold; color:#1e3c72;">${escapeHtml(p.n)}</span></div>`).join('');
-        list.querySelectorAll('.result-item').forEach(el => el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
-        list.style.display = 'block';
-    } else { if(list) list.style.display = 'none'; generateSingleProductDetailsReport(query); }
-}
-
-function generateSingleProductDetailsReport(productName) {
-    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = productName;
-    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
-    const display = document.getElementById('singleProdReportDisplay');
-    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
-
-    let totalQtySold = 0, totalRevenue = 0; const salesHistory = []; const needle = productName.toLowerCase();
-
-    savedInvoices.forEach(inv => {
-        if (!inv.date) return; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return; if (toD && invD > toD) return;
-
-        if (inv.items && Array.isArray(inv.items)) {
-            inv.items.forEach(i => {
-                if (i.name && i.name.toLowerCase().includes(needle)) {
-                    totalQtySold += parseInt(i.qty) || 1; totalRevenue += parseFloat(i.sellTotal) || 0;
-                    salesHistory.push({ invId: inv.id, date: inv.date, qty: i.qty, sellTotal: i.sellTotal, seller: i.seller || 'Unknown' });
-                }
-            });
-        } else if (inv.itemsText && inv.itemsText.toLowerCase().includes(needle)) {
-            salesHistory.push({ invId: inv.id, date: inv.date, qty: 1, sellTotal: inv.totalEGP || 0, seller: 'عنصر محفوظ' }); totalQtySold += 1; totalRevenue += inv.totalEGP || 0;
-        }
-    });
-
-    if (!display) return;
-    if (salesHistory.length === 0) {
-        display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; font-size:1.1rem; padding:15px;">⚠️ لا توجد مبيعات للمنتج [${escapeHtml(productName)}] في الفترة المحددة!</div>`; display.style.display = 'block'; return;
-    }
-
-    const rows = salesHistory.map((h, idx) => `
-        <tr>
-            <td style="font-weight:bold;">${idx + 1}</td>
-            <td style="font-weight:bold; color:#e67e22; font-size:1.1rem;">#${h.invId}</td>
-            <td style="direction:ltr; font-weight:bold;">${escapeHtml(formatDateDisplay(h.date))}</td>
-            <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${h.qty}</td>
-            <td style="font-weight:bold; color:#27ae60; font-size:1.1rem;">${parseFloat(h.sellTotal).toFixed(2)}</td>
-            <td style="font-weight:bold;">${escapeHtml(h.seller)}</td>
-        </tr>`).join('');
-
-    display.innerHTML = `
-        <h3 style="color:#1e3c72; text-align:center; margin-bottom:15px; font-weight:800;">📦 تقرير مبيعات المنتج: <span style="color:#27ae60;">${escapeHtml(productName)}</span></h3>
-        <div class="info-row" style="background:#eef7fe; padding:15px; border-radius:8px; margin-bottom:15px;">
-            <div style="font-size:1.05rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.3rem; font-weight:bold;">${totalQtySold}</span></div>
-            <div style="font-size:1.05rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.3rem; font-weight:bold;">${totalRevenue.toFixed(2)} ج.م</span></div>
-        </div>
-        <div class="table-responsive"><table>
-            <thead><tr style="background-color:#1e3c72; color:white;"><th>#</th><th>رقم الفاتورة</th><th>التاريخ والوقت</th><th>الكمية</th><th>المبلغ الإجمالي</th><th>البائع</th></tr></thead>
-            <tbody>${rows}</tbody>
-        </table></div>`;
-    display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
 }
 
 // ==========================================
