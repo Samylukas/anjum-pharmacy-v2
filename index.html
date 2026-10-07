@@ -150,10 +150,12 @@
         .modern-date-row label { font-weight: bold; color: #1e3c72; font-size: 0.95rem; }
         .modern-date-row input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; outline: none; font-family: inherit; }
 
-        @media print {
+       @media print {
             body.printing-receipt > *:not(#receiptPrintSection) { display: none !important; }
-            html, body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
-            body.printing-receipt #receiptPrintSection { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; }
+            html, body.printing-receipt { margin: 0 !important; padding: 0 !important; background: #fff !important; height: auto !important; overflow: visible !important; }
+            /* إجبار الفاتورة على البدء من أعلى اليسار أو اليمين وعدم التوسط في الصفحة */
+            body.printing-receipt { align-items: flex-start !important; justify-content: flex-start !important; text-align: right !important; }
+            #receiptPrintSection { display: block !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 0 !important; width: 80mm !important; height: auto !important; }
             .custom-label-card { border: none !important; margin: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; }
             #reportLoader { display: none !important; }
         }
