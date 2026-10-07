@@ -1224,70 +1224,95 @@ function executeAdvancedPrint(prodId) {
     else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = '£'; }
 
     const finalPriceStr = showPrice ? `السعر: ${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
-    let printW = isRotated ? hMM : wMM; let printH = isRotated ? wMM : hMM;
+    
+    let printW = isRotated ? hMM : wMM; 
+    let printH = isRotated ? wMM : hMM;
+    
+    // التحويل للبيكسل عشان الموبايل ومكتبة الرسم يقروا الأبعاد صح (1 ملم = ~3.78 بيكسل)
+    let pxW = Math.round(printW * 3.7795);
+    let pxH = Math.round(printH * 3.7795);
+    let innerPxW = Math.round(wMM * 3.7795);
+    let innerPxH = Math.round(hMM * 3.7795);
+
     let labelsHtml = '';
 
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; background: #fff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0;">
-                <div style="display: flex; flex-direction: column; justify-content: space-evenly; align-items: center; width: ${wMM}mm; height: ${hMM}mm; padding: 0.5mm 0; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1;">Anjum Green Pharmacy</div>` : ''}
-                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1; max-width: ${wMM - 1}mm; overflow: hidden; white-space: nowrap;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="shape-rendering: crispEdges; height: 28px;"></svg>
-                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1;">${finalPriceStr}</div>` : ''}
+            <div class="custom-label-card" style="width: ${pxW}px; height:${pxH}px; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; position: relative;">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${innerPxW}px; height: ${innerPxH}px; padding: 2px; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''} text-align:center;">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1.2; margin-bottom: 2px;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.2; max-width: 95\%; overflow: hidden; white-space: nowrap; margin-bottom: 2px;">${safeName}</div>` : ''}
+                    <svg id="bcode-${i}" style="margin:0; padding:0;"></svg>
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.2; margin-top: 2px;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.innerHTML = `<div class="barcode-print-container">${labelsHtml}</div>`;
-    printSec.style.display = 'block';
+    // نخرجه بره الشاشة بدل إخفاؤه تماماً، عشان نعرف نصوره بجودة عالية في الموبايل
+    printSec.style.cssText = 'display: block; position: absolute; left: -9999px; top: -9999px; background: #fff; z-index: -1;';
+    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; gap:10px;">${labelsHtml}</div>`;
 
     for (let i = 0; i < count; i++) {
-        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.1, height: 28, fontSize: 11, margin: 8, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
+        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.2, height: 26, fontSize: 12, margin: 2, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
     }
 
     if (targetApp === 'android_share') {
         toast("⏳ جاري تجهيز الملصق للأندرويد...", "info", 2000);
-        const element = document.querySelector('.custom-label-card'); 
-        html2canvas(element, { scale: 6, useCORS: true, backgroundColor: '#ffffff' }).then(canvas => {
-            canvas.toBlob(async (blob) => {
-                const fileName = `Barcode_${prod.barcode}.png`;
-                const file = new File([blob], fileName, { type: 'image/png' });
-                
-                if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
-                    try {
-                        let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
-                        const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
-                        await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
-                        toast("✅ تم الإرسال بنجاح!", "success");
-                    } catch (err) { console.error('Share Plugin Failed:', err); }
-                } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try {
-                        await navigator.share({ files: [file], title: 'طباعة باركود', text: 'مشاركة لتطبيق الطابعة' });
-                        toast("✅ تم الإرسال بنجاح!", "success");
-                    } catch (err) {
-                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
+        
+        // إعطاء المتصفح نصف ثانية لرسم الباركود والنصوص قبل التصوير
+        setTimeout(() => {
+            const element = document.querySelector('.custom-label-card'); 
+            html2canvas(element, { scale: 4, useCORS: true, backgroundColor: '#ffffff', logging: false }).then(canvas => {
+                canvas.toBlob(async (blob) => {
+                    const fileName = `Barcode_${prod.barcode}.png`;
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    
+                    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+                        try {
+                            let base64data = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, "");
+                            const savedFile = await window.Capacitor.Plugins.Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
+                            await window.Capacitor.Plugins.Share.share({ title: 'طباعة الباركود', url: savedFile.uri, dialogTitle: 'إرسال إلى الطابعة' });
+                            toast("✅ تم الإرسال بنجاح!", "success");
+                        } catch (err) { console.error('Share Plugin Failed:', err); }
+                    } else if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({ files: [file], title: 'طباعة باركود', text: 'مشاركة لتطبيق الطابعة' });
+                            toast("✅ تم الإرسال بنجاح!", "success");
+                        } catch (err) {
+                            const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم حفظ الصورة.", "success", 4000);
+                        }
+                    } else {
+                        const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
                     }
-                } else {
-                    const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); toast("✅ تم التنزيل! افتح تطبيق الطابعة واطبع الصورة.", "success", 4000);
-                }
-                
-                printSec.style.display = 'none'; printSec.innerHTML = '';
-            }, 'image/png');
-        });
+                    
+                    printSec.style.cssText = 'display: none;'; printSec.innerHTML = '';
+                }, 'image/png');
+            });
+        }, 500); 
     } else {
+        printSec.style.cssText = 'display: block;';
         const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm${printH}mm; margin: 0 !important; } }`;
+        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } }`;
         document.head.appendChild(pageStyle);
         document.body.classList.add('printing-receipt');
         setTimeout(() => {
             window.print();
+            window.onafterprint = () => {
+                document.body.classList.remove('printing-receipt'); 
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = ''; 
+                if(pageStyle) pageStyle.remove();
+                window.onafterprint = null;
+            };
             setTimeout(() => {
-                document.body.classList.remove('printing-receipt'); printSec.style.display = 'none'; printSec.innerHTML = ''; const pStyle = document.getElementById('dynamic-page-size'); if(pStyle) pStyle.remove();
-            }, 500);
-        }, 300);
+                document.body.classList.remove('printing-receipt'); 
+                printSec.style.display = 'none'; 
+                printSec.innerHTML = ''; 
+                if(pageStyle) pageStyle.remove();
+            }, 120000);
+        }, 500);
     }
 }
 
