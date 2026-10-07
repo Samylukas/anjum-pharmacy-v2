@@ -1195,4 +1195,430 @@ function filterLowStock() {
         tbody.innerHTML += `
             <tr class="total-row">
                 <td colspan="3" style="text-align:right; font-weight:900;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
-                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.2rem;">الإجمالي التجاري: ${sum
+                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.2rem;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
+            </tr>
+        `;
+    }
+}
+
+function filterNearExpiryOneMonth() {
+    isLowStockModeActive = false;
+    if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
+    const today = new Date();
+    const matched = products.filter(p => { if (!p.expiry) return false; return ((new Date(p.expiry) - today) / 86400000) <= 30; });
+    if (matched.length === 0) { toast('🟢 لا توجد أصناف صلاحيتها قريبة جداً!', 'success'); renderStockTable(); return; }
+    
+    renderStockTable();
+    const tbody = document.getElementById('stockTableBody');
+    if (tbody) {
+        tbody.innerHTML = matched.map((p, index) => {
+            const isExpired = ((new Date(p.expiry) - today) / 86400000) < 0;
+            return stockRowHtml(p, index, isExpired ? 'exp-expired-row' : 'exp-warning-row', isExpired ? ' (🔴 منتهي)' : ' (⚠️ قريب جداً)');
+        }).join('');
+    }
+}
+
+// ==========================================
+// Reporting Module
+// ==========================================
+function printSingleReceipt(invId) {
+    const inv = savedInvoices.find(function(i) { return i.id === invId; }); 
+    if (!inv) return;
+
+    let textReceipt = "=== Anjum Green Pharmacy ===\n";
+    textReceipt += "رقم الفاتورة: #" + inv.id + "\n";
+    textReceipt += "التاريخ: " + formatDateDisplay(inv.date) + "\n";
+    textReceipt += "--------------------------\n\n";
+
+    if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+        inv.items.forEach(function(i) {
+            textReceipt += i.name + "\n";
+            textReceipt += "الكمية: " + i.qty + " | السعر: " + (parseFloat(i.sellTotal) || 0).toFixed(2) + "\n\n";
+        });
+    } else {
+        let oldText = cleanItemSummaryText(inv.itemsText).replace(/<br>/g, "\n");
+        textReceipt += oldText + "\n\n";
+    }
+
+    textReceipt += "--------------------------\n";
+    if (inv.discount > 0) {
+        textReceipt += "نسبة الخصم: " + inv.discount + "%\n";
+    }
+    textReceipt += "الإجمالي النهائي: " + (parseFloat(inv.totalEGP) || 0).toFixed(2) + " ج.م\n\n";
+    textReceipt += "<BC>" + inv.id + "</BC>\n";
+    textReceipt += "شكرا لزيارتكم ونتمنى لكم الشفاء العاجل\n";
+
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+    
+    toast("✅ تم إرسال الفاتورة للطباعة!", "success");
+}
+
+function exportSalesReportExcel() {
+    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
+    const filteredInvoices = savedInvoices.filter(inv => {
+        if (!inv.date) return true; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return false; if (toD && invD > toD) return false; return true;
+    });
+
+    const excelData = filteredInvoices.map((inv, i) => {
+        let cleanItems = '';
+        if (inv.items && Array.isArray(inv.items)) {
+            cleanItems = inv.items.map(item => `${item.name} (الكمية:${item.qty})`).join(' | ');
+        } else {
+            cleanItems = inv.itemsText ? inv.itemsText.replace(/<br>/g, ' | ').replace(/&rlm;/g, '').trim() : "عنصر محفوظ";
+        }
+        return { "#": i + 1, "رقم الفاتورة": inv.id, "التاريخ": inv.date || "", "تفاصيل الأصناف": cleanItems, "إجمالي الجملة": inv.totalComm || 0, "نسبة الخصم": inv.discount || 0, "إجمالي البيع": inv.totalEGP || 0, "صافي الربح": inv.netProfit || 0 };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(excelData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "المبيعات"); XLSX.writeFile(wb, `Sales_Report_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+function buildInvoiceTally(filteredInvoices) {
+    let sumUSD = 0, sumEUR = 0, sumGBP = 0, sumEGP = 0, sumVISA = 0;
+    let grandTotalSell = 0, grandNetProfit = 0, grandTotalComm = 0; 
+    const productStats = {}; const perInvoice = [];
+    const monthlySales = {};
+
+    filteredInvoices.forEach(inv => {
+        let u = 0, eu = 0, g = 0, eg = 0, v = 0; let itemsListHtml = "";
+        
+        let dStr = inv.date ? inv.date.substring(0, 10) : "";
+        let monthKey = "غير معروف";
+        if (dStr.length >= 7) { monthKey = dStr.substring(0, 7); }
+        
+        monthlySales[monthKey] = (monthlySales[monthKey] || 0) + (inv.totalEGP || 0);
+
+        if (inv.items && Array.isArray(inv.items) && inv.items.length > 0) {
+            itemsListHtml = inv.items.map(i => {
+                u += parseFloat(i.usd || 0); eu += parseFloat(i.eur || 0); g += parseFloat(i.gbp || 0); eg += parseFloat(i.egp || 0); v += parseFloat(i.visa || 0);
+                if (i.name) productStats[i.name] = (productStats[i.name] || 0) + (parseInt(i.qty) || 1);
+                return `صنف: ${escapeHtml(i.name)} \vert{} كمية: ${i.qty}`;
+            }).join('<br>');
+        } else {
+            itemsListHtml = escapeHtml(cleanItemSummaryText(inv.itemsText).replace(/<[^>]*>?/gm, ''));
+            itemsListHtml = itemsListHtml.replace(/\|?\s*(بائع|Seller):.*?(?=(\||$))/gi, '').trim();
+            
+            u = inv.usd || 0; eu = inv.eur || 0; g = inv.gbp || 0; eg = inv.egp || 0; v = inv.visa || 0;
+
+            (inv.itemsText ? inv.itemsText.split('<br>') : []).forEach(raw => {
+                const namePart = raw.split(' | ')[0] || raw;
+                const cleanName = namePart.replace(/صنف:/g, '').replace(/<[^>]*>?/gm, '').trim();
+                const qtyMatch = raw.match(/كمية:\s*(\d+)/); const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                if (cleanName) productStats[cleanName] = (productStats[cleanName] || 0) + qty;
+            });
+        }
+        
+        sumUSD += u; sumEUR += eu; sumGBP += g; sumEGP += eg; sumVISA += v; grandTotalSell += inv.totalEGP || 0; grandNetProfit += inv.netProfit || 0; grandTotalComm += inv.totalComm || 0;
+        perInvoice.push({ inv, u, eu, g, eg, v, itemsListHtml });
+    });
+
+    const sortedTop = Object.keys(productStats).map(name => ({ name, qty: productStats[name] })).sort((a, b) => b.qty - a.qty);
+    return { sumUSD, sumEUR, sumGBP, sumEGP, sumVISA, grandTotalSell, grandNetProfit, grandTotalComm, sortedTop, perInvoice, monthlySales };
+}
+
+function filteredInvoicesByRange(fromD, toD) {
+    return savedInvoices.filter(inv => { if (!inv.date) return true; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return false; if (toD && invD > toD) return false; return true; });
+}
+
+function generateReport() {
+    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
+    const filteredInvoices = filteredInvoicesByRange(fromD, toD);
+    const tbody = document.getElementById('savedInvoicesBody'); if (!tbody) return;
+
+    if (filteredInvoices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="color:#7f8c8d; font-weight:bold; font-size:1.1rem; padding:20px;">لا توجد فواتير في هذه الفترة</td></tr>';
+        if (document.getElementById('reportSummaryCardsContainer')) document.getElementById('reportSummaryCardsContainer').innerHTML = '';
+        if (document.getElementById('advancedChartsArea')) document.getElementById('advancedChartsArea').style.display = 'none';
+        return;
+    }
+
+    const tally = buildInvoiceTally(filteredInvoices);
+
+    const rowsHtml = tally.perInvoice.map(({ inv, u, eu, g, eg, v, itemsListHtml }, index) => {
+        let payStr = ``;
+        if(u > 0) payStr += `$ ${u} | `;
+        if(eu > 0) payStr += `€ ${eu} | `;
+        if(g > 0) payStr += `£ ${g} | `;
+        if(v > 0) payStr += `💳 ${v} | `;
+        payStr += `${eg} ج.م`;
+
+        const cleanDateStr = formatDateDisplay(inv.date);
+        return `
+        <tr>
+            <td style="font-weight:bold; font-size:1.05rem;">${index + 1}</td>
+            <td style="font-weight:bold; font-size:1.05rem; color:#e67e22;">#${inv.id}</td>
+            <td style="direction:ltr; font-weight:bold;">${escapeHtml(cleanDateStr)}</td>
+            <td style="text-align:right; font-weight:bold;">${itemsListHtml}</td>
+            <td style="font-weight:bold; direction:rtl;">${payStr}</td>
+            <td style="color:#2c3e50; font-weight:bold; font-size:1.1rem;">${(inv.totalComm || 0).toFixed(2)}</td>
+            <td style="color:#e67e22; font-weight:bold; font-size:1.1rem;">${inv.discount || 0}%</td>
+            <td style="color:#27ae60; font-weight:bold; font-size:1.15rem;">${(inv.totalEGP || 0).toFixed(2)}</td>
+            <td style="color:#8e44ad; font-weight:bold; font-size:1.15rem;">${(inv.netProfit || 0).toFixed(2)}</td>
+            <td class="no-pdf">
+                <button class="btn btn-purple" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="printSingleReceipt(${inv.id})">إيصال 🧾</button>
+                <button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="loadInvoiceToEdit(${inv.id})">تعديل ✏️</button>
+                <button class="btn btn-red" style="padding:4px 8px; font-size:0.8rem; margin:2px 0; width:100%;" onclick="cancelInvoiceSystem(${inv.id})">حذف 🗑️</button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    const totalRowHtml = `
+    <tr class="total-row">
+        <td colspan="5" style="text-align: right; color: #1e3c72; padding: 12px;">الإجماليات الكلية للفترة المحددة:</td>
+        <td style="color: #2c3e50;">${tally.grandTotalComm.toFixed(2)}</td>
+        <td>-</td>
+        <td style="color: #27ae60;">${tally.grandTotalSell.toFixed(2)}</td>
+        <td style="color: #8e44ad;">${tally.grandNetProfit.toFixed(2)}</td>
+        <td class="no-pdf"></td>
+    </tr>`;
+
+    tbody.innerHTML = rowsHtml + totalRowHtml;
+
+    const cardsContainer = document.getElementById('reportSummaryCardsContainer');
+    if (cardsContainer) {
+        cardsContainer.innerHTML = `
+            <div class="english-summary-card net">
+                <div class="title">Net 💰 Profit Total</div>
+                <div class="value">${tally.grandNetProfit.toFixed(2)} EGP</div>
+            </div>
+            <div class="english-summary-card gross">
+                <div class="title">Gross 🛒 Sales Total</div>
+                <div class="value">${tally.grandTotalSell.toFixed(2)} EGP</div>
+            </div>
+            <div class="english-summary-card visa">
+                <div class="title">Total 💳 Visa</div>
+                <div class="value">${tally.sumVISA.toFixed(2)} EGP</div>
+            </div>
+            <div class="english-summary-card cash">
+                <div class="title">Cash 💵 & FX Total</div>
+                <div class="value">$: ${tally.sumUSD.toFixed(2)} | €: ${tally.sumEUR.toFixed(2)}<br>£: ${tally.sumGBP.toFixed(2)}<br>EGP: ${tally.sumEGP.toFixed(2)}</div>
+            </div>
+        `;
+    }
+
+    const chartContainer = document.getElementById('advancedChartsArea');
+    if (chartContainer) {
+        chartContainer.style.display = 'flex';
+        
+        const monthKeys = Object.keys(tally.monthlySales).sort();
+        let monthlyChartTitle = 'مبيعات الشهور';
+        if (monthKeys.length === 2) monthlyChartTitle = 'مقارنة المبيعات (الشهر الحالي والسابق)';
+        else if (monthKeys.length > 2) monthlyChartTitle = 'تحليل نمو المبيعات الشهرية';
+
+        if(window.monthlyChartInst) window.monthlyChartInst.destroy();
+        if(monthKeys.length > 0) {
+            window.monthlyChartInst = new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: monthKeys,
+                    datasets: [{
+                        label: 'إجمالي المبيعات (ج.م)',
+                        data: monthKeys.map(k => tally.monthlySales[k]),
+                        backgroundColor: '#3498db',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    animation: false, responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: monthlyChartTitle, font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
+                }
+            });
+        }
+
+        const top10 = tally.sortedTop.slice(0, 10);
+        if(window.topProductsChartInstance) window.topProductsChartInstance.destroy();
+        if(top10.length > 0) {
+            const niceColors = ['#3498db', '#9b59b6', '#e67e22', '#1abc9c', '#f1c40f', '#e74c3c', '#34495e', '#16a085', '#27ae60', '#2980b9'];
+            window.topProductsChartInstance = new Chart(document.getElementById('topProductsChart'), {
+                type: 'bar',
+                data: {
+                    labels: top10.map(p => p.name.length > 20 ? p.name.substring(0, 20) + '...' : p.name),
+                    datasets: [{
+                        label: 'الكمية المباعة',
+                        data: top10.map(p => p.qty),
+                        backgroundColor: niceColors.slice(0, top10.length),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    animation: false, responsive: true, maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'أكثر 10 منتجات مبيعاً', font: { size: 16, family: 'Cairo' } }, legend: { display: false } }
+                }
+            });
+        }
+    }
+}
+
+function loadInvoiceToEdit(invId) {
+    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    const inv = savedInvoices.find(i => i.id === invId); if (!inv) return;
+    showTab('salesTab'); loadInvoiceIntoForm(inv);
+}
+
+function cancelInvoiceSystem(invId) {
+    const invIdx = savedInvoices.findIndex(i => i.id === invId); if (invIdx === -1) return;
+    const inv = savedInvoices[invIdx];
+
+    confirmModal(`هل أنت متأكد من حذف وإلغاء الفاتورة #${invId} وإرجاع أصنافها للمخزون؟`, () => {
+        if (inv.items && Array.isArray(inv.items)) {
+            inv.items.forEach(item => { 
+                const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); 
+                if (p) { 
+                    p.q += item.qty; 
+                    syncToCloud("updateSingleProduct", p); 
+                } 
+            });
+            saveProductsToStorage(); renderStockTable(); updateAlertsBar();
+        }
+
+        savedInvoices.splice(invIdx, 1); saveInvoicesToStorage(); syncToCloud("deleteInvoice", { id: invId });
+        toast(`🗑️ تم حذف الفاتورة #${invId} وإرجاع الأصناف للمخزون!`, 'success'); fetchCloudInvoicesData();
+    });
+}
+
+function handleNetProfitAction() {
+    if (currentUser?.role !== 'Admin') { toast("❌ متاح للأدمن فقط!", 'error'); return; }
+    
+    generateReport();
+
+    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
+    const deductExp = document.getElementById('deductExpensesToggle')?.checked || false;
+
+    const filteredInvoices = filteredInvoicesByRange(fromD, toD); const tally = buildInvoiceTally(filteredInvoices);
+    let netProfit = tally.grandNetProfit;
+
+    if (deductExp) {
+        let totalExpensesInPeriod = 0;
+        savedFinances.forEach(f => {
+            if (f.type === 'Expense') {
+                if (!f.date) return; const fD = f.date.slice(0, 10); if (fromD && fD < fromD) return; if (toD && fD > toD) return; totalExpensesInPeriod += (parseFloat(f.amount) || 0);
+            }
+        });
+        netProfit -= totalExpensesInPeriod;
+
+        const cardsContainer = document.getElementById('reportSummaryCardsContainer');
+        if (cardsContainer) {
+            const netCard = cardsContainer.querySelector('.english-summary-card.net .value');
+            if (netCard) {
+                netCard.textContent = netProfit.toFixed(2) + ' EGP';
+                toast(`تم خصم المصروفات الحالية (${totalExpensesInPeriod} EGP)`, 'info', 4000);
+            }
+        }
+    }
+}
+
+function clearSingleProductReportSearch() {
+    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = '';
+    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
+    const display = document.getElementById('singleProdReportDisplay');
+    if (display) { display.style.display = 'none'; display.innerHTML = ''; }
+}
+
+function searchSingleProductReport() {
+    const query = document.getElementById('singleProdSearchInput')?.value.trim() || '';
+    const list = document.getElementById('singleProductReportResults'); const display = document.getElementById('singleProdReportDisplay');
+    if (!query) { if(list) list.style.display = 'none'; if(display) display.style.display = 'none'; return; }
+
+    const q = query.toLowerCase(); const matchedProds = products.filter(p => p.n && p.n.toLowerCase().includes(q));
+
+    if (matchedProds.length > 0 && query.length < 3) {
+        list.innerHTML = matchedProds.map(p => `<div class="result-item" data-name="${escapeHtml(p.n)}"><span style="font-weight:bold; color:#1e3c72;">${escapeHtml(p.n)}</span></div>`).join('');
+        list.querySelectorAll('.result-item').forEach(el => el.addEventListener('click', () => generateSingleProductDetailsReport(el.getAttribute('data-name'))));
+        list.style.display = 'block';
+    } else { if(list) list.style.display = 'none'; generateSingleProductDetailsReport(query); }
+}
+
+function generateSingleProductDetailsReport(productName) {
+    if (document.getElementById('singleProdSearchInput')) document.getElementById('singleProdSearchInput').value = productName;
+    if (document.getElementById('singleProductReportResults')) document.getElementById('singleProductReportResults').style.display = 'none';
+    const display = document.getElementById('singleProdReportDisplay');
+    const fromD = document.getElementById('fromDate')?.value || ''; const toD = document.getElementById('toDate')?.value || '';
+
+    let totalQtySold = 0, totalRevenue = 0; const salesHistory = []; const needle = productName.toLowerCase();
+
+    savedInvoices.forEach(inv => {
+        if (!inv.date) return; const invD = inv.date.slice(0, 10); if (fromD && invD < fromD) return; if (toD && invD > toD) return;
+
+        if (inv.items && Array.isArray(inv.items)) {
+            inv.items.forEach(i => {
+                if (i.name && i.name.toLowerCase().includes(needle)) {
+                    totalQtySold += parseInt(i.qty) || 1; totalRevenue += parseFloat(i.sellTotal) || 0;
+                    salesHistory.push({ invId: inv.id, date: inv.date, qty: i.qty, sellTotal: i.sellTotal, seller: i.seller || 'Unknown' });
+                }
+            });
+        } else if (inv.itemsText && inv.itemsText.toLowerCase().includes(needle)) {
+            salesHistory.push({ invId: inv.id, date: inv.date, qty: 1, sellTotal: inv.totalEGP || 0, seller: 'عنصر محفوظ' }); totalQtySold += 1; totalRevenue += inv.totalEGP || 0;
+        }
+    });
+
+    if (!display) return;
+    if (salesHistory.length === 0) {
+        display.innerHTML = `<div style="text-align:center; color:#c0392b; font-weight:bold; font-size:1.1rem; padding:15px;">⚠️ لا توجد مبيعات للمنتج [${escapeHtml(productName)}] في الفترة المحددة!</div>`; display.style.display = 'block'; return;
+    }
+
+    const rows = salesHistory.map((h, idx) => `
+        <tr>
+            <td style="font-weight:bold;">${idx + 1}</td>
+            <td style="font-weight:bold; color:#e67e22; font-size:1.1rem;">#${h.invId}</td>
+            <td style="direction:ltr; font-weight:bold;">${escapeHtml(formatDateDisplay(h.date))}</td>
+            <td style="font-weight:bold; font-size:1.2rem; color:#1e3c72;">${h.qty}</td>
+            <td style="font-weight:bold; color:#27ae60; font-size:1.1rem;">${parseFloat(h.sellTotal).toFixed(2)}</td>
+            <td style="font-weight:bold;">${escapeHtml(h.seller)}</td>
+        </tr>`).join('');
+
+    display.innerHTML = `
+        <h3 style="color:#1e3c72; text-align:center; margin-bottom:15px; font-weight:800;">📦 تقرير مبيعات المنتج: <span style="color:#27ae60;">${escapeHtml(productName)}</span></h3>
+        <div class="info-row" style="background:#eef7fe; padding:15px; border-radius:8px; margin-bottom:15px;">
+            <div style="font-size:1.05rem;">إجمالي الكمية المباعة: <span style="color:#1e3c72; font-size:1.3rem; font-weight:bold;">${totalQtySold}</span></div>
+            <div style="font-size:1.05rem;">إجمالي الإيرادات: <span style="color:#27ae60; font-size:1.3rem; font-weight:bold;">${totalRevenue.toFixed(2)} ج.م</span></div>
+        </div>
+        <div class="table-responsive"><table>
+            <thead><tr style="background-color:#1e3c72; color:white;"><th>#</th><th>رقم الفاتورة</th><th>التاريخ والوقت</th><th>الكمية</th><th>المبلغ الإجمالي</th><th>البائع</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table></div>`;
+    display.style.display = 'block'; window.scrollTo({ top: display.offsetTop - 15, behavior: 'smooth' });
+}
+
+// ==========================================
+// Boot Process (Safe Load)
+// ==========================================
+window.addEventListener('DOMContentLoaded', async () => {
+
+    // 1. تحميل المستخدمين من الذاكرة المحلية أولاً
+    try {
+        await loadLocalUsers();
+    } catch (err) {
+        console.error("Local user load error:", err);
+    }
+
+    // 2. تفعيل الاتصال بالإنترنت لجلب المستخدمين المحدثين في الخلفية
+    fetchInitialUsersOnly();
+
+    // 3. تأخير اختفاء الشاشة الافتتاحية 3.5 ثوانٍ لإعطاء فرصة للإنترنت لإكمال الطلب
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => {
+                splash.style.display = 'none';
+                const login = document.getElementById('loginOverlay');
+                if (login) login.style.display = 'flex';
+                const userEl = document.getElementById('entryUserSelect'); 
+                if (userEl) userEl.focus();
+            }, 800);
+        }
+    }, 3500);
+
+    // 4. تشغيل الأحداث
+    window.addEventListener('online', updateOnlineStatus); 
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'F2') { e.preventDefault(); toggleCameraScanner('sales'); }
+        else if (e.key === 'F4') { e.preventDefault(); showTab('salesTab'); document.getElementById('searchInput')?.focus(); }
+        else if (e.key === 'F8') { e.preventDefault(); clearCurrentInvoice(); }
+        else if (e.key === 'F9') { e.preventDefault(); printCustomerReceiptBridge(); }
+        else if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); saveInvoice(); }
+        else if (e.key === 'Escape') closeModal();
+    });
+});
