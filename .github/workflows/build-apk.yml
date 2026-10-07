@@ -71,6 +71,24 @@ jobs:
         run: |
           npx cap sync android
 
+      # 🔥 الخطوة السحرية لإصلاح خطأ سيرفرات Google/Kotlin وتثبيت النسخة المستقرة 🔥
+      - name: Fix Kotlin 2.2.0 Bug
+        run: |
+          cd android
+          cat <<EOF > build.gradle.tmp
+          buildscript {
+              configurations.all {
+                  resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+                      if (details.requested.group == 'org.jetbrains.kotlin') {
+                          details.useVersion('1.9.24')
+                      }
+                  }
+              }
+          }
+          EOF
+          cat build.gradle >> build.gradle.tmp
+          mv build.gradle.tmp build.gradle
+
       - name: Build Android APK (Gradle)
         run: |
           cd android
