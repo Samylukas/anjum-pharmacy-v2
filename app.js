@@ -493,4 +493,267 @@ function initHtml5Scanner(key, readerId, containerId) {
 }
 
 function stopCameraScanner(key) {
-    const containerId = key + 'Scanner
+    const containerId = key + 'ScannerContainer';
+    if (scanners[key] && activeScannerKey === key) {
+        scanners[key].stop().then(() => { activeScannerKey = null; document.getElementById(containerId).style.display = 'none'; }).catch(() => { document.getElementById(containerId).style.display = 'none'; });
+    } else { const el = document.getElementById(containerId); if(el) el.style.display = 'none'; }
+}
+
+function stopAllScanners() { 
+    ['sales', 'addNew', 'recharge', 'stock', 'return'].forEach(stopCameraScanner); 
+    closeFloatingCamera();
+}
+
+function openFloatingCamera() {
+    const overlay = document.getElementById('floatingCameraOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    
+    setTimeout(() => {
+        try {
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            floatingScannerInstance = new Html5Qrcode('floatingCameraReader');
+            floatingScannerInstance.start(
+                { facingMode: "environment" },
+                { fps: 15, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    playBeepSound(); 
+                    const barcodeQuery = decodedText.trim();
+                    closeFloatingCamera();
+                    
+                    const existingBarcode = products.find(p => String(p.id) !== String(selectedStockEditProductId) && p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+                    if (existingBarcode) { 
+                        toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); 
+                        return; 
+                    }
+                    
+                    const prod = findProductById(selectedStockEditProductId);
+                    if (prod) {
+                        prod.barcode = barcodeQuery; 
+                        saveProductsToStorage(); 
+                        syncToCloud("updateSingleProduct", prod);
+                        toast(`✅ تم تحديث باركود المنتج [${prod.n}]`, 'success'); 
+                        selectedStockEditProductId = null; 
+                        renderStockTable();
+                    }
+                }, 
+                (err) => { }
+            ).catch(err => {
+                toast("❌ فشل تشغيل الكاميرا: تأكد من الصلاحيات", 'error');
+                closeFloatingCamera();
+            });
+        } catch (e) {
+            toast("❌ خطأ غير متوقع: " + e.message, 'error');
+            closeFloatingCamera();
+        }
+    }, 300);
+}
+
+function closeFloatingCamera() {
+    const overlay = document.getElementById('floatingCameraOverlay');
+    if (overlay) overlay.style.display = 'none';
+    
+    if (floatingScannerInstance) {
+        floatingScannerInstance.stop().then(() => {
+            floatingScannerInstance.clear();
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            floatingScannerInstance = null;
+        }).catch(() => {
+            document.getElementById('floatingCameraReader').innerHTML = '';
+            floatingScannerInstance = null;
+        });
+    } else {
+        document.getElementById('floatingCameraReader').innerHTML = '';
+    }
+}
+
+let selectedStockEditProductId = null;
+
+function onBarcodeScanned(key, decodedText) {
+    playBeepSound(); const barcodeQuery = decodedText.trim();
+    stopCameraScanner(key);
+
+    if (key === 'sales') {
+        document.getElementById('searchInput').value = barcodeQuery;
+        const matched = products.find(p => p.barcode && p.barcode.toString().trim() === barcodeQuery);
+        if (matched) pickProduct(matched.id); else toast("⚠️ لم يتم العثور على منتج بهذا الباركود [" + barcodeQuery + "]!", 'warn');
+    } else if (key === 'addNew') {
+        const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+        if (existingBarcode) { toast(`⚠️ الباركود [${barcodeQuery}] مسجل بالفعل للمنتج (${existingBarcode.n})!`, 'error'); return; }
+        document.getElementById('newProdBarcode').value = barcodeQuery; toast("✅ تم قراءة الباركود: " + barcodeQuery, 'success');
+    } else if (key === 'recharge') {
+        document.getElementById('addStockSearch').value = barcodeQuery; searchAddStockProduct();
+    } else if (key === 'stock') {
+        const existingBarcode = products.find(p => p.barcode && p.barcode.toLowerCase() === barcodeQuery.toLowerCase());
+        if (existingBarcode) {
+            document.getElementById('stockFilterInput').value = barcodeQuery;
+            filterStockTable(barcodeQuery);
+            toast(`✅ تم العثور على: ${existingBarcode.n}`, 'success');
+        } else {
+            toast("⚠️ لم يتم العثور على منتج!", 'warn');
+        }
+    } else if (key === 'return') {
+        let cleanId = barcodeQuery.replace(/[^0-9]/g, '');
+        document.getElementById('returnSearchInput').value = cleanId;
+        searchInvoiceForReturn();
+    }
+}
+
+function printCustomerReceiptBridge() {
+    if (invoiceItems.length === 0) {
+        toast("⚠️ الفاتورة فارغة! أضف أصناف أولاً", "warn");
+        return;
+    }
+
+    let textReceipt = "=== Anjum Green Pharmacy ===\n";
+    textReceipt += "رقم الفاتورة: #" + activeInvoiceId + "\n";
+    textReceipt += "--------------------------\n";
+
+    let totalQtyCount = 0;
+    let totalSellPriceSum = 0;
+
+    invoiceItems.forEach(item => {
+        totalQtyCount += item.qty;
+        totalSellPriceSum += item.sellTotal;
+        textReceipt += `${item.name}\nالكمية: ${item.qty} | السعر: ${item.sellTotal.toFixed(2)} ج.م\n`;
+    });
+
+    textReceipt += "--------------------------\n";
+    textReceipt += `إجمالي الأصناف المطلوبة: ${totalQtyCount}\n`;
+    textReceipt += `إجمالي السعر النهائي: ${totalSellPriceSum.toFixed(2)} ج.م\n`;
+    textReceipt += "--------------------------\n";
+    textReceipt += `BARCODE:${activeInvoiceId}\n`;
+    textReceipt += "نتمنى لكم الشفاء العاجل 🌿\n";
+
+    let encodedText = encodeURIComponent(textReceipt);
+    window.location.href = "printbridge://print?type=receipt&text=" + encodedText;
+    
+    toast("✅ تم إرسال فاتورة العميل للطابعة!", "success");
+}
+
+function genericProductSearch(query, listEl, onPick, beepOnBarcodeMatch = true) {
+    const q = query.toLowerCase().trim(); if (!q) { listEl.style.display = 'none'; return; }
+    const barcodeMatched = products.find(p => p.barcode && p.barcode.toLowerCase() === q);
+    if (barcodeMatched) { if (beepOnBarcodeMatch) playBeepSound(); onPick(barcodeMatched); return; }
+
+    const matched = products.filter(p => p.n && p.n.toLowerCase().includes(q));
+    if (matched.length > 0) {
+        listEl.innerHTML = matched.map(p => `
+            <div class="result-item" data-pid="${escapeHtml(p.id)}">
+                <span style="color:#1e3c72; font-weight:bold;">${escapeHtml(p.n)}</span>
+                <span style="color:${p.q > 3 ? '#27ae60' : '#e74c3c'}; font-size:0.95rem;">(المخزون: ${p.q})</span>
+            </div>
+        `).join('');
+        listEl.querySelectorAll('.result-item').forEach(el => { el.addEventListener('click', () => onPick(findProductById(el.getAttribute('data-pid')))); });
+        listEl.style.display = 'block';
+    } else { listEl.style.display = 'none'; }
+}
+
+function searchProduct() { genericProductSearch(document.getElementById('searchInput')?.value || '', document.getElementById('searchResults'), (p) => pickProduct(p.id)); }
+
+function pickProduct(prodId) {
+    const p = findProductById(prodId); if (!p) return;
+    const guideMult = RATES.GUIDE_MULT || 3; selectedProdId = p.id;
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchInput').value = p.n;
+    document.getElementById('prodName').textContent = p.n;
+    document.getElementById('stockQty').textContent = p.q;
+    document.getElementById('commPrice').textContent = (p.p || 0).toFixed(2);
+    document.getElementById('guidePrice').textContent = ((p.p || 0) * guideMult).toFixed(2);
+    document.getElementById('sellQty').value = 1;
+
+    ['pUSD', 'pEUR', 'pGBP', 'pEGP', 'pVISA'].forEach(id => { const input = document.getElementById(id); if (input) input.value = 0; });
+    document.getElementById('productCard').style.display = 'block'; checkPriceAlert();
+}
+
+function checkPriceAlert() {
+    const p = findProductById(selectedProdId); if (!p) return;
+    const guideMult = RATES.GUIDE_MULT || 3; const qty = parseInt(document.getElementById('sellQty')?.value) || 1;
+    const u = parseFloat(document.getElementById('pUSD')?.value) || 0; const eu = parseFloat(document.getElementById('pEUR')?.value) || 0; const g = parseFloat(document.getElementById('pGBP')?.value) || 0; const eg = parseFloat(document.getElementById('pEGP')?.value) || 0; const v = parseFloat(document.getElementById('pVISA')?.value) || 0;
+    const enteredTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
+    const minRequiredTotal = (p.p * guideMult) * qty;
+    const warnBox = document.getElementById('priceWarningBox');
+
+    if (document.getElementById('enteredTotalVal')) document.getElementById('enteredTotalVal').textContent = enteredTotalEGP.toFixed(2);
+    if (document.getElementById('requiredMinVal')) document.getElementById('requiredMinVal').textContent = minRequiredTotal.toFixed(2);
+    if (warnBox) warnBox.style.display = enteredTotalEGP < minRequiredTotal ? 'block' : 'none';
+}
+
+function addToInvoice() {
+    const p = findProductById(selectedProdId); if (!p) return;
+    const qty = parseInt(document.getElementById('sellQty')?.value) || 1;
+    if (qty > p.q) { toast('⚠️ الكمية غير متوفرة في المخزون! المتاح: ' + p.q, 'warn'); return; }
+
+    playBeepSound();
+    const u = parseFloat(document.getElementById('pUSD')?.value) || 0; const eu = parseFloat(document.getElementById('pEUR')?.value) || 0; const g = parseFloat(document.getElementById('pGBP')?.value) || 0; const eg = parseFloat(document.getElementById('pEGP')?.value) || 0; const v = parseFloat(document.getElementById('pVISA')?.value) || 0;
+    const itemTotalEGP = (u * RATES.USD) + (eu * RATES.EUR) + (g * RATES.GBP) + (eg * RATES.EGP) + (v * RATES.VISA);
+
+    p.q -= qty; saveProductsToStorage(); updateAlertsBar();
+    const commTotal = p.p * qty; const sellTotal = itemTotalEGP; const netProfit = sellTotal - commTotal;
+
+    invoiceItems.push({
+        productId: p.id, name: p.n, qty: qty, commUnitPrice: p.p, sellUnitPrice: qty > 0 ? (sellTotal / qty) : 0,
+        commTotal, sellTotal, netProfit, usd: u, eur: eu, gbp: g, egp: eg, visa: v
+    });
+    renderInvoice(); document.getElementById('productCard').style.display = 'none'; document.getElementById('searchInput').value = '';
+}
+
+function prepareNewInvoice() {
+    activeInvoiceId = invoiceCounter; currentNavIndex = -1;
+    if (document.getElementById('invNum')) document.getElementById('invNum').textContent = activeInvoiceId;
+    const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    if (document.getElementById('invoiceDate')) document.getElementById('invoiceDate').value = now.toISOString().slice(0, 16);
+    invoiceItems = []; invoiceDiscountPercent = 0;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
+    renderInvoice();
+}
+
+function clearCurrentInvoice() {
+    if (document.getElementById('searchInput')) document.getElementById('searchInput').value = '';
+    if (document.getElementById('searchResults')) document.getElementById('searchResults').style.display = 'none';
+    if (document.getElementById('productCard')) document.getElementById('productCard').style.display = 'none';
+    selectedProdId = null;
+
+    if (invoiceItems.length > 0) {
+        invoiceItems.forEach(item => { const p = findProductById(item.productId) || products.find(p2 => p2.n === item.name); if (p) p.q += item.qty; });
+        saveProductsToStorage(); renderStockTable(); updateAlertsBar();
+    }
+    invoiceItems = []; invoiceDiscountPercent = 0;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = 0;
+    renderInvoice();
+}
+
+function loadInvoiceIntoForm(inv) {
+    if (!inv) return;
+    activeInvoiceId = inv.id;
+    if (document.getElementById('invNum')) document.getElementById('invNum').textContent = inv.id;
+    if (inv.date && document.getElementById('invoiceDate')) document.getElementById('invoiceDate').value = inv.date.replace(' ', 'T').slice(0, 16);
+
+    if (Array.isArray(inv.items)) { invoiceItems = JSON.parse(JSON.stringify(inv.items)); } 
+    else {
+        invoiceItems = [{ name: cleanItemSummaryText(inv.itemsText), qty: 1, commUnitPrice: inv.totalComm || 0, sellUnitPrice: inv.totalEGP || 0, commTotal: inv.totalComm || 0, sellTotal: inv.totalEGP || 0, netProfit: inv.netProfit || 0, usd: inv.usd || 0, eur: inv.eur || 0, gbp: inv.gbp || 0, egp: inv.egp || 0, visa: inv.visa || 0 }];
+    }
+    invoiceDiscountPercent = inv.discount || 0;
+    if (document.getElementById('invoiceDiscountInput')) document.getElementById('invoiceDiscountInput').value = invoiceDiscountPercent;
+    renderInvoice();
+}
+
+function cleanItemSummaryText(rawText) { if (!rawText) return "عنصر محفوظ"; return rawText.toString().trim(); }
+
+function navigateInvoice(direction) {
+    if (savedInvoices.length === 0) { toast('لا توجد فواتير مسجلة!', 'warn'); return; }
+    if (direction === 'first') currentNavIndex = 0;
+    else if (direction === 'last') currentNavIndex = savedInvoices.length - 1;
+    else if (direction === 'prev') currentNavIndex = Math.max(0, currentNavIndex <= 0 ? 0 : currentNavIndex - 1);
+    else if (direction === 'next') currentNavIndex = currentNavIndex >= savedInvoices.length - 1 ? savedInvoices.length - 1 : currentNavIndex + 1;
+    loadInvoiceIntoForm(savedInvoices[currentNavIndex]);
+}
+
+function handleDiscountChange(elem) {
+    let val = parseFloat(elem.value) || 0;
+    if (val > 25) { toast("الحد الأقصى للخصم هو 25%!", 'warn'); elem.value = 25; invoiceDiscountPercent = 25; }
+    else if (val < 0) { elem.value = 0; invoiceDiscountPercent = 0; }
+    else invoiceDiscountPercent = val; renderInvoice();
+}
+
+function
