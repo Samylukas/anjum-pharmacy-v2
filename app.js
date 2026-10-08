@@ -1347,8 +1347,54 @@ function exportFinanceExcel() {
 }
 
 // ==========================================
-// Stock Module
+// Stock Module & Low Stock Calculation
 // ==========================================
+function updateLowStockTotals() {
+    const selectedRows = document.querySelectorAll('#stockTableBody tr.low-stock-row.pdf-selected-row');
+    let totalCount = 0;
+    let sumTradePrice = 0;
+
+    selectedRows.forEach(row => {
+        totalCount++;
+        const priceCell = row.cells[3];
+        if (priceCell) {
+            const priceVal = parseFloat(priceCell.textContent.replace(/[^0-9.]/g, '')) || 0;
+            sumTradePrice += priceVal;
+        }
+    });
+
+    const countEl = document.getElementById('lowStockTotalCountVal');
+    const priceEl = document.getElementById('lowStockTotalPriceVal');
+
+    if (countEl) countEl.textContent = `${totalCount} صنف`;
+    if (priceEl) priceEl.textContent = `${sumTradePrice.toFixed(2)} ج.م`;
+}
+
+function toggleSelectAllLowStock(checkboxEl) {
+    const isChecked = checkboxEl.checked;
+    const itemCheckboxes = document.querySelectorAll('.low-stock-check');
+    itemCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+        const tr = cb.closest('tr');
+        if (tr) {
+            if (isChecked) tr.classList.add('pdf-selected-row');
+            else tr.classList.remove('pdf-selected-row');
+        }
+    });
+    updateLowStockTotals();
+}
+
+function toggleLowStockRowSelection(cb) {
+    const tr = cb.closest('tr');
+    if (!tr) return;
+    if (cb.checked) {
+        tr.classList.add('pdf-selected-row');
+    } else {
+        tr.classList.remove('pdf-selected-row');
+    }
+    updateLowStockTotals();
+}
+
 function addNewProductToSystem() {
     const name = document.getElementById('newProdName')?.value.trim(); const price = parseFloat(document.getElementById('newProdPrice')?.value) || 0; const qty = parseInt(document.getElementById('newProdQty')?.value) || 0; const barcode = document.getElementById('newProdBarcode')?.value.trim(); const expiry = document.getElementById('newProdExpiry')?.value;
     if (!name) { toast('أدخل اسم المنتج!', 'warn'); return; }
@@ -1425,25 +1471,6 @@ function deleteProductSystem(prodId) {
         syncToCloud("deleteProduct", { id: prod.id, name: prod.n }); products = products.filter(p => p.id !== prodId);
         saveProductsToStorage(); updateAlertsBar(); toast(`🗑️ تم الحذف!`, 'success'); renderStockTable();
     });
-}
-
-function toggleSelectAllLowStock(checkboxEl) {
-    const isChecked = checkboxEl.checked;
-    const itemCheckboxes = document.querySelectorAll('.low-stock-check');
-    itemCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-        toggleLowStockRowSelection(cb);
-    });
-}
-
-function toggleLowStockRowSelection(cb) {
-    const tr = cb.closest('tr');
-    if (!tr) return;
-    if (cb.checked) {
-        tr.classList.add('pdf-selected-row');
-    } else {
-        tr.classList.remove('pdf-selected-row');
-    }
 }
 
 function stockRowHtml(p, index, rowClass, statusSuffix) {
@@ -1534,21 +1561,21 @@ function filterLowStock() {
     if(document.getElementById('stockReportSubtitle')) document.getElementById('stockReportSubtitle').textContent = "تقرير النواقص والأصناف المطلوبة";
 
     const matched = products.filter(p => p.q <= 3).sort((a, b) => a.n.localeCompare(b.n, 'ar'));
-    let sumTradePrice = 0;
 
     const tbody = document.getElementById('stockTableBody');
     if (tbody) {
         tbody.innerHTML = matched.map((p, index) => {
-            sumTradePrice += (p.p || 0);
             return stockRowHtml(p, index, 'low-stock-row', '');
         }).join('');
 
         tbody.innerHTML += `
             <tr class="total-row pdf-total-fix" style="background-color:#f8f9fa; font-size:0.95rem; font-weight:bold;">
-                <td colspan="3" style="text-align:right; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
-                <td colspan="3" style="text-align:right; color:#27ae60; font-size:1.1rem; padding:10px;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
+                <td colspan="3" style="text-align:right; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: <span id="lowStockTotalCountVal">0 صنف</span></td>
+                <td colspan="3" style="text-align:right; color:#27ae60; font-size:1.1rem; padding:10px;">الإجمالي التجاري: <span id="lowStockTotalPriceVal">0.00 ج.م</span></td>
             </tr>
         `;
+        
+        updateLowStockTotals();
     }
 }
 
