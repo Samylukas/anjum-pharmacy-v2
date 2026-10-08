@@ -151,10 +151,10 @@ async function downloadDirectPDF(elementId, titleText, isLandscape = false) {
 
 function printSalesReportPDF() { downloadDirectPDF('reportsPrintArea', 'Sales_Report', true); }
 function printFinanceReportPDF() { downloadDirectPDF('financePrintArea', 'Financial_Report', false); }
+
 function printStockTable() {
     const isFilteredLow = isLowStockModeActive;
     if (isFilteredLow) {
-        // حماية سطر الإجماليات من الإخفاء بإضافة :not(.pdf-total-fix)
         const uncheckedRows = document.querySelectorAll('#stockTableBody tr:not(.pdf-selected-row):not(.pdf-total-fix)');
         uncheckedRows.forEach(row => row.style.display = 'none');
         
@@ -170,21 +170,6 @@ function printStockTable() {
             inp.parentNode.appendChild(span);
         });
     }
-    
-    downloadDirectPDF('stockPrintArea', 'Stock_Report', isFilteredLow ? false : true).finally(() => {
-        if (isFilteredLow) {
-            const allRows = document.querySelectorAll('#stockTableBody tr');
-            allRows.forEach(row => row.style.display = '');
-            
-            const inputs = document.querySelectorAll('#stockTableBody tr .req-qty-input');
-            inputs.forEach(inp => {
-                inp.style.display = '';
-                const span = inp.parentNode.querySelector('.req-qty-print-span');
-                if(span) span.remove();
-            });
-        }
-    });
-}
     
     downloadDirectPDF('stockPrintArea', 'Stock_Report', isFilteredLow ? false : true).finally(() => {
         if (isFilteredLow) {
@@ -257,7 +242,10 @@ async function loadLocalUsers() {
         renderUserDropdowns();
     } catch (error) {
         console.error("Local user load error:", error);
-        cloudUsers = [{ username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' }];
+        cloudUsers = [
+            { username: 'admin', passwordHash: await sha256Hex('852'), role: 'Admin' },
+            { username: 'cashier', passwordHash: await sha256Hex('123'), role: 'Cashier' }
+        ];
         renderUserDropdowns();
     }
 }
@@ -1524,6 +1512,8 @@ function renderStockTable(filter = '') {
     }).join('');
 }
 
+function filterStockTable(val) { renderStockTable(val); }
+
 function filterLowStock() {
     isLowStockModeActive = true;
     if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
@@ -1553,7 +1543,6 @@ function filterLowStock() {
             return stockRowHtml(p, index, 'low-stock-row', '');
         }).join('');
 
-        // سطر الإجماليات مضاف له كلاس pdf-total-fix لمنع إخفائه أثناء التصدير
         tbody.innerHTML += `
             <tr class="total-row pdf-total-fix" style="background-color:#f8f9fa; font-size:0.95rem; font-weight:bold;">
                 <td colspan="3" style="text-align:right; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
