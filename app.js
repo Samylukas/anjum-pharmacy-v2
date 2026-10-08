@@ -154,7 +154,8 @@ function printFinanceReportPDF() { downloadDirectPDF('financePrintArea', 'Financ
 function printStockTable() {
     const isFilteredLow = isLowStockModeActive;
     if (isFilteredLow) {
-        const uncheckedRows = document.querySelectorAll('#stockTableBody tr:not(.pdf-selected-row)');
+        // حماية سطر الإجماليات من الإخفاء بإضافة :not(.pdf-total-fix)
+        const uncheckedRows = document.querySelectorAll('#stockTableBody tr:not(.pdf-selected-row):not(.pdf-total-fix)');
         uncheckedRows.forEach(row => row.style.display = 'none');
         
         const inputs = document.querySelectorAll('#stockTableBody tr.pdf-selected-row .req-qty-input');
@@ -169,6 +170,21 @@ function printStockTable() {
             inp.parentNode.appendChild(span);
         });
     }
+    
+    downloadDirectPDF('stockPrintArea', 'Stock_Report', isFilteredLow ? false : true).finally(() => {
+        if (isFilteredLow) {
+            const allRows = document.querySelectorAll('#stockTableBody tr');
+            allRows.forEach(row => row.style.display = '');
+            
+            const inputs = document.querySelectorAll('#stockTableBody tr .req-qty-input');
+            inputs.forEach(inp => {
+                inp.style.display = '';
+                const span = inp.parentNode.querySelector('.req-qty-print-span');
+                if(span) span.remove();
+            });
+        }
+    });
+}
     
     downloadDirectPDF('stockPrintArea', 'Stock_Report', isFilteredLow ? false : true).finally(() => {
         if (isFilteredLow) {
@@ -1537,10 +1553,11 @@ function filterLowStock() {
             return stockRowHtml(p, index, 'low-stock-row', '');
         }).join('');
 
+        // سطر الإجماليات مضاف له كلاس pdf-total-fix لمنع إخفائه أثناء التصدير
         tbody.innerHTML += `
-            <tr class="total-row" style="background-color:#f8f9fa; font-size:0.95rem;">
-                <td colspan="3" style="text-align:right; font-weight:900; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
-                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.1rem; padding:10px;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
+            <tr class="total-row pdf-total-fix" style="background-color:#f8f9fa; font-size:0.95rem; font-weight:bold;">
+                <td colspan="3" style="text-align:right; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
+                <td colspan="3" style="text-align:right; color:#27ae60; font-size:1.1rem; padding:10px;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
             </tr>
         `;
     }
