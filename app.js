@@ -882,7 +882,15 @@ function executeAdvancedPrint(prodId) {
     
     const showName = document.getElementById('lblShowName')?.checked;
     const showPrice = document.getElementById('lblShowPrice')?.checked;
+    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
+    const isRotated = document.getElementById('lblRotatePrint')?.checked;
     const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
+    
+    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
+    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 11;
+    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
+    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
+    closeModal();
     
     const guideMult = RATES.GUIDE_MULT || 3;
     const safeName = escapeHtml(prod.n);
@@ -893,11 +901,10 @@ function executeAdvancedPrint(prodId) {
     else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = 'EUR'; }
     else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = 'GBP'; }
 
-    const finalPriceStr = showPrice ? `${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
+    const finalPriceStr = showPrice ? `${finalPriceVal.toFixed(2)} ${currencySymbol}` : '';
 
     if (targetApp === 'print_bridge') {
         if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
-        closeModal();
         
         let printUrl = "printbridge://print?type=label&barcode=" + encodeURIComponent(prod.barcode);
         if (showName) printUrl += "&name=" + encodeURIComponent(safeName.substring(0, 20));
@@ -908,43 +915,41 @@ function executeAdvancedPrint(prodId) {
         return;
     }
 
-    const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
-    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
-    const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
-    const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
-    const showPharmacy = document.getElementById('lblShowPharmacy')?.checked;
-    const isRotated = document.getElementById('lblRotatePrint')?.checked;
-    closeModal();
-    
     let printW = isRotated ? hMM : wMM; 
     let printH = isRotated ? wMM : hMM;
-    
-    let pxW = Math.round(printW * 3.7795);
-    let pxH = Math.round(printH * 3.7795);
-    let innerPxW = Math.round(wMM * 3.7795);
-    let innerPxH = Math.round(hMM * 3.7795);
 
     let labelsHtml = '';
 
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${pxW}px; height:${pxH}px; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; position: relative;">
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: ${innerPxW}px; height: ${innerPxH}px; padding: 2px; box-sizing: border-box; ${isRotated ? 'transform: rotate(-90deg);' : ''} text-align:center;">
-                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 2)}px; font-weight: bold; color: #000; line-height: 1.2; margin-bottom: 2px;">Anjum Green Pharmacy</div>` : ''}
-                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.2; max-width: 95%; overflow: hidden; white-space: nowrap; margin-bottom: 2px;">${safeName}</div>` : ''}
-                    <svg id="bcode-${i}" style="margin:0; padding:0;"></svg>
-                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.2; margin-top: 2px;">${finalPriceStr}</div>` : ''}
+            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin: 0 auto; padding: 1mm; page-break-after: always;">
+                <div style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(7, fontSz - 3)}px; font-weight: bold; color: #000; line-height: 1.1; margin-bottom: 1px;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.1; width: 100\%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 1px;">${safeName}</div>` : ''}
+                    <div style="display:flex; justify-content:center; width:100%; overflow:hidden;">
+                        <svg id="bcode-${i}" style="margin:0 auto; display:block;"></svg>
+                    </div>
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.1; margin-top: 1px;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.style.cssText = 'display: block; position: absolute; left: -9999px; top: -9999px; background: #fff; z-index: -1;';
-    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; gap:10px;">${labelsHtml}</div>`;
+    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">${labelsHtml}</div>`;
 
     for (let i = 0; i < count; i++) {
-        JsBarcode("#bcode-" + i, prod.barcode, { format: "CODE128", width: 1.2, height: 26, fontSize: 12, margin: 2, flat: true, displayValue: true, background: "#ffffff", lineColor: "#000000" });
+        JsBarcode("#bcode-" + i, prod.barcode, { 
+            format: "CODE128", 
+            width: 1.0, 
+            height: 22, 
+            fontSize: 10, 
+            margin: 1, 
+            flat: true, 
+            displayValue: true, 
+            background: "#ffffff", 
+            lineColor: "#000000" 
+        });
     }
 
     if (targetApp === 'android_share') {
@@ -979,11 +984,17 @@ function executeAdvancedPrint(prodId) {
             });
         }, 500); 
     } else {
-        printSec.style.cssText = 'display: block;';
+        printSec.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; background: #fff; z-index: 99999;';
         const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { @page { size: ${printW}mm${printH}mm; margin: 0 !important; } }`;
+        pageStyle.innerHTML = `@media print { 
+            @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } 
+            body { margin: 0 !important; padding: 0 !important; }
+            #mainContainer, .no-print { display: none !important; }
+            #receiptPrintSection { display: block !important; position: absolute; left: 0; top: 0; width: ${printW}mm; height: ${printH}mm; }
+        }`;
         document.head.appendChild(pageStyle);
         document.body.classList.add('printing-receipt');
+        
         setTimeout(() => {
             window.print();
             window.onafterprint = () => {
