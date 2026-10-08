@@ -753,59 +753,82 @@ function printCustomerReceiptBrowser() {
         totalQtyCount += item.qty;
         totalSellPriceSum += item.sellTotal;
         return `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px dashed #000; padding-bottom:5px;">
-                <div style="flex:2; text-align:right; font-weight:bold; font-size:14px; color:#000;">${escapeHtml(item.name)}</div>
-                <div style="flex:1; text-align:center; font-size:14px; color:#000;">${item.qty}</div>
-                <div style="flex:1; text-align:left; font-size:14px; color:#000;">${item.sellTotal.toFixed(2)}</div>
-            </div>
+            <tr>
+                <td style="text-align:right; font-weight:bold; font-size:12px; padding:3px 0; border-bottom:1px dashed #ccc;">${escapeHtml(item.name)}</td>
+                <td style="text-align:center; font-size:12px; padding:3px 0; border-bottom:1px dashed #ccc;">${item.qty}</td>
+                <td style="text-align:left; font-size:12px; padding:3px 0; border-bottom:1px dashed #ccc;">${item.sellTotal.toFixed(2)}</td>
+            </tr>
         `;
     }).join('');
 
     const printHtml = `
-        <div style="width: 72mm; padding: 0; font-family: 'Arial', sans-serif; color: #000; direction:rtl; text-align:center; margin:0 auto;">
-            <h2 style="font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color:#000;">Anjum Green Pharmacy</h2>
-            <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 5px; color:#000;">رقم الفاتورة: #${activeInvoiceId}</div>
+        <div style="width: 72mm; max-width: 100%; margin: 0 auto; padding: 5mm 2mm; font-family: 'Cairo', Arial, sans-serif; color: #000; direction: rtl; text-align: center; box-sizing: border-box;">
+            <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 4px 0; color:#000;">Anjum Green Pharmacy</h3>
+            <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; border-bottom: 2px solid #000; padding-bottom: 4px; color:#000;">رقم الفاتورة: #${activeInvoiceId}</div>
             
-            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px; margin-bottom:5px; color:#000;">
-                <div style="flex:2; text-align:right;">الصنف</div>
-                <div style="flex:1; text-align:center;">الكمية</div>
-                <div style="flex:1; text-align:left;">السعر</div>
-            </div>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+                <thead>
+                    <tr style="border-bottom: 1.5px solid #000; font-size: 12px;">
+                        <th style="text-align:right; padding-bottom:4px;">الصنف</th>
+                        <th style="text-align:center; padding-bottom:4px; width:40px;">الكمية</th>
+                        <th style="text-align:left; padding-bottom:4px; width:55px;">السعر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
             
-            <div>
-                ${itemsHtml}
-            </div>
-            
-            <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; font-weight: bold; font-size: 16px; color:#000;">
+            <div style="border-top: 2px solid #000; margin-top: 6px; padding-top: 6px; font-weight: bold; font-size: 13px; color:#000;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
                     <span>إجمالي الأصناف:</span>
                     <span>${totalQtyCount}</span>
                 </div>
-                <div style="display:flex; justify-content:space-between;">
+                <div style="display:flex; justify-content:space-between; font-size:14px;">
                     <span>الإجمالي:</span>
-                    <span>${totalSellPriceSum.toFixed(2)}</span>
+                    <span>${totalSellPriceSum.toFixed(2)} ج.م</span>
                 </div>
             </div>
             
-            <div style="margin-top: 15px; display:flex; justify-content:center;">
-                <svg id="receipt-barcode" style="height:40px;"></svg>
+            <div style="margin-top: 10px; display:flex; justify-content:center; align-items:center;">
+                <svg id="receipt-barcode" style="height:35px; max-width:100%;"></svg>
             </div>
-            <div style="font-size: 14px; font-weight: bold; margin-top: 10px; margin-bottom: 20px; color:#000;">نتمنى لكم الشفاء العاجل</div>
+            <div style="font-size: 12px; font-weight: bold; margin-top: 6px; color:#000;">نتمنى لكم الشفاء العاجل</div>
         </div>
     `;
 
     const printSec = document.getElementById('receiptPrintSection');
     printSec.innerHTML = printHtml;
-    printSec.style.display = 'block';
+    printSec.style.cssText = 'display: block; position: fixed; left: 0; top: 0; width: 100%; background: #fff; z-index: 99999;';
 
     JsBarcode("#receipt-barcode", activeInvoiceId.toString(), {
-        format: "CODE128", width: 1.5, height: 40, fontSize: 12, margin: 5, flat: true, displayValue: true
+        format: "CODE128", width: 1.3, height: 35, fontSize: 11, margin: 2, flat: true, displayValue: true
     });
 
     const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-    pageStyle.innerHTML = `@media print { @page { margin: 0 !important; } }`;
+    pageStyle.innerHTML = `
+        @media print { 
+            @page { 
+                size: 80mm auto; 
+                margin: 0mm !important; 
+            } 
+            html, body { 
+                width: 80mm !important; 
+                margin: 0 auto !important; 
+                padding: 0 !important; 
+                background: #fff !important;
+            }
+            #mainContainer, .no-print { display: none !important; }
+            #receiptPrintSection { 
+                display: block !important; 
+                position: relative !important; 
+                width: 100% !important; 
+                margin: 0 auto !important; 
+                padding: 0 !important; 
+            }
+        }
+    `;
     document.head.appendChild(pageStyle);
-    
     document.body.classList.add('printing-receipt');
     
     setTimeout(() => {
@@ -823,7 +846,7 @@ function printCustomerReceiptBrowser() {
             printSec.innerHTML = ''; 
             if(pageStyle) pageStyle.remove();
         }, 120000);
-    }, 500);
+    }, 400);
 }
 
 function promptPrintBarcodeLabel(prodId) {
