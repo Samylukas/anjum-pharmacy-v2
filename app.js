@@ -887,7 +887,7 @@ function executeAdvancedPrint(prodId) {
     const selectedCurrency = document.getElementById('lblCurrency')?.value || 'EGP';
     
     const count = targetApp === 'android_share' ? 1 : (parseInt(document.getElementById('lblCount')?.value) || 1);
-    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 11;
+    const fontSz = parseInt(document.getElementById('lblFont')?.value) || 12;
     const wMM = parseFloat(document.getElementById('lblW')?.value) || 38.1;
     const hMM = parseFloat(document.getElementById('lblH')?.value) || 25.4;
     closeModal();
@@ -901,7 +901,7 @@ function executeAdvancedPrint(prodId) {
     else if (selectedCurrency === 'EUR') { finalPriceVal = baseEGP / (RATES.EUR || 1); currencySymbol = 'EUR'; }
     else if (selectedCurrency === 'GBP') { finalPriceVal = baseEGP / (RATES.GBP || 1); currencySymbol = 'GBP'; }
 
-    const finalPriceStr = showPrice ? `${finalPriceVal.toFixed(2)} ${currencySymbol}` : '';
+    const finalPriceStr = showPrice ? `${finalPriceVal.toFixed(2)}${currencySymbol}` : '';
 
     if (targetApp === 'print_bridge') {
         if (!prod.barcode) { toast("⚠️ لا يوجد رقم باركود لهذا المنتج", "warn"); return; }
@@ -922,29 +922,29 @@ function executeAdvancedPrint(prodId) {
 
     for (let i = 0; i < count; i++) {
         labelsHtml += `
-            <div class="custom-label-card" style="width: ${printW}mm; height: ${printH}mm; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; margin: 0 auto; padding: 1mm; page-break-after: always;">
-                <div style="width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
-                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(7, fontSz - 3)}px; font-weight: bold; color: #000; line-height: 1.1; margin-bottom: 1px;">Anjum Green Pharmacy</div>` : ''}
-                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.1; width: 100\%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 1px;">${safeName}</div>` : ''}
-                    <div style="display:flex; justify-content:center; width:100%; overflow:hidden;">
+            <div class="custom-label-card" style="width: ${printW}mm; height:${printH}mm; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; margin: 0 auto; padding: 1mm; page-break-after: always;">
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; ${isRotated ? 'transform: rotate(-90deg);' : ''}">
+                    ${showPharmacy ? `<div style="font-family: Arial, sans-serif; font-size: ${Math.max(8, fontSz - 3)}px; font-weight: bold; color: #000; line-height: 1; margin: 0;">Anjum Green Pharmacy</div>` : ''}
+                    ${showName ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz}px; font-weight: bold; color: #000; line-height: 1.1; width: 100%; max-height: 2.2em; overflow: hidden; text-overflow: ellipsis; margin: 0;">${safeName}</div>` : ''}
+                    <div style="display:flex; justify-content:center; align-items:center; width:100%; overflow:hidden;">
                         <svg id="bcode-${i}" style="margin:0 auto; display:block;"></svg>
                     </div>
-                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 1}px; font-weight: bold; color: #000; line-height: 1.1; margin-top: 1px;">${finalPriceStr}</div>` : ''}
+                    ${showPrice ? `<div style="font-family: Arial, sans-serif; font-size: ${fontSz + 2}px; font-weight: bold; color: #000; line-height: 1; margin: 0;">${finalPriceStr}</div>` : ''}
                 </div>
             </div>
         `;
     }
 
     const printSec = document.getElementById('receiptPrintSection');
-    printSec.innerHTML = `<div class="barcode-print-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%;">${labelsHtml}</div>`;
+    printSec.innerHTML = `<div class="barcode-print-container" style="width:${printW}mm; height:${printH}mm; margin:0 auto;">${labelsHtml}</div>`;
 
     for (let i = 0; i < count; i++) {
         JsBarcode("#bcode-" + i, prod.barcode, { 
             format: "CODE128", 
-            width: 1.0, 
-            height: 22, 
-            fontSize: 10, 
-            margin: 1, 
+            width: 1.8,
+            height: 35,
+            fontSize: 12, 
+            margin: 0, 
             flat: true, 
             displayValue: true, 
             background: "#ffffff", 
@@ -984,14 +984,36 @@ function executeAdvancedPrint(prodId) {
             });
         }, 500); 
     } else {
-        printSec.style.cssText = 'display: block; position: absolute; left: 0; top: 0; width: 100%; background: #fff; z-index: 99999;';
+        printSec.style.cssText = 'display: block; position: fixed; left: 0; top: 0; width: 100%; background: #fff; z-index: 99999;';
         const pageStyle = document.createElement('style'); pageStyle.id = 'dynamic-page-size';
-        pageStyle.innerHTML = `@media print { 
-            @page { size: ${printW}mm ${printH}mm; margin: 0 !important; } 
-            body { margin: 0 !important; padding: 0 !important; }
-            #mainContainer, .no-print { display: none !important; }
-            #receiptPrintSection { display: block !important; position: absolute; left: 0; top: 0; width: ${printW}mm; height: ${printH}mm; }
-        }`;
+        pageStyle.innerHTML = `
+            @media print { 
+                @page { 
+                    size: ${printW}mm${printH}mm !important; 
+                    margin: 0mm !important; 
+                } 
+                html, body { 
+                    width: ${printW}mm !important; 
+                    height: ${printH}mm !important; 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                }
+                #mainContainer, .no-print { display: none !important; }
+                #receiptPrintSection { 
+                    display: flex !important; 
+                    justify-content: center;
+                    align-items: center;
+                    width: ${printW}mm !important; 
+                    height: ${printH}mm !important; 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                }
+                .barcode-print-container, .custom-label-card { 
+                    width: ${printW}mm !important; 
+                    height: ${printH}mm !important; 
+                }
+            }
+        `;
         document.head.appendChild(pageStyle);
         document.body.classList.add('printing-receipt');
         
