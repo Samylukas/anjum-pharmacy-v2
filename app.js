@@ -1448,12 +1448,13 @@ function stockRowHtml(p, index, rowClass, statusSuffix) {
     
     if (isFilteredLow) {
         return `
-        <tr class="low-stock-row pdf-selected-row">
+        <tr class="low-stock-row pdf-selected-row" style="font-size:0.9rem;">
             <td class="no-pdf"><input type="checkbox" class="low-stock-check" checked onchange="toggleLowStockRowSelection(this)"></td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#1e3c72;">${index + 1}</td>
-            <td style="text-align:right; font-weight:bold; white-space:normal; font-size:1.05rem;">${escapeHtml(p.n)}</td>
-            <td style="font-weight:bold; font-size:1.1rem; color:#c0392b;">${(p.p || 0).toFixed(2)} ج.م</td>
-            <td><input type="number" class="req-qty-input" placeholder="الكمية المطلوبة..." style="width:100%; padding:5px; border:1px solid #ccc; border-radius:5px; text-align:center;"></td>
+            <td style="font-weight:bold; font-size:0.95rem; color:#1e3c72;">${index + 1}</td>
+            <td style="text-align:right; font-weight:bold; white-space:normal; font-size:0.95rem;">${escapeHtml(p.n)}</td>
+            <td style="font-weight:bold; font-size:0.95rem; color:#c0392b;">${(p.p || 0).toFixed(2)} ج.م</td>
+            <td class="no-pdf" style="font-weight:bold; color:#e67e22; font-size:0.95rem;">${p.q}</td>
+            <td><input type="number" class="req-qty-input" placeholder="الكمية المطلوبة..." style="width:100%; padding:3px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:0.9rem;"></td>
         </tr>`;
     }
 
@@ -1507,8 +1508,6 @@ function renderStockTable(filter = '') {
     }).join('');
 }
 
-function filterStockTable(val) { renderStockTable(val); }
-
 function filterLowStock() {
     isLowStockModeActive = true;
     if (document.getElementById('stockFilterInput')) document.getElementById('stockFilterInput').value = '';
@@ -1516,11 +1515,12 @@ function filterLowStock() {
     const thead = document.getElementById('stockTableHead');
     if (thead) {
         thead.innerHTML = `
-            <tr>
+            <tr style="font-size:0.95rem;">
                 <th id="thSelectHead" style="width:40px;" class="no-pdf"><input type="checkbox" id="selectAllLowStockToggle" checked onchange="toggleSelectAllLowStock(this)"></th>
-                <th style="width:50px;">#</th>
+                <th style="width:40px;">#</th>
                 <th>اسم الصنف</th>
                 <th>السعر التجاري</th>
+                <th class="no-pdf">المخزون الحالي</th>
                 <th>الكمية المطلوبة</th>
             </tr>`;
     }
@@ -1538,9 +1538,9 @@ function filterLowStock() {
         }).join('');
 
         tbody.innerHTML += `
-            <tr class="total-row">
-                <td colspan="3" style="text-align:right; font-weight:900;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
-                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.2rem;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
+            <tr class="total-row" style="background-color:#f8f9fa; font-size:0.95rem;">
+                <td colspan="3" style="text-align:right; font-weight:900; color:#1e3c72; padding:10px;">إجمالي عدد الأصناف: ${matched.length} صنف</td>
+                <td colspan="2" style="text-align:right; color:#27ae60; font-weight:900; font-size:1.1rem; padding:10px;">الإجمالي التجاري: ${sumTradePrice.toFixed(2)} ج.م</td>
             </tr>
         `;
     }
